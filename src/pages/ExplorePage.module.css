@@ -1,0 +1,312 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.stickyHeader {
+    position: sticky;
+    top: 0;
+    background-color: var(--bg-base);
+    z-index: 10;
+    padding: var(--sp-4) var(--sp-4) var(--sp-2) var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    border-bottom: 1px solid var(--border-1);
+}
+
+.scrollArea {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--sp-4);
+    scroll-snap-type: y mandatory;
+}
+
+.header {
+    padding-top: var(--sp-1);
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.searchBar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    background: var(--surface-1);
+    border: 1px solid var(--border-1);
+    /* #1A1A1F border requested */
+    border-radius: var(--radius-md);
+    /* 14px */
+    padding: 0 var(--sp-3);
+    height: 44px;
+    transition: border-color var(--duration-base);
+}
+
+.searchBar:focus-within {
+    border-color: var(--accent);
+}
+
+.searchBar .material-symbols-outlined {
+    font-size: 20px;
+    color: var(--text-muted);
+}
+
+.searchInput {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-family: var(--font-primary);
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.searchInput::placeholder {
+    color: var(--text-muted);
+}
+
+.clearBtn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    padding: 0;
+}
+
+.filterRow {
+    display: flex;
+    gap: var(--sp-2);
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+
+.filterChip {
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border-1);
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-primary);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--duration-base);
+}
+
+.filterActive {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--sp-4);
+}
+
+.videoCard {
+    background: #101015;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+    scroll-snap-align: start;
+    scroll-margin-top: var(--sp-4);
+    height: calc(100vh - 220px);
+    min-height: 480px;
+    max-height: 640px;
+}
+
+.locked {
+    border-color: var(--border-2);
+}
+
+.videoContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    background: var(--surface-2);
+    display: flex;
+    flex-direction: column;
+}
+
+.thumbnailVideo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.thumbnailPlaceholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: linear-gradient(135deg, var(--surface-1) 0%, var(--surface-2) 100%);
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
+.scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.4) 100%);
+    z-index: 1;
+    pointer-events: none;
+}
+
+.topRow {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    right: var(--sp-3);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    z-index: 2;
+}
+
+.patternChip {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.92);
+    background: rgba(0, 0, 0, 0.45);
+    padding: 4px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.muteToggle {
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.overlayContent {
+    position: absolute;
+    bottom: var(--sp-4);
+    left: var(--sp-4);
+    right: var(--sp-4);
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.clinicalCues {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
+.cue {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(45, 124, 255, 0.15);
+    border: 1px solid rgba(45, 124, 255, 0.3);
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    align-self: flex-start;
+}
+
+.cardTitle {
+    font-size: 20px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.metaPillRow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.metaPill {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+}
+
+.lockOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 11, 14, 0.75);
+    backdrop-filter: blur(4px);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    gap: 8px;
+}
+
+.lockOverlay .material-symbols-outlined {
+    font-size: 32px;
+    color: var(--text-muted);
+}
+
+.lockOverlay span:last-child {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-8) var(--sp-4);
+    gap: var(--sp-3);
+    color: var(--text-muted);
+    text-align: center;
+    font-size: 14px;
+}
+
+.emptyState .material-symbols-outlined {
+    font-size: 48px;
+}

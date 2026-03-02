@@ -1,0 +1,299 @@
+.page {
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+}
+
+.header {
+    padding-top: var(--sp-3);
+}
+
+.title {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.kpiRow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* User requested 2 clean cards */
+    gap: var(--sp-3);
+}
+
+.kpiCard {
+    background: #101015;
+    border: 1px solid #1A1A1F;
+    border-radius: 14px;
+    padding: var(--sp-4) var(--sp-2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-shadow: 0 0 0 1px rgba(45, 124, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
+    transition: border-color var(--duration-base);
+}
+
+.kpiCard:hover {
+    border-color: rgba(45, 124, 255, 0.2);
+}
+
+.kpiIconWrapper {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(45, 124, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2px;
+}
+
+.kpiIcon {
+    font-size: 20px;
+}
+
+.kpiValue {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.kpiLabel {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+}
+
+.sectionTitle {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.checkInRow {
+    display: flex;
+    justify-content: space-between;
+    background: var(--surface-1);
+    border: 1px solid var(--border-1);
+    border-radius: var(--radius-md);
+    padding: var(--sp-4);
+}
+
+.checkInItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.checkDot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: all var(--duration-base);
+}
+
+.done {
+    background: rgba(45, 124, 255, 0.2);
+    border-color: rgba(45, 124, 255, 0.5);
+    color: var(--accent);
+}
+
+.done .material-symbols-outlined {
+    font-size: 16px;
+}
+
+.checkLabel {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.trendCard {
+    background: #101015;
+    border: 1px solid #1A1A1F;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(45, 124, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
+}
+
+.trendRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--border-1);
+}
+
+.trendRow:last-child {
+    border-bottom: none;
+}
+
+.trendLabel {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.trendRight {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.trendRight .material-symbols-outlined {
+    font-size: 18px;
+}
+
+.trendText {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.trendValue {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.emptyConsoleState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--sp-8) var(--sp-4);
+    gap: var(--sp-3);
+    background: #101015;
+    border: 1px solid var(--border-1);
+    border-radius: 14px;
+    margin-top: var(--sp-4);
+}
+
+.tabContainer {
+    display: flex;
+    background: var(--surface-1);
+    border-radius: 8px;
+    padding: 2px;
+    border: 1px solid var(--border-1);
+}
+
+.tabBtn {
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--duration-base);
+}
+
+.tabActive {
+    background: var(--surface-2);
+    color: var(--text-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.chartUI {
+    background: #101015;
+    border: 1px solid #1A1A1F;
+    border-radius: 14px;
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    box-shadow: 0 0 0 1px rgba(45, 124, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
+}
+
+.chartTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.chartLineContainer {
+    height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fakeChartLine {
+    flex: 1;
+    position: relative;
+    padding: 10px 0;
+}
+
+.chartXAxis {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: monospace;
+}
+
+.chartBarContainer {
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.bars {
+    flex: 1;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: 20px;
+}
+
+.barWrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    align-items: flex-end;
+}
+
+.bar {
+    width: 12px;
+    background: var(--accent);
+    border-radius: 4px 4px 0 0;
+    opacity: 0.8;
+    transition: height 0.5s ease-out;
+}
+
+/* Removed success color modifier as per "No fitness vibes. No green." */
+
+.danger {
+    color: var(--danger);
+}
+
+.warning {
+    color: var(--warning);
+}
+
+.accent {
+    color: var(--accent);
+}
