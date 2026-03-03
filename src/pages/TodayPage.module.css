@@ -74,16 +74,13 @@
     background: #101015;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
-    padding: var(--sp-3) var(--sp-3);
+    padding: var(--sp-2) var(--sp-2);
     display: flex;
-    align-items: flex-start;
-    gap: var(--sp-3);
-    cursor: pointer;
+    flex-direction: column;
+    gap: var(--sp-2);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px rgba(0, 0, 0, 0.42);
     transition: border-color var(--duration-base) var(--ease-standard),
         background-color var(--duration-base) var(--ease-standard);
-    flex-direction: column;
-    /* Changed to column to hold expander */
 }
 
 .patternCard:hover {
@@ -94,6 +91,32 @@
     border-color: var(--accent) !important;
     background: var(--surface-2);
 }
+
+.cardTopBar {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-2) var(--sp-2) 0 var(--sp-2);
+}
+
+.blockLabel {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.hudWrapper {
+    height: 260px;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
 
 .patternRow {
     display: flex;
@@ -113,7 +136,6 @@
     justify-content: center;
     color: transparent;
     flex-shrink: 0;
-    margin-top: 4px;
     transition: all var(--duration-base);
     cursor: pointer;
     padding: 0;
@@ -131,86 +153,6 @@
 
 .completedCheckbox .material-symbols-outlined {
     font-size: 16px;
-}
-
-.patternContent {
-    flex: 1;
-    min-width: 0;
-}
-
-.patternHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--sp-2);
-}
-
-.patternName {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.patternCategory {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    background: var(--surface-3);
-    padding: 2px 6px;
-    border-radius: 4px;
-    white-space: nowrap;
-}
-
-.patternMeta {
-    margin-top: 4px;
-    font-size: 12px;
-    color: var(--text-muted);
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-/* 9:16 Video Preview */
-.patternThumbnail {
-    width: 54px;
-    height: 96px;
-    /* 9:16 ratio approx */
-    border-radius: 8px;
-    background: var(--surface-2);
-    flex-shrink: 0;
-    overflow: hidden;
-    border: 1px solid var(--border-1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--text-muted);
-    margin-left: auto;
-    cursor: pointer;
-    position: relative;
-}
-
-.patternThumbnail video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-    /* Let parent handle clicks */
-}
-
-.patternThumbnail .playIconOverlay {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.8;
 }
 
 .patternExpanded {

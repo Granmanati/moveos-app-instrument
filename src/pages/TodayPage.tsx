@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
+import { VideoHUDPreview } from '../components/VideoHUDPreview';
 
 interface ExerciseLibrary {
     id: string;
@@ -43,17 +44,40 @@ export default function TodayPage() {
     const [generating, setGenerating] = useState(false);
 
     // UI states
-    const [activePattern, setActivePattern] = useState<string | null>(null);
+    const [expandedCards, setExpandedCards] = useState<string[]>([]);
     const [showPremiumGate, setShowPremiumGate] = useState(false);
+
+    // Refs for scrolling
+    const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+    // Load persisted expand state on session load
+    useEffect(() => {
+        if (session?.id) {
+            const saved = localStorage.getItem(`moveos:today:expanded:${session.id}`);
+            if (saved) {
+                try {
+                    setExpandedCards(JSON.parse(saved));
+                } catch (e) {
+                    console.error('Error parsing saved expanded cards', e);
+                }
+            }
+        }
+    }, [session?.id]);
+
+    const toggleExpand = (exId: string) => {
+        setExpandedCards(prev => {
+            const next = prev.includes(exId) ? prev.filter(id => id !== exId) : [...prev, exId];
+            if (session?.id) {
+                localStorage.setItem(`moveos:today:expanded:${session.id}`, JSON.stringify(next));
+            }
+            return next;
+        });
+    };
 
     // Form states for pain logging
     const [painScores, setPainScores] = useState<Record<string, number>>({});
     const [painNotes, setPainNotes] = useState<Record<string, string>>({});
     const [savingPain, setSavingPain] = useState<Record<string, boolean>>({});
-
-    // Video refs
-    const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
-    const [playingVideos, setPlayingVideos] = useState<Record<string, boolean>>({});
 
     // Initial check for onboarding redirect flag
     useEffect(() => {
@@ -162,6 +186,19 @@ export default function TodayPage() {
             setExercises(prev => prev.map(ex =>
                 ex.id === sessionExerciseId ? { ...ex, is_completed: currentCompleted } : ex
             ));
+        } else if (newCompleted) {
+            // Auto scroll logic (wrapped in setTimeout to let UI update first)
+            setTimeout(() => {
+                const idx = exercises.findIndex(ex => ex.id === sessionExerciseId);
+                if (idx !== -1) {
+                    if (idx + 1 < exercises.length) {
+                        const nextId = exercises[idx + 1].id;
+                        cardRefs.current[nextId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else {
+                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                    }
+                }
+            }, 100);
         }
     };
 
@@ -183,8 +220,8 @@ export default function TodayPage() {
 
             if (error) throw error;
 
-            // Close accordion and maybe show brief success feedback (just UI cleanup)
-            setActivePattern(null);
+            // Close accordion if desired, or keep it open? UX v1.1 asks to 'Persist expand/collapse state'. 
+            // Better to keep it open or just clear notes. Let's not auto-close.
             setPainNotes(prev => ({ ...prev, [sessionExerciseId]: '' })); // Clear notes after save
 
             // Optionally update the exercises list locally so they know they have a saved log
@@ -214,19 +251,6 @@ export default function TodayPage() {
             console.error('Error completing session:', err);
             setErrorMsg(`RPC Error: ${err.message || err.details || JSON.stringify(err)}`);
             setViewState('error');
-        }
-    };
-
-    const toggleVideoPlay = (exId: string) => {
-        const video = videoRefs.current[exId];
-        if (!video) return;
-
-        if (video.paused) {
-            video.play();
-            setPlayingVideos(prev => ({ ...prev, [exId]: true }));
-        } else {
-            video.pause();
-            setPlayingVideos(prev => ({ ...prev, [exId]: false }));
         }
     };
 
@@ -289,65 +313,48 @@ export default function TodayPage() {
                             {exercises.map((ex, i) => {
                                 const library = ex.exercise_library;
                                 const isCompleted = ex.is_completed;
-                                const isExpanded = activePattern === ex.id;
+                                const isExpanded = expandedCards.includes(ex.id);
                                 const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
                                 const currentPainScore = painScores[ex.id] || 0;
 
                                 return (
                                     <div
                                         key={ex.id}
+                                        ref={(el) => { cardRefs.current[ex.id] = el; }}
                                         className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
                                     >
-                                        <div className={styles.patternRow}>
-                                            {/* Completion Toggle */}
+                                        <div className={styles.cardTopBar}>
                                             <button
                                                 className={`${styles.checkboxBtn} ${isCompleted ? styles.completedCheckbox : ''}`}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleToggleComplete(ex.id, ex.is_completed);
                                                 }}
+                                                aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
                                             >
                                                 <Icon name="check" />
                                             </button>
-
-                                            {/* Details */}
-                                            <div className={styles.patternContent} onClick={() => setActivePattern(isExpanded ? null : ex.id)} style={{ cursor: 'pointer' }}>
-                                                <div className={styles.patternHeader}>
-                                                    <div>
-                                                        <span style={{ fontSize: '10px', color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.5px' }}>
-                                                            {i + 1} // {getBlockName(ex.block_order)}
-                                                        </span>
-                                                        <h3 className={styles.patternName} style={{ marginTop: '2px' }}>{library?.name || 'Unknown Pattern'}</h3>
-                                                    </div>
-                                                </div>
-                                                <div className={styles.patternMeta}>
-                                                    <span className={styles.patternCategory}>{library?.pattern}</span>
-                                                    <span>{ex.sets} SETS · {ex.reps_min}-{ex.reps_max} REPS</span>
-                                                    <span>REST {ex.rest_sec}s</span>
-                                                </div>
+                                            <div className={styles.blockLabel}>
+                                                <span style={{ color: 'var(--accent)', fontWeight: 600, marginRight: '4px' }}>{i + 1} //</span>
+                                                <span>{getBlockName(ex.block_order)}</span>
                                             </div>
+                                        </div>
 
-                                            {/* Video Preview */}
-                                            {library?.media_video_url ? (
-                                                <div className={styles.patternThumbnail} onClick={(e) => { e.stopPropagation(); toggleVideoPlay(ex.id); }}>
-                                                    <video
-                                                        ref={(el) => { videoRefs.current[ex.id] = el; }}
-                                                        src={library.media_video_url}
-                                                        muted
-                                                        loop
-                                                        playsInline
-                                                    />
-                                                    {!playingVideos[ex.id] && (
-                                                        <div className={styles.playIconOverlay}>
-                                                            <Icon name="play_arrow" size={16} style={{ color: '#fff' }} />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className={styles.patternThumbnail} style={{ background: 'var(--surface-3)', border: 'none' }}>
-                                                    <Icon name="videocam_off" size={20} style={{ opacity: 0.5 }} />
-                                                </div>
-                                            )}
+                                        <div
+                                            className={styles.hudWrapper}
+                                            onClick={() => toggleExpand(ex.id)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <VideoHUDPreview
+                                                videoUrl={library?.media_video_url}
+                                                pattern={library?.pattern}
+                                                name={library?.name || 'Unknown Pattern'}
+                                                sets={ex.sets}
+                                                repsMin={ex.reps_min}
+                                                repsMax={ex.reps_max}
+                                                restSeconds={ex.rest_sec}
+                                                className={styles.hudComponent}
+                                            />
                                         </div>
 
                                         {/* Expandable Accordion for Pain Logging */}
