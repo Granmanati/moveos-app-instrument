@@ -86,48 +86,7 @@
     color: var(--text-muted);
 }
 
-.checkInRow {
-    display: flex;
-    justify-content: space-between;
-    background: var(--surface-1);
-    border: 1px solid var(--border-1);
-    border-radius: var(--radius-md);
-    padding: var(--sp-4);
-}
-
-.checkInItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-}
-
-.checkDot {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    border: 1px solid var(--border-2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: transparent;
-    transition: all var(--duration-base);
-}
-
-.done {
-    background: rgba(45, 124, 255, 0.2);
-    border-color: rgba(45, 124, 255, 0.5);
-    color: var(--accent);
-}
-
-.done .material-symbols-outlined {
-    font-size: 16px;
-}
-
-.checkLabel {
-    font-size: 10px;
-    color: var(--text-muted);
-}
+/* Removed legacy checkIn row styles as adherence is now drawn via Recharts */
 
 .trendCard {
     background: #101015;
@@ -239,50 +198,7 @@
     gap: 8px;
 }
 
-.fakeChartLine {
-    flex: 1;
-    position: relative;
-    padding: 10px 0;
-}
-
-.chartXAxis {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    color: var(--text-muted);
-    font-family: monospace;
-}
-
-.chartBarContainer {
-    height: 140px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.bars {
-    flex: 1;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding-top: 20px;
-}
-
-.barWrapper {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    height: 100%;
-    align-items: flex-end;
-}
-
-.bar {
-    width: 12px;
-    background: var(--accent);
-    border-radius: 4px 4px 0 0;
-    opacity: 0.8;
-    transition: height 0.5s ease-out;
-}
+/* Removed fake SVG path properties and fake bar flex containers since Recharts uses standard SVGs directly */
 
 /* Removed success color modifier as per "No fitness vibes. No green." */
 

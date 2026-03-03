@@ -1,10 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './TodayPage.module.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
+
+interface ExerciseLibrary {
+    id: string;
+    name: string;
+    pattern: string;
+    media_video_url: string;
+    level: number;
+}
+
+interface SessionExerciseLog {
+    pain_score: number;
+}
+
+interface SessionExercise {
+    id: string;
+    is_completed: boolean;
+    status: string;
+    sets: number;
+    reps_min: number;
+    reps_max: number;
+    rest_sec: number;
+    block_order: number;
+    exercise_library: ExerciseLibrary;
+    session_exercise_logs: SessionExerciseLog[]; // From Supabase One-to-Many join
+}
 
 export default function TodayPage() {
     const { user, profile } = useAuth();
@@ -13,18 +38,27 @@ export default function TodayPage() {
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [session, setSession] = useState<any>(null);
-    const [exercises, setExercises] = useState<any[]>([]);
+    const [exercises, setExercises] = useState<SessionExercise[]>([]);
     const [errorMsg, setErrorMsg] = useState('');
     const [generating, setGenerating] = useState(false);
-    const [activePattern, setActivePattern] = useState<string | null>(null);
 
+    // UI states
+    const [activePattern, setActivePattern] = useState<string | null>(null);
     const [showPremiumGate, setShowPremiumGate] = useState(false);
+
+    // Form states for pain logging
+    const [painScores, setPainScores] = useState<Record<string, number>>({});
+    const [painNotes, setPainNotes] = useState<Record<string, string>>({});
+    const [savingPain, setSavingPain] = useState<Record<string, boolean>>({});
+
+    // Video refs
+    const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+    const [playingVideos, setPlayingVideos] = useState<Record<string, boolean>>({});
 
     // Initial check for onboarding redirect flag
     useEffect(() => {
         if (location.state?.isNewOnboarding) {
             setShowPremiumGate(true);
-            // Clear the state so it doesn't pop up again on refresh
             window.history.replaceState({}, document.title);
         }
     }, [location]);
@@ -42,9 +76,12 @@ export default function TodayPage() {
                 .select(`
                     id, state, phase,
                     session_exercises (
-                        id, status, sets, reps_min, reps_max, rest_sec, block_order,
+                        id, status, is_completed, sets, reps_min, reps_max, rest_sec, block_order,
                         exercise_library (
                             id, name, pattern, media_video_url, level
+                        ),
+                        session_exercise_logs (
+                            pain_score
                         )
                     )
                 `)
@@ -57,9 +94,21 @@ export default function TodayPage() {
             if (data) {
                 setSession(data);
                 if (data.session_exercises) {
-                    // Ordenar por block_order
+                    // Sort strictly by block_order
                     const sorted = [...data.session_exercises].sort((a: any, b: any) => a.block_order - b.block_order);
-                    setExercises(sorted);
+                    setExercises(sorted as any);
+
+                    // Initialize local state for pain scores if they exist
+                    const initialScores: Record<string, number> = {};
+                    sorted.forEach((ex: any) => {
+                        if (ex.session_exercise_logs && ex.session_exercise_logs.length > 0) {
+                            // Take the most recent log (assuming ordered inserted, we take last element)
+                            initialScores[ex.id] = ex.session_exercise_logs[ex.session_exercise_logs.length - 1].pain_score;
+                        } else {
+                            initialScores[ex.id] = 0; // Default slider value
+                        }
+                    });
+                    setPainScores(initialScores);
                 }
                 setViewState('success');
             } else {
@@ -68,7 +117,7 @@ export default function TodayPage() {
             }
         } catch (err: any) {
             console.error(err);
-            setErrorMsg(err.message || 'Error al cargar los ejercicios de hoy.');
+            setErrorMsg(err.message || 'Error loading today\'s patterns.');
             setViewState('error');
         }
     };
@@ -85,105 +134,141 @@ export default function TodayPage() {
         try {
             const { error: genError } = await supabase.rpc('generate_session');
             if (genError) throw genError;
-
-            // Re-fetch to show the newly generated session
             await fetchSessionWithExercises();
         } catch (err: any) {
             console.error('Error generating session:', err);
-            setErrorMsg(err.message || 'Error al generar la sesión. Intenta de nuevo.');
+            setErrorMsg(err.message || 'Error generating session. Try again.');
             setViewState('error');
         } finally {
             setGenerating(false);
         }
     };
 
-    const handleLogExercise = async (sessionExerciseId: string, painScore: number) => {
-        const { error } = await supabase.rpc('log_exercise', {
-            p_session_exercise_id: sessionExerciseId,
-            p_pain_score: painScore,
-            p_notes: ''
-        });
+    const handleToggleComplete = async (sessionExerciseId: string, currentCompleted: boolean) => {
+        const newCompleted = !currentCompleted;
+        // Optimistic update
+        setExercises(prev => prev.map(ex =>
+            ex.id === sessionExerciseId ? { ...ex, is_completed: newCompleted } : ex
+        ));
 
-        if (!error) {
-            setActivePattern(null);
-        } else {
-            console.error('Error logging exercise:', error);
+        const { error } = await supabase
+            .from('session_exercises')
+            .update({ is_completed: newCompleted })
+            .eq('id', sessionExerciseId);
+
+        if (error) {
+            console.error('Error toggling completion:', error);
+            // Revert state on error
+            setExercises(prev => prev.map(ex =>
+                ex.id === sessionExerciseId ? { ...ex, is_completed: currentCompleted } : ex
+            ));
         }
     };
 
-    const handleToggleComplete = async (sessionExerciseId: string, currentStatus: string) => {
-        const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
-        const { error } = await supabase
-            .from('session_exercises')
-            .update({ status: newStatus })
-            .eq('id', sessionExerciseId);
+    const handleSavePainLog = async (sessionExerciseId: string) => {
+        if (!user) return;
+        setSavingPain(prev => ({ ...prev, [sessionExerciseId]: true }));
+        try {
+            const score = painScores[sessionExerciseId] || 0;
+            const notes = painNotes[sessionExerciseId] || '';
 
-        if (!error) {
-            setExercises(prev => prev.map(ex =>
-                ex.id === sessionExerciseId ? { ...ex, status: newStatus } : ex
-            ));
-        } else {
-            console.error('Error toggling status:', error);
+            const { error } = await supabase
+                .from('session_exercise_logs')
+                .insert({
+                    user_id: user.id,
+                    session_exercise_id: sessionExerciseId,
+                    pain_score: score,
+                    notes: notes
+                });
+
+            if (error) throw error;
+
+            // Close accordion and maybe show brief success feedback (just UI cleanup)
+            setActivePattern(null);
+            setPainNotes(prev => ({ ...prev, [sessionExerciseId]: '' })); // Clear notes after save
+
+            // Optionally update the exercises list locally so they know they have a saved log
+            setExercises(prev => prev.map(ex => {
+                if (ex.id === sessionExerciseId) {
+                    const existingLogs = ex.session_exercise_logs || [];
+                    return { ...ex, session_exercise_logs: [...existingLogs, { pain_score: score }] };
+                }
+                return ex;
+            }));
+
+        } catch (err: any) {
+            console.error('Error saving pain log:', err);
+            alert('Failed to save log.');
+        } finally {
+            setSavingPain(prev => ({ ...prev, [sessionExerciseId]: false }));
         }
     };
 
     const handleCompleteSession = async () => {
         if (!session) return;
         try {
-            console.log('Calling complete_session RPC with session.id:', session.id);
-            const { data, error } = await supabase.rpc('complete_session', { p_session_id: session.id });
-            console.log('complete_session response ->', { data, error });
-
-            if (error) {
-                console.error('EXACT ERR OBJ from complete_session:', JSON.stringify(error, null, 2));
-                throw error;
-            }
+            const { error } = await supabase.rpc('complete_session', { p_session_id: session.id });
+            if (error) throw error;
             navigate('/progress');
         } catch (err: any) {
-            console.error('Error completing session in catch block:', err);
+            console.error('Error completing session:', err);
             setErrorMsg(`RPC Error: ${err.message || err.details || JSON.stringify(err)}`);
             setViewState('error');
         }
     };
 
-    const allCompleted = exercises.length > 0 && exercises.every(ex => ex.status === 'completed');
+    const toggleVideoPlay = (exId: string) => {
+        const video = videoRefs.current[exId];
+        if (!video) return;
+
+        if (video.paused) {
+            video.play();
+            setPlayingVideos(prev => ({ ...prev, [exId]: true }));
+        } else {
+            video.pause();
+            setPlayingVideos(prev => ({ ...prev, [exId]: false }));
+        }
+    };
+
+    const allCompleted = exercises.length > 0 && exercises.every(ex => ex.is_completed);
+
+    const getBlockName = (order: number) => {
+        const mapping: Record<number, string> = { 1: 'SQUAT', 2: 'HINGE', 3: 'PUSH', 4: 'PULL', 5: 'CARRY', 6: 'REGULATE' };
+        return mapping[order] || `BLOCK ${order}`;
+    };
 
     return (
         <AppShell
-            title={`Fase de ${session?.phase || profile?.current_phase || 'Desarrollo'}`}
-            subtitle={new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            title={`Phase of ${session?.phase || profile?.current_phase || 'Foundation'}`}
+            subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         >
-            {/* Main Area based on State */}
-            {viewState === 'loading' && (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '60vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                    <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                    <p style={{ marginTop: '16px', fontSize: '14px' }}>Cargando esquema de movimiento...</p>
+            {/* Inline alerts for errors */}
+            {errorMsg && viewState === 'error' && (
+                <div style={{ background: 'rgba(231, 76, 60, 0.1)', color: 'var(--warning)', border: '1px solid rgba(231, 76, 60, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
+                    <Icon name="info" size={16} />
+                    <span>{errorMsg}</span>
                 </div>
             )}
 
-            {viewState === 'error' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
-                    <h2 className={styles.sectionTitle} style={{ color: 'var(--text-primary)', fontSize: '18px' }}>Error de Sistema</h2>
-                    <p className={styles.subtitle}>{errorMsg}</p>
-                    <button className={styles.primaryBtn} onClick={fetchSessionWithExercises} style={{ marginTop: '24px' }}>
-                        Reintentar conexión
-                    </button>
+            {viewState === 'loading' && (
+                <div style={{ display: 'flex', flexDirection: 'column', height: '60vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                    <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
+                    <p style={{ marginTop: '16px', fontSize: '14px' }}>Loading movement pipeline...</p>
                 </div>
             )}
 
             {viewState === 'empty' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
                     <Icon name="event_busy" style={{ color: 'var(--text-muted)' }} size={48} />
-                    <h2 className={styles.sectionTitle} style={{ color: 'var(--text-primary)', fontSize: '18px' }}>No hay sesión activa</h2>
-                    <p className={styles.subtitle}>Aún no has generado tu entrenamiento pautado para hoy.</p>
+                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Session</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '250px' }}>Your daily execution block has not been initialized yet.</p>
                     <button
                         className={styles.primaryBtn}
                         onClick={handleGenerateSession}
                         disabled={generating}
-                        style={{ marginTop: '24px', display: 'flex', justifyContent: 'center', gap: '8px' }}
+                        style={{ marginTop: '24px' }}
                     >
-                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generar Sesión Ahora'}
+                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today\'s Session'}
                     </button>
                 </div>
             )}
@@ -191,118 +276,158 @@ export default function TodayPage() {
             {viewState === 'success' && session && (
                 <>
                     <section className={styles.section}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 className={styles.sectionTitle}>Patrones de hoy</h2>
-                            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
-                                {exercises.filter(ex => ex.status !== 'completed').length} bloques restantes
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingBottom: '8px' }}>
+                            <div>
+                                <h2 className={styles.sectionTitle}>Execution Pipeline</h2>
+                            </div>
+                            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'monospace' }}>
+                                {exercises.filter(ex => !ex.is_completed).length} BLOCKS REMAINING
                             </span>
                         </div>
+
                         <div className={styles.patternList}>
                             {exercises.map((ex, i) => {
                                 const library = ex.exercise_library;
-                                const isCompleted = ex.status === 'completed';
+                                const isCompleted = ex.is_completed;
+                                const isExpanded = activePattern === ex.id;
+                                const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
+                                const currentPainScore = painScores[ex.id] || 0;
 
                                 return (
                                     <div
                                         key={ex.id}
-                                        className={`${styles.patternCard} ${activePattern === ex.id ? styles.patternActive : ''} ${isCompleted ? styles.completed : ''}`}
-                                        onClick={() => {
-                                            if (!isCompleted) setActivePattern(activePattern === ex.id ? null : ex.id);
-                                        }}
-                                        style={{ opacity: isCompleted ? 0.6 : 1 }}
+                                        className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
                                     >
-                                        <div className={styles.patternIndex}>
-                                            {i === 0 ? 'START' : 'QUEUE'}
-                                        </div>
-                                        <div className={styles.patternContent}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-                                                <div>
-                                                    <div className={styles.patternHeader}>
-                                                        <h3 className={styles.patternName}>{library?.name || 'Patrón Desconocido'}</h3>
-                                                        <span className={styles.patternCategory}>{library?.pattern}</span>
-                                                    </div>
-                                                    <div className={styles.patternMeta}>
-                                                        <span>{ex.sets} series · {ex.reps_min}-{ex.reps_max} reps</span>
-                                                    </div>
-                                                    <div className={styles.patternMeta} style={{ marginTop: '2px' }}>
-                                                        <span>Descanso: {ex.rest_sec}s</span>
-                                                        <span>·</span>
-                                                        <span>Lv {library?.level || 1}</span>
+                                        <div className={styles.patternRow}>
+                                            {/* Completion Toggle */}
+                                            <button
+                                                className={`${styles.checkboxBtn} ${isCompleted ? styles.completedCheckbox : ''}`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleComplete(ex.id, ex.is_completed);
+                                                }}
+                                            >
+                                                <Icon name="check" />
+                                            </button>
+
+                                            {/* Details */}
+                                            <div className={styles.patternContent} onClick={() => setActivePattern(isExpanded ? null : ex.id)} style={{ cursor: 'pointer' }}>
+                                                <div className={styles.patternHeader}>
+                                                    <div>
+                                                        <span style={{ fontSize: '10px', color: 'var(--accent)', fontWeight: 600, letterSpacing: '0.5px' }}>
+                                                            {i + 1} // {getBlockName(ex.block_order)}
+                                                        </span>
+                                                        <h3 className={styles.patternName} style={{ marginTop: '2px' }}>{library?.name || 'Unknown Pattern'}</h3>
                                                     </div>
                                                 </div>
-                                                <div className={styles.patternThumbnail}>
-                                                    <Icon name="play_circle" size={24} />
+                                                <div className={styles.patternMeta}>
+                                                    <span className={styles.patternCategory}>{library?.pattern}</span>
+                                                    <span>{ex.sets} SETS · {ex.reps_min}-{ex.reps_max} REPS</span>
+                                                    <span>REST {ex.rest_sec}s</span>
                                                 </div>
                                             </div>
-                                            {activePattern === ex.id && (
-                                                <div className={styles.patternExpanded}>
-                                                    <div className={styles.videoPlaceholder}>
-                                                        <Icon name="play_circle" />
-                                                        <span>Ayuda visual · {(library?.media_video_url) ? 'Video disponible' : 'Sin video'}</span>
-                                                    </div>
-                                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                                                        <button className={styles.ghostBtn} onClick={(e) => { e.stopPropagation(); handleLogExercise(ex.id, 0); }}>
-                                                            Log: Sin dolor
-                                                        </button>
-                                                        <button className={styles.ghostBtn} onClick={(e) => { e.stopPropagation(); handleLogExercise(ex.id, 5); }}>
-                                                            Log: Dolor (5)
-                                                        </button>
-                                                    </div>
+
+                                            {/* Video Preview */}
+                                            {library?.media_video_url ? (
+                                                <div className={styles.patternThumbnail} onClick={(e) => { e.stopPropagation(); toggleVideoPlay(ex.id); }}>
+                                                    <video
+                                                        ref={(el) => { videoRefs.current[ex.id] = el; }}
+                                                        src={library.media_video_url}
+                                                        muted
+                                                        loop
+                                                        playsInline
+                                                    />
+                                                    {!playingVideos[ex.id] && (
+                                                        <div className={styles.playIconOverlay}>
+                                                            <Icon name="play_arrow" size={16} style={{ color: '#fff' }} />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : (
+                                                <div className={styles.patternThumbnail} style={{ background: 'var(--surface-3)', border: 'none' }}>
+                                                    <Icon name="videocam_off" size={20} style={{ opacity: 0.5 }} />
                                                 </div>
                                             )}
                                         </div>
-                                        <button
-                                            className={styles.ghostBtn}
-                                            style={{ width: '48px', height: '48px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleToggleComplete(ex.id, ex.status);
-                                            }}
-                                        >
-                                            <Icon
-                                                name={isCompleted ? 'check_circle' : 'radio_button_unchecked'}
-                                                active={isCompleted}
-                                            />
-                                        </button>
+
+                                        {/* Expandable Accordion for Pain Logging */}
+                                        {isExpanded && (
+                                            <div className={styles.patternExpanded}>
+                                                <div className={styles.reportPainTitle}>
+                                                    Report Load/Pain
+                                                    {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-muted)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
+                                                </div>
+
+                                                <div className={styles.inputGroup}>
+                                                    <div className={styles.inputLabel}>
+                                                        <span>No Pain</span>
+                                                        <span>Severe</span>
+                                                    </div>
+                                                    <div className={styles.sliderContainer}>
+                                                        <input
+                                                            type="range"
+                                                            min="0" max="10"
+                                                            value={currentPainScore}
+                                                            onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id]: parseInt(e.target.value) }))}
+                                                            className={styles.painSlider}
+                                                        />
+                                                    </div>
+                                                    <div style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '-8px' }}>
+                                                        {currentPainScore}
+                                                    </div>
+                                                </div>
+
+                                                <textarea
+                                                    className={styles.textarea}
+                                                    placeholder="Clinical notes or joint sensations..."
+                                                    value={painNotes[ex.id] || ''}
+                                                    onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                                />
+
+                                                <button
+                                                    className={styles.ghostBtn}
+                                                    style={{ width: '100%', marginTop: '4px', background: 'var(--surface-2)', border: 'none' }}
+                                                    onClick={() => handleSavePainLog(ex.id)}
+                                                    disabled={savingPain[ex.id]}
+                                                >
+                                                    {savingPain[ex.id] ? 'Saving...' : 'Save Log Record'}
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             })}
                         </div>
                     </section>
 
-                    <section className={styles.actionSection}>
+                    <section className={styles.actionSection} style={{ marginTop: '24px' }}>
                         <button
                             className={styles.primaryBtn}
                             disabled={!allCompleted || session.state === 'completed'}
                             onClick={handleCompleteSession}
-                            style={{ opacity: (!allCompleted || session.state === 'completed') ? 0.5 : 1 }}
                         >
-                            {session.state === 'completed' ? 'Sesión Terminada' : 'Completar sesión'}
-                        </button>
-                        <button className={styles.secondaryBtn} disabled={session.state === 'completed'}>
-                            Recalcular plan
+                            {session.state === 'completed' ? 'Session Already Completed' : 'Complete Session'}
                         </button>
                     </section>
                 </>
             )}
 
-            {/* Premium Prompt Gate Modal */}
             {showPremiumGate && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modalContent}>
                         <div className={styles.modalIconBox}>
                             <Icon name="bolt" size={32} />
                         </div>
-                        <h2 className={styles.modalTitle}>Unlock Adaptive Engine</h2>
+                        <h2 className={styles.modalTitle}>System Engine Lock</h2>
                         <p className={styles.modalText}>
-                            Enable dynamic load adjustment, advanced analytics, and full execution library access.
+                            Enable dynamic load adjustment and execution tracking by removing restrictions.
                         </p>
                         <div className={styles.modalActions}>
                             <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
-                                Start 7-Day Trial
+                                Upgrade Pipeline
                             </button>
                             <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)} style={{ border: 'none' }}>
-                                Continue with Free Version
+                                Acknowledge Basic Mode
                             </button>
                         </div>
                     </div>

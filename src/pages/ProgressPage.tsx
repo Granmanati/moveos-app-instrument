@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ProgressPage() {
     const { user } = useAuth();
@@ -12,14 +13,14 @@ export default function ProgressPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [activeTab, setActiveTab] = useState<'7d' | '30d'>('7d');
 
-    const [trends, setTrends] = useState<any[]>([]);
+    const [chartData, setChartData] = useState<any[]>([]);
     const [metrics, setMetrics] = useState({
-        avg7d: 0,
-        avg30d: 0,
-        todayPain: 0
+        avgPain: '0.0',
+        completed: 0,
+        adherence: 0
     });
 
-
+    const windowDays = activeTab === '7d' ? 7 : 30;
 
     const fetchProgress = async () => {
         if (!user) return;
@@ -27,35 +28,85 @@ export default function ProgressPage() {
         setErrorMsg('');
 
         try {
-            // Get pain trends
-            const { data, error } = await supabase
-                .from('pain_trends')
-                .select('pain_avg_7d, pain_avg_30d, updated_at')
-                .eq('user_id', user.id)
-                .order('updated_at', { ascending: false })
-                .limit(30);
+            const end = new Date();
+            const start = new Date();
+            start.setDate(end.getDate() - (windowDays - 1));
 
-            if (error) throw error;
+            const endIso = end.toISOString().split('T')[0];
+            const startIso = start.toISOString().split('T')[0];
 
-            if (!data || data.length === 0) {
-                setViewState('empty');
-                return;
+            // Parallel fetch from the materialized views or regular views
+            const [painRes, adhRes] = await Promise.all([
+                supabase
+                    .from('v_pain_daily')
+                    .select('day, pain_avg')
+                    .gte('day', startIso)
+                    .lte('day', endIso)
+                    .eq('user_id', user.id),
+                supabase
+                    .from('v_adherence_daily')
+                    .select('day, completed')
+                    .gte('day', startIso)
+                    .lte('day', endIso)
+                    .eq('user_id', user.id)
+            ]);
+
+            if (painRes.error) throw painRes.error;
+            if (adhRes.error) throw adhRes.error;
+
+            const painData = painRes.data || [];
+            const adhData = adhRes.data || [];
+
+            const newData = [];
+            let totalPain = 0;
+            let painDays = 0;
+            let sessionsCompleted = 0;
+
+            for (let i = windowDays - 1; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = d.toISOString().split('T')[0];
+
+                const p = painData.find(x => x.day === dateStr);
+                const a = adhData.find(x => x.day === dateStr);
+
+                const painVal = p && p.pain_avg != null ? Number(p.pain_avg) : null;
+                const compVal = a && a.completed ? 1 : 0;
+
+                if (painVal !== null) {
+                    totalPain += painVal;
+                    painDays++;
+                }
+                if (compVal === 1) {
+                    sessionsCompleted++;
+                }
+
+                // Format display date: MM/DD
+                const displayDate = `${d.getMonth() + 1}/${d.getDate()}`;
+
+                newData.push({
+                    date: dateStr,
+                    displayDate,
+                    pain: painVal,
+                    completed: compVal
+                });
             }
 
-            const latest = data[0];
+            const avgPain = painDays > 0 ? (totalPain / painDays).toFixed(1) : '0.0';
+            const adherence = Math.round((sessionsCompleted / windowDays) * 100);
 
-            setTrends(data);
+            setChartData(newData);
             setMetrics({
-                avg30d: latest.pain_avg_30d != null ? parseFloat(Number(latest.pain_avg_30d).toFixed(1)) : 0,
-                avg7d: latest.pain_avg_7d != null ? parseFloat(Number(latest.pain_avg_7d).toFixed(1)) : 0,
-                todayPain: 0 // Omitted until specific daily pain API is exposed 
+                avgPain,
+                completed: sessionsCompleted,
+                adherence
             });
 
             setViewState('success');
 
         } catch (err: any) {
             console.error('Progress error:', err);
-            setErrorMsg(err.message || 'Error al cargar el historial.');
+            setErrorMsg(err.message || 'Error loading clinical analytics.');
             setViewState('error');
         }
     };
@@ -63,146 +114,146 @@ export default function ProgressPage() {
     useEffect(() => {
         fetchProgress();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, activeTab]);
 
-    const getTrendIcon = (val: number, prev: number) => {
-        if (val > prev) return 'trending_up';
-        if (val < prev) return 'trending_down';
-        return 'trending_flat';
-    };
 
-    const getTrendColor = (val: number, prev: number) => {
-        if (val > prev) return styles.danger; // Pain going up is bad
-        return styles.accent; // Removing green, using accent blue only
+    // Custom Tooltip for Recharts
+    const CustomTooltip = ({ active, payload, label }: any) => {
+        if (active && payload && payload.length) {
+            return (
+                <div style={{ background: '#1A1A1F', border: '1px solid #2A2A35', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                    <p style={{ margin: '0 0 4px 0', color: '#8A8F98', fontWeight: 600 }}>{label}</p>
+                    <p style={{ margin: 0, color: payload[0].color, fontWeight: 700 }}>
+                        {payload[0].name}: {payload[0].value}
+                    </p>
+                </div>
+            );
+        }
+        return null;
     };
 
     return (
-        <AppShell title="Historial" subtitle="Carga · Tolerancia · Adherencia">
-            {viewState === 'loading' && (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '60vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                    <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                    <p style={{ marginTop: '16px', fontSize: '14px' }}>Procesando métricas...</p>
-                </div>
-            )}
-
-            {viewState === 'error' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
-                    <button
-                        onClick={fetchProgress}
-                        style={{ marginTop: '16px', padding: '12px 24px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
-                    >
-                        Reintentar
-                    </button>
-                </div>
-            )}
-
-            {viewState === 'empty' && (
-                <div className={styles.emptyConsoleState}>
-                    <Icon name="monitoring" style={{ color: 'var(--text-muted)' }} size={32} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '13px', fontWeight: 600, letterSpacing: '0.5px', fontFamily: 'monospace' }}>SYSTEM ALERTT: INSUFFICIENT DATA</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '12px', fontFamily: 'monospace' }}>
-                        Complete 3 sessions to unlock analytics.
-                    </p>
-                </div>
-            )}
-
-            {viewState === 'success' && (
-                <>
-                    {/* KPI row */}
-                    <div className={styles.kpiRow}>
-                        <div className={styles.kpiCard}>
-                            <div className={styles.kpiIconWrapper}>
-                                <Icon name="event_available" className={styles.accent} />
-                            </div>
-                            <span className={styles.kpiValue}>{trends.length}</span>
-                            <span className={styles.kpiLabel}>Sesiones</span>
-                        </div>
-                        <div className={styles.kpiCard}>
-                            <div className={styles.kpiIconWrapper}>
-                                <Icon name="trending_up" className={styles.accent} />
-                            </div>
-                            <span className={styles.kpiValue}>100%</span>
-                            <span className={styles.kpiLabel}>Adherencia</span>
-                        </div>
+        <AppShell>
+            <div className={styles.page}>
+                <header className={styles.header}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <p style={{ fontSize: '12px', letterSpacing: '1.2px', color: '#2D7CFF', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>MOVE OS</p>
                     </div>
+                    <h1 className={styles.title} style={{ marginTop: '8px' }}>Progress</h1>
+                </header>
 
-                    {/* Trends */}
-                    <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Tendencia de Dolor</h2>
-                        <div className={styles.trendCard}>
-                            <div className={styles.trendRow}>
-                                <span className={styles.trendLabel}>Dolor Promedio 7d</span>
-                                <div className={styles.trendRight}>
-                                    <Icon name={getTrendIcon(metrics.avg7d, metrics.avg30d)} className={getTrendColor(metrics.avg7d, metrics.avg30d)} size={18} />
-                                    <span className={styles.trendValue}>{metrics.avg7d}/10</span>
-                                </div>
-                            </div>
-                            <div className={styles.trendRow}>
-                                <span className={styles.trendLabel}>Dolor Promedio 30d</span>
-                                <div className={styles.trendRight}>
-                                    <span className={styles.trendValue}>{metrics.avg30d}/10</span>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-                    {/* Charts UI Shell */}
-                    <section className={styles.section}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h2 className={styles.sectionTitle}>Análisis del Sistema</h2>
-                            <div className={styles.tabContainer}>
-                                <button className={`${styles.tabBtn} ${activeTab === '7d' ? styles.tabActive : ''}`} onClick={() => setActiveTab('7d')}>7 Days</button>
-                                <button className={`${styles.tabBtn} ${activeTab === '30d' ? styles.tabActive : ''}`} onClick={() => setActiveTab('30d')}>30 Days</button>
-                            </div>
-                        </div>
+                {viewState === 'loading' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', height: '50vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
+                        <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
+                        <p style={{ marginTop: '16px', fontSize: '14px' }}>Aggregating system logs...</p>
+                    </div>
+                )}
 
-                        <div className={styles.chartUI}>
-                            <h3 className={styles.chartTitle}>Tendencia de Dolor</h3>
-                            <div className={styles.chartLineContainer}>
-                                {/* Fake Line Chart rendering using SVG */}
-                                <div className={styles.fakeChartLine}>
-                                    <svg viewBox="0 0 100 40" preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-                                        {activeTab === '7d' ? (
-                                            <>
-                                                <path d="M0,30 L20,28 L40,35 L60,20 L80,25 L100,10" fill="none" stroke="var(--danger)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                <circle cx="100" cy="10" r="3" fill="var(--danger)" />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <path d="M0,10 L20,15 L40,12 L60,25 L80,30 L100,35" fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                <circle cx="100" cy="35" r="3" fill="var(--accent)" />
-                                            </>
-                                        )}
-                                    </svg>
-                                </div>
-                                <div className={styles.chartXAxis}>
-                                    <span>{activeTab === '7d' ? '-7d' : '-30d'}</span>
-                                    <span>Hoy</span>
-                                </div>
-                            </div>
+                {viewState === 'error' && (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
+                        <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                        <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
+                        <button
+                            onClick={fetchProgress}
+                            style={{ marginTop: '16px', padding: '12px 24px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
+                        >
+                            Retry Connection
+                        </button>
+                    </div>
+                )}
+
+                {viewState === 'success' && (
+                    <>
+                        {/* Toggle Segment */}
+                        <div className={styles.tabContainer} style={{ width: '100%' }}>
+                            <button className={`${styles.tabBtn} ${activeTab === '7d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('7d')}>7 Days</button>
+                            <button className={`${styles.tabBtn} ${activeTab === '30d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('30d')}>30 Days</button>
                         </div>
 
-                        <div className={styles.chartUI}>
-                            <h3 className={styles.chartTitle}>Volumen de Carga</h3>
-                            <div className={styles.chartBarContainer}>
-                                {/* Fake bar chart */}
-                                <div className={styles.bars}>
-                                    {(activeTab === '7d' ? [40, 60, 45, 80, 50, 90, 100] : [70, 85, 95, 100]).map((h, i) => (
-                                        <div key={i} className={styles.barWrapper}>
-                                            <div className={styles.bar} style={{ height: `${h}%` }}></div>
+                        {/* KPI row */}
+                        <div className={styles.kpiRow} style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+                            <div className={styles.kpiCard}>
+                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
+                                    <Icon name="healing" className={styles.accent} size={16} />
+                                </div>
+                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.avgPain}</span>
+                                <span className={styles.kpiLabel}>Avg Pain</span>
+                            </div>
+                            <div className={styles.kpiCard}>
+                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
+                                    <Icon name="event_available" className={styles.accent} size={16} />
+                                </div>
+                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.completed}</span>
+                                <span className={styles.kpiLabel}>Sessions</span>
+                            </div>
+                            <div className={styles.kpiCard}>
+                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
+                                    <Icon name="trending_up" className={styles.accent} size={16} />
+                                </div>
+                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.adherence}%</span>
+                                <span className={styles.kpiLabel}>Adherence</span>
+                            </div>
+                        </div>
+
+                        {/* Chart 1: Pain Trend */}
+                        <section className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Pain Trend</h2>
+                            <div className={styles.chartUI}>
+                                {chartData.filter(d => d.pain !== null).length === 0 ? (
+                                    <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
+                                        <Icon name="monitoring" style={{ color: 'var(--text-muted)' }} size={24} />
+                                        <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>NO PAIN LOGS IN WINDOW</h2>
+                                    </div>
+                                ) : (
+                                    <div style={{ height: '200px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                <YAxis domain={[0, 10]} stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} axisLine={false} tickLine={false} width={30} />
+                                                <Tooltip content={<CustomTooltip />} />
+                                                <Line type="monotone" dataKey="pain" name="Pain" stroke="#2D7CFF" strokeWidth={2} dot={{ r: 3, fill: '#0B0B0E', stroke: '#2D7CFF', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#2D7CFF', stroke: '#fff' }} connectNulls={true} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Chart 2: Adherence */}
+                        <section className={styles.section}>
+                            <h2 className={styles.sectionTitle}>Adherence Volume</h2>
+                            <div className={styles.chartUI}>
+                                {metrics.completed === 0 ? (
+                                    <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
+                                        <Icon name="event_busy" style={{ color: 'var(--text-muted)' }} size={24} />
+                                        <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>COMPLETE 3 SESSIONS TO UNLOCK</h2>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-1)', marginBottom: '12px' }}>
+                                            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Window Adherence: <strong style={{ color: 'var(--text-primary)' }}>{metrics.adherence}%</strong></span>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className={styles.chartXAxis}>
-                                    <span>{activeTab === '7d' ? 'L M X J V S D' : 'Semana 1 - Semana 4'}</span>
-                                </div>
+                                        <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <BarChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
+                                                    <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                    <YAxis hide domain={[0, 1]} />
+                                                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} content={<CustomTooltip />} />
+                                                    <Bar dataKey="completed" name="Completed" fill="#2D7CFF" radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={true} />
+                                                </BarChart>
+                                            </ResponsiveContainer>
+                                        </div>
+                                    </>
+                                )}
                             </div>
-                        </div>
-                    </section>
-                </>
-            )}
+                        </section>
+
+                        {/* Bottom Spacer */}
+                        <div style={{ height: '100px' }} />
+                    </>
+                )}
+            </div>
         </AppShell>
     );
 }
