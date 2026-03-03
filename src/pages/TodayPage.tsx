@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './TodayPage.module.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
@@ -9,6 +9,7 @@ import { Icon } from '../components/Icon';
 export default function TodayPage() {
     const { user, profile } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [session, setSession] = useState<any>(null);
@@ -16,6 +17,17 @@ export default function TodayPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [generating, setGenerating] = useState(false);
     const [activePattern, setActivePattern] = useState<string | null>(null);
+
+    const [showPremiumGate, setShowPremiumGate] = useState(false);
+
+    // Initial check for onboarding redirect flag
+    useEffect(() => {
+        if (location.state?.isNewOnboarding) {
+            setShowPremiumGate(true);
+            // Clear the state so it doesn't pop up again on refresh
+            window.history.replaceState({}, document.title);
+        }
+    }, [location]);
 
     const fetchSessionWithExercises = async () => {
         if (!user) return;
@@ -272,6 +284,29 @@ export default function TodayPage() {
                         </button>
                     </section>
                 </>
+            )}
+
+            {/* Premium Prompt Gate Modal */}
+            {showPremiumGate && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalIconBox}>
+                            <Icon name="bolt" size={32} />
+                        </div>
+                        <h2 className={styles.modalTitle}>Unlock Adaptive Engine</h2>
+                        <p className={styles.modalText}>
+                            Enable dynamic load adjustment, advanced analytics, and full execution library access.
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
+                                Start 7-Day Trial
+                            </button>
+                            <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)} style={{ border: 'none' }}>
+                                Continue with Free Version
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </AppShell>
     );
