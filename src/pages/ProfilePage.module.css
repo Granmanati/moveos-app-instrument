@@ -13,6 +13,16 @@
     padding-top: var(--sp-3);
 }
 
+.systemLabel {
+    font-size: 11px;
+    letter-spacing: 1.2px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin: 0;
+    padding-bottom: var(--sp-3);
+    text-transform: uppercase;
+}
+
 .avatarLarge {
     width: 64px;
     height: 64px;
@@ -22,7 +32,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 36px;
     color: var(--accent);
     flex-shrink: 0;
 }
@@ -64,8 +73,23 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    box-shadow: 0 0 0 1px rgba(45, 124, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
     transition: border-color var(--duration-base);
+}
+
+.statIconBadge {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(45, 124, 255, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 4px;
+}
+
+.statIcon {
+    color: var(--accent);
 }
 
 .statCard:hover {
@@ -125,10 +149,30 @@
     color: var(--text-primary);
 }
 
-.upgradeText {
+.upgradeList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     font-size: 13px;
     color: var(--text-secondary);
-    line-height: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.upgradeList li {
+    display: flex;
+    align-items: center;
+}
+
+.upgradeList li::before {
+    content: "•";
+    color: var(--accent);
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+    padding-left: 1em;
 }
 
 .upgradeBtn {
@@ -148,6 +192,53 @@
 
 .upgradeBtn:active {
     transform: translateY(1px);
+}
+
+.ghostBtn {
+    background: transparent;
+    border: 1px solid var(--border-1);
+    color: var(--text-secondary);
+    height: 36px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-primary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    margin-top: -4px;
+}
+
+.activePlanCard {
+    background: #101015;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 20px 40px rgba(0, 0, 0, 0.40);
+}
+
+.statusLine {
+    margin-left: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: #00C853;
+    background: rgba(0, 200, 83, 0.15);
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.manageBtn {
+    height: 40px;
+    background: var(--surface-2);
+    border: 1px solid var(--border-1);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .settingsList {
@@ -206,7 +297,7 @@
     align-items: center;
     justify-content: center;
     gap: var(--sp-2);
-    background: transparent;
+    background: rgba(231, 76, 60, 0.02);
     border: 1px solid rgba(231, 76, 60, 0.15);
     border-radius: var(--radius-md);
     font-family: var(--font-primary);
@@ -226,8 +317,7 @@
     transform: translateY(1px);
 }
 
-.version {
-    text-align: center;
-    font-size: 11px;
-    color: var(--border-2);
+.signOutBtn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
