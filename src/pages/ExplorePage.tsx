@@ -5,10 +5,15 @@ import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 
-const CATEGORIES = ['Todos', 'squat', 'hinge', 'push', 'pull', 'carry', 'regulate'];
+import { useNavigate } from 'react-router-dom';
+
+const PATTERNS = ['Todos', 'squat', 'hinge', 'push', 'pull', 'carry', 'regulate'];
+const EQUIPMENTS = ['Todos', 'bodyweight', 'bands', 'kettlebell', 'barbell', 'other'];
+const LEVELS = ['Todos', 'L1', 'L2', 'L3'];
 
 export default function ExplorePage() {
     const { user } = useAuth();
+    const navigate = useNavigate();
 
     // UI States
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
@@ -18,8 +23,15 @@ export default function ExplorePage() {
     const [subscription, setSubscription] = useState<any>(null);
 
     const [search, setSearch] = useState('');
-    const [activeCategory, setActiveCategory] = useState('Todos');
+    const [activePattern, setActivePattern] = useState('Todos');
+    const [activeEquipment, setActiveEquipment] = useState('Todos');
+    const [activeLevel, setActiveLevel] = useState('Todos');
+
+    const [limit, setLimit] = useState(30);
+    const [hasMore, setHasMore] = useState(true);
+
     const [mutedVideos, setMutedVideos] = useState<Record<string, boolean>>({});
+    const [showLockModal, setShowLockModal] = useState(false);
 
     const toggleMute = (id: string) => {
         setMutedVideos(prev => ({ ...prev, [id]: prev[id] === false }));
@@ -41,20 +53,19 @@ export default function ExplorePage() {
             if (subError) throw subError;
             setSubscription(subData || { tier: 'free' });
 
-            // Fetch library
+            // Fetch library with pagination limit
             const { data: exData, error: exError } = await supabase
                 .from('exercise_library')
                 .select('*')
-                .order('name');
+                .order('name')
+                .limit(limit);
 
             if (exError) throw exError;
 
-            if (exData && exData.length > 0) {
+            if (exData) {
                 setLibrary(exData);
-                setViewState('success');
-            } else {
-                setLibrary([]);
-                setViewState('empty');
+                setHasMore(exData.length === limit); // basic check for hasMore
+                setViewState(exData.length > 0 ? 'success' : 'empty');
             }
 
         } catch (err: any) {
@@ -67,18 +78,21 @@ export default function ExplorePage() {
     useEffect(() => {
         fetchExploreData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, limit]); // Re-fetch when limit increases
 
     const filtered = library.filter((item) => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-        const matchesCategory = activeCategory === 'Todos' || item.pattern === activeCategory;
-        return matchesSearch && matchesCategory;
+        const matchesPattern = activePattern === 'Todos' || item.pattern === activePattern;
+        const matchesEquipment = activeEquipment === 'Todos' || item.equipment === activeEquipment;
+        // In DB, levels might be '1', '2' or 'L1', 'L2'. Using loose match for flexibility.
+        const matchesLevel = activeLevel === 'Todos' || (item.level && `L${item.level}` === activeLevel) || item.level === activeLevel;
+
+        return matchesSearch && matchesPattern && matchesEquipment && matchesLevel;
     });
 
-    const isLocked = (item: any) => {
-        const isPremiumEx = item.is_premium;
+    const isLocked = (index: number) => {
         const userTier = subscription?.tier || 'free';
-        return (isPremiumEx && userTier === 'free');
+        return userTier === 'free' && index >= 8;
     };
 
     return (
@@ -107,13 +121,35 @@ export default function ExplorePage() {
                     </div>
 
                     <div className={styles.filterRow}>
-                        {CATEGORIES.map((cat) => (
+                        {PATTERNS.map((cat) => (
                             <button
                                 key={cat}
-                                className={`${styles.filterChip} ${activeCategory === cat ? styles.filterActive : ''}`}
-                                onClick={() => setActiveCategory(cat)}
+                                className={`${styles.filterChip} ${activePattern === cat ? styles.filterActive : ''}`}
+                                onClick={() => setActivePattern(cat)}
                             >
                                 {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className={styles.filterRow} style={{ paddingTop: 0 }}>
+                        {EQUIPMENTS.map((eq) => (
+                            <button
+                                key={eq}
+                                className={`${styles.filterChip} ${activeEquipment === eq ? styles.filterActive : ''}`}
+                                onClick={() => setActiveEquipment(eq)}
+                            >
+                                {eq.charAt(0).toUpperCase() + eq.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className={styles.filterRow} style={{ paddingTop: 0 }}>
+                        {LEVELS.map((lvl) => (
+                            <button
+                                key={lvl}
+                                className={`${styles.filterChip} ${activeLevel === lvl ? styles.filterActive : ''}`}
+                                onClick={() => setActiveLevel(lvl)}
+                            >
+                                {lvl}
                             </button>
                         ))}
                     </div>
@@ -159,12 +195,18 @@ export default function ExplorePage() {
 
                 {viewState === 'success' && filtered.length > 0 && (
                     <div className={styles.grid}>
-                        {filtered.map((item) => {
-                            const locked = isLocked(item);
+                        {filtered.map((item, index) => {
+                            const locked = isLocked(index);
                             return (
-                                <div key={item.id} className={`${styles.videoCard} ${locked ? styles.locked : ''}`}>
+                                <div
+                                    key={item.id}
+                                    className={`${styles.videoCard} ${locked ? styles.locked : ''}`}
+                                    onClick={() => {
+                                        if (locked) setShowLockModal(true);
+                                    }}
+                                >
                                     <div className={styles.videoContainer}>
-                                        {item.media_video_url ? (
+                                        {item.media_video_url && !locked ? (
                                             <video src={item.media_video_url} playsInline muted={mutedVideos[item.id] !== false} loop autoPlay preload="metadata" className={styles.thumbnailVideo} />
                                         ) : (
                                             <div className={styles.thumbnailPlaceholder}>
@@ -205,15 +247,65 @@ export default function ExplorePage() {
                                             <div className={styles.lockOverlay}>
                                                 <Icon name="lock" size={32} />
                                                 <span>PRO</span>
+                                                <button
+                                                    className={styles.trialPillBtn}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setShowLockModal(true);
+                                                    }}
+                                                >
+                                                    Start 7-day trial
+                                                </button>
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             )
                         })}
+
+                        {hasMore && (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--sp-4) 0 var(--sp-8) 0' }}>
+                                <button
+                                    className={styles.loadMoreBtn}
+                                    onClick={() => setLimit(prev => prev + 30)}
+                                >
+                                    Load more
+                                </button>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
+
+            {/* Lock Modal */}
+            {showLockModal && (
+                <div className={styles.modalOverlay} onClick={() => setShowLockModal(false)}>
+                    <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+                        <div className={styles.modalIconBox}>
+                            <Icon name="lock" size={32} />
+                        </div>
+                        <h2 className={styles.modalTitle}>Unlock Execution Library</h2>
+                        <p className={styles.modalText}>
+                            Access full exercise database, adaptive engine, and analytics.
+                        </p>
+
+                        <div className={styles.modalActions}>
+                            <button
+                                className={styles.primaryBtn}
+                                onClick={() => navigate('/pricing')}
+                            >
+                                Start 7-day trial
+                            </button>
+                            <button
+                                className={styles.ghostBtn}
+                                onClick={() => setShowLockModal(false)}
+                            >
+                                Not now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AppShell>
     );
 }
