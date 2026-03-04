@@ -11,7 +11,7 @@ interface AppShellProps {
 
 export default function AppShell({ title, subtitle, customHeader, children }: AppShellProps) {
     return (
-        <div className={styles.shell}>
+        <div className={`${styles.shell} animate-page-enter`}>
             {customHeader ? (
                 <div className={styles.headerWrapper}>{customHeader}</div>
             ) : (title || subtitle) ? (
