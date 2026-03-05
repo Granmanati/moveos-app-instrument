@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { VideoHUDPreview } from '../components/VideoHUDPreview';
+import { safeSelect, safeRpc } from '../lib/db';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
 
 interface ExerciseLibrary {
     id: string;
@@ -47,8 +49,25 @@ export default function TodayPage() {
     const [expandedCards, setExpandedCards] = useState<string[]>([]);
     const [showPremiumGate, setShowPremiumGate] = useState(false);
 
-    // Refs for scrolling
+    // Refs for scrolling and observing
     const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+    const topObserverRef = useRef<HTMLDivElement>(null);
+    const [isStickyVisible, setIsStickyVisible] = useState(false);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                setIsStickyVisible(!entry.isIntersecting);
+            },
+            { threshold: 0, rootMargin: '-60px 0px 0px 0px' }
+        );
+
+        if (topObserverRef.current) {
+            observer.observe(topObserverRef.current);
+        }
+
+        return () => observer.disconnect();
+    }, []);
 
     // Load persisted expand state on session load
     useEffect(() => {
@@ -95,7 +114,7 @@ export default function TodayPage() {
         try {
             const today = new Date().toISOString().split('T')[0];
 
-            const { data, error } = await supabase
+            const queryInfo = supabase
                 .from('training_sessions')
                 .select(`
                     id, state, phase,
@@ -113,7 +132,13 @@ export default function TodayPage() {
                 .eq('session_date', today)
                 .maybeSingle();
 
-            if (error) throw error;
+            const { data, error } = await safeSelect(queryInfo, 'TodaySession');
+
+            if (error) {
+                setErrorMsg(error.message);
+                setViewState('error');
+                return;
+            }
 
             if (data) {
                 setSession(data);
@@ -140,8 +165,9 @@ export default function TodayPage() {
                 setViewState('empty');
             }
         } catch (err: any) {
+            // Should be handled by safeSelect mostly, but just in case
             console.error(err);
-            setErrorMsg(err.message || 'Error loading today\'s patterns.');
+            setErrorMsg(err.message || "Un error inesperado ocurrió.");
             setViewState('error');
         }
     };
@@ -156,12 +182,17 @@ export default function TodayPage() {
         setGenerating(true);
         setErrorMsg('');
         try {
-            const { error: genError } = await supabase.rpc('generate_session');
-            if (genError) throw genError;
+            const { error: genError } = await safeRpc('generate_session');
+            if (genError) {
+                setErrorMsg(genError.message);
+                setViewState('error');
+                return;
+            }
             await fetchSessionWithExercises();
         } catch (err: any) {
-            console.error('Error generating session:', err);
-            setErrorMsg(err.message || 'Error generating session. Try again.');
+            // Unlikely with safeRpc
+            console.error(err);
+            setErrorMsg(err.message);
             setViewState('error');
         } finally {
             setGenerating(false);
@@ -189,16 +220,19 @@ export default function TodayPage() {
         } else if (newCompleted) {
             // Auto scroll logic (wrapped in setTimeout to let UI update first)
             setTimeout(() => {
+                // do not scroll if user has expanded a different card panel and is interacting
+                if (expandedCards.length > 0 && !expandedCards.includes(sessionExerciseId)) {
+                    return;
+                }
+
                 const idx = exercises.findIndex(ex => ex.id === sessionExerciseId);
                 if (idx !== -1) {
                     if (idx + 1 < exercises.length) {
                         const nextId = exercises[idx + 1].id;
-                        cardRefs.current[nextId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    } else {
-                        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                        cardRefs.current[nextId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }
-            }, 100);
+            }, 150);
         }
     };
 
@@ -261,16 +295,52 @@ export default function TodayPage() {
         return mapping[order] || `BLOCK ${order}`;
     };
 
+    const getLoadImpact = (ex: any, currentPainScore: number) => {
+        let impact = 'low'; // default
+        const order = ex.block_order;
+        const sets = ex.sets;
+        const reps = ex.reps_min;
+
+        if (order === 6) impact = 'low'; // REGULATE
+        else if (order === 5) impact = 'moderate'; // CARRY default
+        else if (order === 1 || order === 2) impact = 'moderate'; // SQUAT/HINGE default
+
+        if (sets >= 4 && reps <= 6) impact = 'high';
+
+        // user pain >= 6 reduces one level
+        if (currentPainScore >= 6) {
+            if (impact === 'high') impact = 'moderate';
+            else if (impact === 'moderate') impact = 'low';
+        }
+
+        return impact;
+    };
+
+    const completedCount = exercises.filter(ex => ex.is_completed).length;
+    const totalCount = exercises.length;
+    const upcomingBlock = exercises.find(ex => !ex.is_completed);
+
     return (
         <AppShell
             title={`Phase of ${session?.phase || profile?.current_phase || 'Foundation'}`}
             subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
         >
-            {/* Inline alerts for errors */}
-            {errorMsg && viewState === 'error' && (
-                <div style={{ background: 'rgba(231, 76, 60, 0.1)', color: 'var(--warning)', border: '1px solid rgba(231, 76, 60, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
-                    <Icon name="info" size={16} />
-                    <span>{errorMsg}</span>
+            <div className={`${styles.stickyMiniProgress} ${isStickyVisible ? styles.stickyVisible : ''}`}>
+                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{completedCount}/{totalCount} completed</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                    {upcomingBlock ? `Next: ${getBlockName(upcomingBlock.block_order)}` : 'Ready to complete'}
+                </div>
+            </div>
+
+            {/* Error State */}
+            {viewState === 'error' && (
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
+                    <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
+                    <div style={{ marginTop: '16px', width: '200px' }}>
+                        <PrimaryButton onClick={fetchSessionWithExercises}>Reintentar</PrimaryButton>
+                    </div>
                 </div>
             )}
 
@@ -286,135 +356,196 @@ export default function TodayPage() {
                     <Icon name="event_busy" style={{ color: 'var(--text-muted)' }} size={48} />
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Session</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '250px' }}>Your daily execution block has not been initialized yet.</p>
-                    <button
-                        className={styles.primaryBtn}
-                        onClick={handleGenerateSession}
-                        disabled={generating}
-                        style={{ marginTop: '24px' }}
-                    >
-                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today\'s Session'}
-                    </button>
+                    <div style={{ marginTop: '24px', width: '100%' }}>
+                        <PrimaryButton
+                            onClick={handleGenerateSession}
+                            disabled={generating}
+                        >
+                            {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today\'s Session'}
+                        </PrimaryButton>
+                    </div>
                 </div>
             )}
 
             {viewState === 'success' && session && (
                 <>
                     <section className={styles.section}>
+                        <div className={styles.progressContainer}>
+                            <div className={styles.progressText}>
+                                <span>Session progress</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{completedCount} / {totalCount} blocks completed</span>
+                            </div>
+                            <div className={styles.progressBarBg}>
+                                <div className={styles.progressBarFill} style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} />
+                            </div>
+                        </div>
+
+                        <div className={styles.nextPreviewCard}>
+                            {upcomingBlock ? (
+                                <>
+                                    <Icon name="arrow_forward" size={16} style={{ color: 'var(--accent)' }} />
+                                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                        Next up: <strong style={{ color: 'var(--text-primary)' }}>{getBlockName(upcomingBlock.block_order)}</strong> — {upcomingBlock.sets}×{upcomingBlock.reps_min}–{upcomingBlock.reps_max} · {upcomingBlock.rest_sec}s
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    <Icon name="check_circle" size={16} style={{ color: '#4caf50' }} />
+                                    <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
+                                        Session ready to complete.
+                                    </span>
+                                </>
+                            )}
+                        </div>
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingBottom: '8px' }}>
                             <div>
                                 <h2 className={styles.sectionTitle}>Execution Pipeline</h2>
                             </div>
                             <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'monospace' }}>
-                                {exercises.filter(ex => !ex.is_completed).length} BLOCKS REMAINING
+                                {totalCount - completedCount} BLOCKS REMAINING
                             </span>
                         </div>
 
-                        <div className={styles.patternList}>
-                            {exercises.map((ex, i) => {
-                                const library = ex.exercise_library;
-                                const isCompleted = ex.is_completed;
-                                const isExpanded = expandedCards.includes(ex.id);
-                                const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
-                                const currentPainScore = painScores[ex.id] || 0;
+                        <div ref={topObserverRef} />
 
-                                return (
-                                    <div
-                                        key={ex.id}
-                                        ref={(el) => { cardRefs.current[ex.id] = el; }}
-                                        className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
-                                    >
-                                        <div className={styles.cardTopBar}>
-                                            <button
-                                                className={`${styles.checkboxBtn} ${isCompleted ? styles.completedCheckbox : ''}`}
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleToggleComplete(ex.id, ex.is_completed);
-                                                }}
-                                                aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
-                                            >
-                                                <Icon name="check" />
-                                            </button>
-                                            <div className={styles.blockLabel}>
-                                                <span style={{ color: 'var(--accent)', fontWeight: 600, marginRight: '4px' }}>{i + 1} //</span>
-                                                <span>{getBlockName(ex.block_order)}</span>
-                                            </div>
-                                        </div>
+                        <div className={styles.executionLayout}>
+                            <div className={styles.executionRail}>
+                                {exercises.map((ex) => {
+                                    const isCompleted = ex.is_completed;
+                                    const isActive = !isCompleted && ex.id === upcomingBlock?.id;
 
+                                    let nodeClass = styles.railNode;
+                                    if (isCompleted) nodeClass += ` ${styles.completed}`;
+                                    else if (isActive) nodeClass += ` ${styles.active}`;
+
+                                    return (
                                         <div
-                                            className={styles.hudWrapper}
-                                            onClick={() => toggleExpand(ex.id)}
-                                            style={{ cursor: 'pointer' }}
+                                            key={`rail-${ex.id}`}
+                                            className={styles.railNodeWrapper}
+                                            onClick={() => cardRefs.current[ex.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                         >
-                                            <VideoHUDPreview
-                                                videoUrl={library?.media_video_url}
-                                                pattern={library?.pattern}
-                                                name={library?.name || 'Unknown Pattern'}
-                                                sets={ex.sets}
-                                                repsMin={ex.reps_min}
-                                                repsMax={ex.reps_max}
-                                                restSeconds={ex.rest_sec}
-                                                className={styles.hudComponent}
-                                            />
+                                            <div className={nodeClass} />
                                         </div>
+                                    );
+                                })}
+                            </div>
 
-                                        {/* Expandable Accordion for Pain Logging */}
-                                        {isExpanded && (
-                                            <div className={styles.patternExpanded}>
-                                                <div className={styles.reportPainTitle}>
-                                                    Report Load/Pain
-                                                    {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-muted)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
-                                                </div>
+                            <div className={`${styles.patternList} ${styles.patternListWrapper}`}>
+                                {exercises.map((ex, i) => {
+                                    const library = ex.exercise_library;
+                                    const isCompleted = ex.is_completed;
+                                    const isExpanded = expandedCards.includes(ex.id);
+                                    const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
+                                    const currentPainScore = painScores[ex.id] || 0;
 
-                                                <div className={styles.inputGroup}>
-                                                    <div className={styles.inputLabel}>
-                                                        <span>No Pain</span>
-                                                        <span>Severe</span>
-                                                    </div>
-                                                    <div className={styles.sliderContainer}>
-                                                        <input
-                                                            type="range"
-                                                            min="0" max="10"
-                                                            value={currentPainScore}
-                                                            onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id]: parseInt(e.target.value) }))}
-                                                            className={styles.painSlider}
-                                                        />
-                                                    </div>
-                                                    <div style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '-8px' }}>
-                                                        {currentPainScore}
-                                                    </div>
-                                                </div>
-
-                                                <textarea
-                                                    className={styles.textarea}
-                                                    placeholder="Clinical notes or joint sensations..."
-                                                    value={painNotes[ex.id] || ''}
-                                                    onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id]: e.target.value }))}
-                                                />
-
+                                    return (
+                                        <div
+                                            key={ex.id}
+                                            ref={(el) => { cardRefs.current[ex.id] = el; }}
+                                            className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
+                                        >
+                                            <div className={styles.cardTopBar}>
                                                 <button
-                                                    className={styles.ghostBtn}
-                                                    style={{ width: '100%', marginTop: '4px', background: 'var(--surface-2)', border: 'none' }}
-                                                    onClick={() => handleSavePainLog(ex.id)}
-                                                    disabled={savingPain[ex.id]}
+                                                    className={`${styles.checkboxBtn} ${isCompleted ? styles.completedCheckbox : ''}`}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleToggleComplete(ex.id, ex.is_completed);
+                                                    }}
+                                                    aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
                                                 >
-                                                    {savingPain[ex.id] ? 'Saving...' : 'Save Log Record'}
+                                                    <Icon name="check" className={styles.checkIcon} />
                                                 </button>
+                                                <div className={styles.blockLabel} style={{ flexShrink: 0 }}>
+                                                    <span style={{ color: 'var(--accent)', fontWeight: 600, marginRight: '4px' }}>{i + 1} //</span>
+                                                    <span>{getBlockName(ex.block_order)}</span>
+                                                </div>
+                                                <div style={{ flex: 1 }} />
+                                                {(() => {
+                                                    const impact = getLoadImpact(ex, currentPainScore);
+                                                    return (
+                                                        <span className={`${styles.impactChip} ${styles[`impact_${impact}`]}`}>
+                                                            {impact === 'low' ? 'Low Impact' : impact === 'moderate' ? 'Mod Impact' : 'High Impact'}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
-                                        )}
-                                    </div>
-                                )
-                            })}
+
+                                            <div
+                                                className={styles.hudWrapper}
+                                                onClick={() => toggleExpand(ex.id)}
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <VideoHUDPreview
+                                                    videoUrl={library?.media_video_url}
+                                                    pattern={library?.pattern}
+                                                    name={library?.name || 'Unknown Pattern'}
+                                                    sets={ex.sets}
+                                                    repsMin={ex.reps_min}
+                                                    repsMax={ex.reps_max}
+                                                    restSeconds={ex.rest_sec}
+                                                    className={styles.hudComponent}
+                                                />
+                                            </div>
+
+                                            {/* Expandable Accordion for Pain Logging */}
+                                            {isExpanded && (
+                                                <div className={styles.patternExpanded}>
+                                                    <div className={styles.reportPainTitle}>
+                                                        Report Load/Pain
+                                                        {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-muted)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
+                                                    </div>
+
+                                                    <div className={styles.inputGroup}>
+                                                        <div className={styles.inputLabel}>
+                                                            <span>No Pain</span>
+                                                            <span>Severe</span>
+                                                        </div>
+                                                        <div className={styles.sliderContainer}>
+                                                            <input
+                                                                type="range"
+                                                                min="0" max="10"
+                                                                value={currentPainScore}
+                                                                onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id]: parseInt(e.target.value) }))}
+                                                                className={styles.painSlider}
+                                                            />
+                                                        </div>
+                                                        <div style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '-8px' }}>
+                                                            {currentPainScore}
+                                                        </div>
+                                                    </div>
+
+                                                    <textarea
+                                                        className={styles.textarea}
+                                                        placeholder="Clinical notes or joint sensations..."
+                                                        value={painNotes[ex.id] || ''}
+                                                        onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                                    />
+
+                                                    <button
+                                                        className={styles.ghostBtn}
+                                                        style={{ width: '100%', marginTop: '4px', background: 'var(--surface-2)', border: 'none' }}
+                                                        onClick={() => handleSavePainLog(ex.id)}
+                                                        disabled={savingPain[ex.id]}
+                                                    >
+                                                        {savingPain[ex.id] ? 'Saving...' : 'Save Log Record'}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
                     </section>
 
                     <section className={styles.actionSection} style={{ marginTop: '24px' }}>
-                        <button
-                            className={styles.primaryBtn}
+                        <PrimaryButton
                             disabled={!allCompleted || session.state === 'completed'}
                             onClick={handleCompleteSession}
                         >
                             {session.state === 'completed' ? 'Session Already Completed' : 'Complete Session'}
-                        </button>
+                        </PrimaryButton>
                     </section>
                 </>
             )}

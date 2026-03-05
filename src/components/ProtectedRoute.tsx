@@ -2,7 +2,7 @@ import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 export default function ProtectedRoute() {
-    const { user, profile, isLoading } = useAuth();
+    const { user, profile, isLoading, tier, paywallDismissedUntil } = useAuth();
     const location = useLocation();
 
     if (isLoading) {
@@ -35,6 +35,15 @@ export default function ProtectedRoute() {
     } else if (location.pathname === '/onboarding') {
         // Si ya lo completó pero intenta ir a onboarding por url, lo mandamos al home
         return <Navigate to="/" replace />;
+    }
+
+    // Paywall Gate for Free Tier
+    if (tier === 'free' && location.pathname !== '/pricing') {
+        const now = new Date();
+        const needsPaywall = !paywallDismissedUntil || paywallDismissedUntil < now;
+        if (needsPaywall) {
+            return <Navigate to="/pricing" state={{ from: location }} replace />;
+        }
     }
 
     return <Outlet />;

@@ -21,6 +21,7 @@ export interface UserProfile {
     subscription_status?: SubscriptionStatus;
     trial_started_at?: string | null;
     trial_ends_at?: string | null;
+    paywall_dismissed_until?: string | null;
     [key: string]: any;
 }
 
@@ -34,10 +35,12 @@ interface AuthContextType {
     trialEndsAt: Date | null;
     trialDaysLeft: number;
     lang: Lang;
+    paywallDismissedUntil: Date | null;
     signOut: () => Promise<void>;
     refreshProfile: () => Promise<void>;
     startTrial: () => Promise<void>;
     setLanguage: (lang: Lang) => Promise<void>;
+    dismissPaywall: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,6 +60,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         : 0;
     const lang: Lang = (profile?.preferred_language as Lang) ||
         (localStorage.getItem('moveos_lang') as Lang) || 'en';
+    const paywallDismissedUntil: Date | null = profile?.paywall_dismissed_until ? new Date(profile.paywall_dismissed_until) : null;
 
     useEffect(() => {
         supabase.auth.getSession().then(({ data: { session } }) => {
@@ -158,6 +162,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const dismissPaywall = async () => {
+        if (!user) return;
+        try {
+            const { error } = await supabase.rpc('dismiss_paywall_cooldown');
+            if (error) throw error;
+            await fetchProfile(user.id);
+        } catch (err) {
+            console.error('Error dismissing paywall cooldown:', err);
+        }
+    };
+
     const value: AuthContextType = {
         session,
         user,
@@ -168,10 +183,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         trialEndsAt,
         trialDaysLeft,
         lang,
+        paywallDismissedUntil,
         signOut,
         refreshProfile,
         startTrial,
         setLanguage,
+        dismissPaywall,
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

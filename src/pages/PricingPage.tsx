@@ -7,10 +7,11 @@ import { useI18n } from '../i18n/useI18n';
 
 export default function PricingPage() {
     const navigate = useNavigate();
-    const { tier, subscriptionStatus, trialDaysLeft, startTrial } = useAuth();
+    const { tier, subscriptionStatus, trialDaysLeft, startTrial, dismissPaywall } = useAuth();
     const { t } = useI18n();
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
     const [startingTrial, setStartingTrial] = useState(false);
+    const [dismissing, setDismissing] = useState(false);
 
     const isFree = tier === 'free';
     const isTrialing = subscriptionStatus === 'trialing';
@@ -150,8 +151,20 @@ export default function PricingPage() {
                     <button className={styles.proPlanBtn}>Coming soon</button>
                 </div>
 
-                <button className={styles.ghostBackBtn} onClick={() => navigate(-1)}>
-                    {t('cancel')}
+                <button
+                    className={styles.ghostBackBtn}
+                    onClick={async () => {
+                        setDismissing(true);
+                        try {
+                            await dismissPaywall();
+                            navigate(-1);
+                        } finally {
+                            setDismissing(false);
+                        }
+                    }}
+                    disabled={dismissing}
+                >
+                    {dismissing ? t('loading') : t('cancel')}
                 </button>
             </div>
         </div>

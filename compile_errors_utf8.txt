@@ -1,0 +1,2 @@
+﻿src/pages/ExplorePage.tsx(69,10): error TS1472: 'catch' or 'finally' expected.
+src/pages/ExplorePage.tsx(297,1): error TS1005: '}' expected.

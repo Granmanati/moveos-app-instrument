@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
+import { safeSelect } from '../lib/db';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function ProgressPage() {
@@ -36,19 +38,23 @@ export default function ProgressPage() {
             const startIso = start.toISOString().split('T')[0];
 
             // Parallel fetch from the materialized views or regular views
+            const qPain = supabase
+                .from('v_pain_daily')
+                .select('day, pain_avg')
+                .gte('day', startIso)
+                .lte('day', endIso)
+                .eq('user_id', user.id);
+
+            const qAdh = supabase
+                .from('v_adherence_daily')
+                .select('day, completed')
+                .gte('day', startIso)
+                .lte('day', endIso)
+                .eq('user_id', user.id);
+
             const [painRes, adhRes] = await Promise.all([
-                supabase
-                    .from('v_pain_daily')
-                    .select('day, pain_avg')
-                    .gte('day', startIso)
-                    .lte('day', endIso)
-                    .eq('user_id', user.id),
-                supabase
-                    .from('v_adherence_daily')
-                    .select('day, completed')
-                    .gte('day', startIso)
-                    .lte('day', endIso)
-                    .eq('user_id', user.id)
+                safeSelect<any[]>(qPain, 'ProgressPain'),
+                safeSelect<any[]>(qAdh, 'ProgressAdh')
             ]);
 
             if (painRes.error) throw painRes.error;
@@ -154,12 +160,9 @@ export default function ProgressPage() {
                         <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
-                        <button
-                            onClick={fetchProgress}
-                            style={{ marginTop: '16px', padding: '12px 24px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                            Retry Connection
-                        </button>
+                        <div style={{ marginTop: '16px', width: '200px' }}>
+                            <PrimaryButton onClick={fetchProgress}>Retry Connection</PrimaryButton>
+                        </div>
                     </div>
                 )}
 

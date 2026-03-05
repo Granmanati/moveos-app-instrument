@@ -6,6 +6,9 @@ import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { useI18n } from '../i18n/useI18n';
 import { useNavigate } from 'react-router-dom';
+import { safeSelect } from '../lib/db';
+import { PageHeader } from '../components/ui/PageHeader';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
 
 const PATTERNS = ['Todos', 'squat', 'hinge', 'push', 'pull', 'carry', 'regulate'];
 const EQUIPMENTS = ['Todos', 'bodyweight', 'bands', 'kettlebell', 'barbell', 'other'];
@@ -43,23 +46,27 @@ export default function ExplorePage() {
         setErrorMsg('');
         try {
             // Fetch full library (we gate client-side based on tier)
-            const { data: exData, error: exError } = await supabase
+            const queryInfo = supabase
                 .from('exercise_library')
                 .select('*')
                 .order('name')
                 .limit(limit);
 
-            if (exError) throw exError;
+            const { data: exData, error: exError } = await safeSelect(queryInfo, 'ExploreData');
+
+            if (exError) {
+                setErrorMsg(exError.message);
+                setViewState('error');
+                return;
+            }
 
             if (exData) {
                 setLibrary(exData);
                 setHasMore(exData.length === limit);
                 setViewState(exData.length > 0 ? 'success' : 'empty');
             }
-
         } catch (err: any) {
-            console.error('Explore error:', err);
-            setErrorMsg(err.message || 'Error cargando la biblioteca.');
+            setErrorMsg(err.message || 'Error occurred while loading data.');
             setViewState('error');
         }
     };
@@ -87,10 +94,10 @@ export default function ExplorePage() {
         <AppShell
             customHeader={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--sp-4)', paddingBottom: 'var(--sp-2)' }}>
-                    <header className={styles.header}>
-                        <h1 className={styles.title}>Biblioteca de ejecución</h1>
-                        <p className={styles.subtitle}>Patrones clínicos y rutinas</p>
-                    </header>
+                    <PageHeader
+                        title="Biblioteca de ejecución"
+                        subtitle="Patrones clínicos y rutinas"
+                    />
 
                     <div className={styles.searchBar}>
                         <Icon name="search" size={18} style={{ color: 'var(--text-muted)' }} />
@@ -158,12 +165,9 @@ export default function ExplorePage() {
                         <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
-                        <button
-                            onClick={fetchExploreData}
-                            style={{ marginTop: '16px', padding: '12px 24px', background: 'var(--accent)', color: 'white', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                            Reintentar
-                        </button>
+                        <div style={{ marginTop: '16px', width: '200px' }}>
+                            <PrimaryButton onClick={fetchExploreData}>Reintentar</PrimaryButton>
+                        </div>
                     </div>
                 )}
 
@@ -235,15 +239,11 @@ export default function ExplorePage() {
                                             <div className={styles.lockOverlay}>
                                                 <Icon name="lock" size={32} />
                                                 <span>PRO</span>
-                                                <button
-                                                    className={styles.trialPillBtn}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setShowLockModal(true);
-                                                    }}
-                                                >
-                                                    {t('exploreUnlockCTA')}
-                                                </button>
+                                                <div style={{ marginTop: '8px', minWidth: '160px' }}>
+                                                    <PrimaryButton size="sm" onClick={(e) => { e.stopPropagation(); setShowLockModal(true); }}>
+                                                        {t('exploreUnlockCTA')}
+                                                    </PrimaryButton>
+                                                </div>
                                             </div>
                                         )}
                                     </div>

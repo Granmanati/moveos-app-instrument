@@ -1,0 +1,32 @@
+﻿
+> moveos-app@0.0.0 build
+> tsc -b && vite build
+
+src/components/ProtectedRoute.tsx(1,10): error TS2300: Duplicate identifier 'Navigate'.
+src/components/ProtectedRoute.tsx(1,20): error TS2300: Duplicate identifier 'Outlet'.
+src/components/ProtectedRoute.tsx(1,28): error TS2300: Duplicate identifier 'useLocation'.
+src/components/ProtectedRoute.tsx(2,10): error TS2300: Duplicate identifier 'useAuth'.
+src/components/ProtectedRoute.tsx(4,10): error TS2300: Duplicate identifier 'Navigate'.
+src/components/ProtectedRoute.tsx(4,20): error TS2300: Duplicate identifier 'Outlet'.
+src/components/ProtectedRoute.tsx(4,28): error TS2300: Duplicate identifier 'useLocation'.
+src/components/ProtectedRoute.tsx(5,10): error TS2300: Duplicate identifier 'useAuth'.
+src/pages/ExplorePage.tsx(55,71): error TS2345: Argument of type 'PostgrestFilterBuilder<any, any, any, any[], "exercise_library", unknown, "GET">' is not assignable to parameter of type 'Promise<{ data: unknown; error: PostgrestError | null; }>'.
+  Type 'PostgrestFilterBuilder<any, any, any, any[], "exercise_library", unknown, "GET">' is missing the following properties from type 'Promise<{ data: unknown; error: PostgrestError | null; }>': catch, finally, [Symbol.toStringTag]
+src/pages/ExplorePage.tsx(64,28): error TS2345: Argument of type '{}' is not assignable to parameter of type 'SetStateAction<any[]>'.
+src/pages/ExplorePage.tsx(65,35): error TS2339: Property 'length' does not exist on type '{}'.
+src/pages/ExplorePage.tsx(66,37): error TS2339: Property 'length' does not exist on type '{}'.
+src/pages/HomePage.tsx(6,1): error TS6133: 'supabase' is declared but its value is never read.
+src/pages/PricingPage.tsx(9,11): error TS2451: Cannot redeclare block-scoped variable 'navigate'.
+src/pages/PricingPage.tsx(10,11): error TS2451: Cannot redeclare block-scoped variable 'navigate'.
+src/pages/ProgressPage.tsx(8,1): error TS6133: 'PageHeader' is declared but its value is never read.
+src/pages/ProgressPage.tsx(10,1): error TS6133: 'SystemCard' is declared but its value is never read.
+src/pages/ProgressPage.tsx(58,35): error TS2345: Argument of type 'PostgrestFilterBuilder<any, any, any, { day: any; pain_avg: any; }[], "v_pain_daily", unknown, "GET">' is not assignable to parameter of type 'Promise<{ data: any[] | null; error: PostgrestError | null; }>'.
+  Type 'PostgrestFilterBuilder<any, any, any, { day: any; pain_avg: any; }[], "v_pain_daily", unknown, "GET">' is missing the following properties from type 'Promise<{ data: any[] | null; error: PostgrestError | null; }>': catch, finally, [Symbol.toStringTag]
+src/pages/ProgressPage.tsx(59,35): error TS2345: Argument of type 'PostgrestFilterBuilder<any, any, any, { day: any; completed: any; }[], "v_adherence_daily", unknown, "GET">' is not assignable to parameter of type 'Promise<{ data: any[] | null; error: PostgrestError | null; }>'.
+  Type 'PostgrestFilterBuilder<any, any, any, { day: any; completed: any; }[], "v_adherence_daily", unknown, "GET">' is missing the following properties from type 'Promise<{ data: any[] | null; error: PostgrestError | null; }>': catch, finally, [Symbol.toStringTag]
+src/pages/TodayPage.tsx(10,1): error TS6133: 'PageHeader' is declared but its value is never read.
+src/pages/TodayPage.tsx(12,1): error TS6133: 'SystemCard' is declared but its value is never read.
+src/pages/TodayPage.tsx(120,54): error TS2345: Argument of type 'PostgrestBuilder<any, { id: any; state: any; phase: any; session_exercises: { id: any; status: any; is_completed: any; sets: any; reps_min: any; reps_max: any; rest_sec: any; block_order: any; exercise_library: { id: any; name: any; pattern: any; media_video_url: any; level: any; }[]; session_exercise_logs: { ...; }...' is not assignable to parameter of type 'Promise<{ data: unknown; error: PostgrestError | null; }>'.
+  Type 'PostgrestBuilder<any, { id: any; state: any; phase: any; session_exercises: { id: any; status: any; is_completed: any; sets: any; reps_min: any; reps_max: any; rest_sec: any; block_order: any; exercise_library: { id: any; name: any; pattern: any; media_video_url: any; level: any; }[]; session_exercise_logs: { ...; }...' is missing the following properties from type 'Promise<{ data: unknown; error: PostgrestError | null; }>': catch, finally, [Symbol.toStringTag]
+src/pages/TodayPage.tsx(130,26): error TS2339: Property 'session_exercises' does not exist on type '{}'.
+src/pages/TodayPage.tsx(132,45): error TS2339: Property 'session_exercises' does not exist on type '{}'.

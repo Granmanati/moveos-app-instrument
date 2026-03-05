@@ -3,9 +3,11 @@ import styles from './HomePage.module.css';
 
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
+import { safeRpc } from '../lib/db';
+import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { SecondaryButton } from '../components/ui/SecondaryButton';
 
 interface HomeSnapshot {
     today: string;
@@ -34,8 +36,13 @@ export default function HomePage() {
         setErrorMsg('');
 
         try {
-            const { data, error } = await supabase.rpc('get_home_snapshot');
-            if (error) throw error;
+            const { data, error } = await safeRpc('get_home_snapshot');
+
+            if (error) {
+                setErrorMsg(error.message);
+                setViewState('error');
+                return;
+            }
 
             if (data) {
                 setSnapshot(data as HomeSnapshot);
@@ -46,6 +53,7 @@ export default function HomePage() {
                 setErrorMsg('No data returned.');
             }
         } catch (err: any) {
+            // Unlikely to hit this heavily with safeRpc but just in case
             console.error(err);
             setErrorMsg(err.message || 'Error al cargar los datos del sistema.');
             setViewState('error');
@@ -62,8 +70,12 @@ export default function HomePage() {
         setGenerating(true);
         setErrorMsg('');
         try {
-            const { error: genError } = await supabase.rpc('generate_session');
-            if (genError) throw genError;
+            const { error: genError } = await safeRpc('generate_session');
+            if (genError) {
+                setErrorMsg(genError.message);
+                setViewState('error');
+                return;
+            }
 
             await fetchDashboardData();
         } catch (err: any) {
@@ -153,28 +165,23 @@ export default function HomePage() {
                             </div>
 
                             {!snapshot.today_session ? (
-                                <button
-                                    className={styles.primaryBtn}
-                                    onClick={handleGenerateSession}
-                                    disabled={generating}
-                                >
-                                    {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today’s Session'}
-                                </button>
+                                <div style={{ marginTop: '16px', width: '100%' }}>
+                                    <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
+                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today’s Session'}
+                                    </PrimaryButton>
+                                </div>
                             ) : snapshot.today_session.state === 'generated' || snapshot.today_session.state === 'pending' ? (
-                                <button
-                                    className={styles.primaryBtn}
-                                    onClick={() => navigate('/today')}
-                                >
-                                    Open Today
-                                </button>
+                                <div style={{ marginTop: '16px', width: '100%' }}>
+                                    <PrimaryButton onClick={() => navigate('/today')}>
+                                        Open Today
+                                    </PrimaryButton>
+                                </div>
                             ) : (
-                                <button
-                                    className={styles.secondaryBtn}
-                                    style={{ width: '100%', height: '48px' }}
-                                    onClick={() => navigate('/progress')}
-                                >
-                                    View Progress
-                                </button>
+                                <div style={{ marginTop: '16px', width: '100%' }}>
+                                    <SecondaryButton onClick={() => navigate('/progress')}>
+                                        View Progress
+                                    </SecondaryButton>
+                                </div>
                             )}
                         </div>
                     </section>
