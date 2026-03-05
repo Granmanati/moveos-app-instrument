@@ -1,22 +1,25 @@
 .nav {
     position: fixed;
     bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
     width: 100%;
     max-width: 430px;
-    height: 72px;
-    /* v1.4 taller nav */
-    background: rgba(10, 10, 13, 0.85);
+    margin: 0 auto;
+    height: 64px;
+    background: rgba(10, 10, 13, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-top: 1px solid var(--border-1);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
     display: flex;
     justify-content: space-around;
     align-items: center;
     z-index: 100;
     padding-bottom: env(safe-area-inset-bottom, 0px);
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+    /* Center within the app container */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .tab {
@@ -24,14 +27,17 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    padding: 8px 12px;
+    gap: 3px;
+    padding: 10px 0;
+    min-height: 44px;
+    min-width: 44px;
     border-radius: var(--radius-sm);
     text-decoration: none;
     color: var(--text-muted);
-    transition: color var(--duration-base) var(--ease-standard);
+    transition: color 0.18s ease;
     flex: 1;
     -webkit-tap-highlight-color: transparent;
+    position: relative;
 }
 
 .tab:hover {
@@ -42,24 +48,53 @@
     color: var(--accent);
 }
 
-.iconOverride {
-    transition: all var(--duration-fast) var(--ease-standard);
+.active::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    box-shadow: 0 0 6px rgba(45, 124, 255, 0.6);
 }
 
-/* Micro-interaction bounce */
-.active .iconOverride {
-    animation: iconBounce 180ms var(--ease-bounce);
-    filter: drop-shadow(0 4px 8px rgba(45, 124, 255, 0.4));
+.icon {
+    transition: all 0.18s ease;
+    color: var(--text-muted);
+}
+
+.iconActive {
+    color: var(--accent);
+    animation: iconBounce 180ms var(--ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
+    filter: drop-shadow(0 3px 6px rgba(45, 124, 255, 0.35));
+}
+
+@keyframes iconBounce {
+    0% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-4px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
 }
 
 .label {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 600;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     line-height: 1;
-    transition: color var(--duration-fast);
+    transition: color 0.18s ease;
+    text-transform: uppercase;
 }
 
 .active .label {
-    color: var(--text-primary);
+    color: var(--accent);
 }

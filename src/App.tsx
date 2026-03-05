@@ -23,8 +23,10 @@ export default function App() {
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
+                {/* Onboarding: full-screen, no bottom nav */}
                 <Route path="/onboarding" element={<OnboardingPage />} />
 
+                {/* Main app routes with BottomNav */}
                 <Route path="/">
                   <Route index element={<HomePage />} />
                   <Route path="today" element={<TodayPage />} />

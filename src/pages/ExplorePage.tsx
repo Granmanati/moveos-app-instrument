@@ -4,34 +4,34 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
-
+import { useI18n } from '../i18n/useI18n';
 import { useNavigate } from 'react-router-dom';
 
 const PATTERNS = ['Todos', 'squat', 'hinge', 'push', 'pull', 'carry', 'regulate'];
 const EQUIPMENTS = ['Todos', 'bodyweight', 'bands', 'kettlebell', 'barbell', 'other'];
 const LEVELS = ['Todos', 'L1', 'L2', 'L3'];
+const FREE_TIER_LIMIT = 10;
 
 export default function ExplorePage() {
-    const { user } = useAuth();
+    const { user, tier } = useAuth();
+    const { t } = useI18n();
     const navigate = useNavigate();
+    const isFree = tier === 'free';
 
     // UI States
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [errorMsg, setErrorMsg] = useState('');
 
     const [library, setLibrary] = useState<any[]>([]);
-    const [subscription, setSubscription] = useState<any>(null);
-
     const [search, setSearch] = useState('');
     const [activePattern, setActivePattern] = useState('Todos');
     const [activeEquipment, setActiveEquipment] = useState('Todos');
     const [activeLevel, setActiveLevel] = useState('Todos');
-
     const [limit, setLimit] = useState(30);
     const [hasMore, setHasMore] = useState(true);
+    const [showLockModal, setShowLockModal] = useState(false);
 
     const [mutedVideos, setMutedVideos] = useState<Record<string, boolean>>({});
-    const [showLockModal, setShowLockModal] = useState(false);
 
     const toggleMute = (id: string) => {
         setMutedVideos(prev => ({ ...prev, [id]: prev[id] === false }));
@@ -41,19 +41,8 @@ export default function ExplorePage() {
         if (!user) return;
         setViewState('loading');
         setErrorMsg('');
-
         try {
-            // Fetch subscription tier
-            const { data: subData, error: subError } = await supabase
-                .from('subscription_status')
-                .select('tier')
-                .eq('user_id', user.id)
-                .maybeSingle();
-
-            if (subError) throw subError;
-            setSubscription(subData || { tier: 'free' });
-
-            // Fetch library with pagination limit
+            // Fetch full library (we gate client-side based on tier)
             const { data: exData, error: exError } = await supabase
                 .from('exercise_library')
                 .select('*')
@@ -64,7 +53,7 @@ export default function ExplorePage() {
 
             if (exData) {
                 setLibrary(exData);
-                setHasMore(exData.length === limit); // basic check for hasMore
+                setHasMore(exData.length === limit);
                 setViewState(exData.length > 0 ? 'success' : 'empty');
             }
 
@@ -91,8 +80,7 @@ export default function ExplorePage() {
     });
 
     const isLocked = (index: number) => {
-        const userTier = subscription?.tier || 'free';
-        return userTier === 'free' && index >= 8;
+        return isFree && index >= FREE_TIER_LIMIT;
     };
 
     return (
@@ -254,7 +242,7 @@ export default function ExplorePage() {
                                                         setShowLockModal(true);
                                                     }}
                                                 >
-                                                    Start 7-day trial
+                                                    {t('exploreUnlockCTA')}
                                                 </button>
                                             </div>
                                         )}

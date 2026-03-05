@@ -1,17 +1,22 @@
 import type { ReactNode } from 'react';
 import BottomNav from './BottomNav';
 import styles from './AppShell.module.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useLocation } from 'react-router-dom';
 
 interface AppShellProps {
     title?: ReactNode;
     subtitle?: ReactNode;
     customHeader?: ReactNode;
+    hideNav?: boolean;
     children: ReactNode;
 }
 
-export default function AppShell({ title, subtitle, customHeader, children }: AppShellProps) {
+export default function AppShell({ title, subtitle, customHeader, hideNav = false, children }: AppShellProps) {
+    const location = useLocation();
+
     return (
-        <div className={`${styles.shell} animate-page-enter`}>
+        <div className={styles.shell}>
             {customHeader ? (
                 <div className={styles.headerWrapper}>{customHeader}</div>
             ) : (title || subtitle) ? (
@@ -22,13 +27,22 @@ export default function AppShell({ title, subtitle, customHeader, children }: Ap
                 </header>
             ) : null}
 
-            <main className={styles.content}>
-                <div className={styles.contentInner}>
-                    {children}
-                </div>
+            <main className={`${styles.content} ${hideNav ? styles.contentFullHeight : ''}`}>
+                <AnimatePresence mode="wait">
+                    <motion.div
+                        key={location.pathname}
+                        className={styles.contentInner}
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.22, ease: [0.4, 0, 0.2, 1] }}
+                    >
+                        {children}
+                    </motion.div>
+                </AnimatePresence>
             </main>
 
-            <BottomNav />
+            {!hideNav && <BottomNav />}
         </div>
     );
 }

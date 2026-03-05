@@ -1,22 +1,19 @@
 import styles from './BottomNav.module.css';
 import { NavLink } from 'react-router-dom';
-import { Icon } from './Icon';
+import { LayoutGrid, ListChecks, Compass, LineChart, User } from 'lucide-react';
+import { useI18n } from '../i18n/useI18n';
 
-interface NavItem {
-    readonly path: string;
-    readonly label: string;
-    readonly icon: string;
-}
-
-const NAV_ITEMS: readonly NavItem[] = [
-    { path: '/', label: 'Home', icon: 'space_dashboard' },
-    { path: '/today', label: 'Today', icon: 'checklist' },
-    { path: '/explore', label: 'Explore', icon: 'explore' },
-    { path: '/progress', label: 'Progress', icon: 'monitoring' },
-    { path: '/profile', label: 'Profile', icon: 'person' },
+const NAV_ITEMS = [
+    { path: '/', label: 'navHome' as const, Icon: LayoutGrid },
+    { path: '/today', label: 'navToday' as const, Icon: ListChecks },
+    { path: '/explore', label: 'navExplore' as const, Icon: Compass },
+    { path: '/progress', label: 'navProgress' as const, Icon: LineChart },
+    { path: '/profile', label: 'navProfile' as const, Icon: User },
 ];
 
 export default function BottomNav() {
+    const { t } = useI18n();
+
     return (
         <nav className={styles.nav}>
             {NAV_ITEMS.map((item) => (
@@ -30,8 +27,12 @@ export default function BottomNav() {
                 >
                     {({ isActive }) => (
                         <>
-                            <Icon name={item.icon} active={isActive} className={styles.iconOverride} />
-                            <span className={styles.label}>{item.label}</span>
+                            <item.Icon
+                                size={22}
+                                strokeWidth={isActive ? 2.2 : 1.8}
+                                className={`${styles.icon} ${isActive ? styles.iconActive : ''}`}
+                            />
+                            <span className={styles.label}>{t(item.label)}</span>
                         </>
                     )}
                 </NavLink>
