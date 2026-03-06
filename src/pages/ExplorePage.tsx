@@ -86,6 +86,7 @@ export default function ExplorePage() {
             const queryInfo = supabase
                 .from('exercise_library')
                 .select('*')
+                .eq('is_active', true)
                 .order('name')
                 .limit(limit);
 
@@ -124,7 +125,7 @@ export default function ExplorePage() {
     });
 
     const isLocked = (item: any) => {
-        return isFree && item.tier_required === 'premium';
+        return isFree && item.is_premium === true;
     };
 
     // Remove FREE_TIER_LIMIT unused warning logic as well hook if not used. 
@@ -232,7 +233,7 @@ export default function ExplorePage() {
                     <div className={styles.feedContainer}>
                         {filtered.map((item) => {
                             const locked = isLocked(item);
-                            const isMuted = mutedVideos[item.id] !== false; // default true
+                            const isMuted = mutedVideos[item.id.toString()] !== false; // default true
 
                             return (
                                 <div
@@ -244,7 +245,7 @@ export default function ExplorePage() {
                                             setShowLockModal(true);
                                         } else {
                                             // Optional: toggle play/pause on tap
-                                            const vid = videoRefs.current[item.id];
+                                            const vid = videoRefs.current[item.id.toString()];
                                             if (vid) {
                                                 if (vid.paused) vid.play();
                                                 else vid.pause();
@@ -255,7 +256,7 @@ export default function ExplorePage() {
                                     <div className={styles.videoContainer}>
                                         {item.media_video_url && !locked ? (
                                             <video
-                                                ref={el => { videoRefs.current[item.id] = el; }}
+                                                ref={el => { videoRefs.current[item.id.toString()] = el; }}
                                                 src={item.media_video_url}
                                                 playsInline
                                                 muted={isMuted}
@@ -264,7 +265,7 @@ export default function ExplorePage() {
                                                 className={styles.thumbnailVideo}
                                             />
                                         ) : (
-                                            <div ref={el => { videoRefs.current[item.id] = el as any; }} className={styles.thumbnailPlaceholder}>
+                                            <div ref={el => { videoRefs.current[item.id.toString()] = el as any; }} className={styles.thumbnailPlaceholder}>
                                                 <Icon name="play_circle" style={{ color: 'rgba(255,255,255,0.5)' }} size={48} />
                                             </div>
                                         )}
@@ -279,22 +280,19 @@ export default function ExplorePage() {
                                             )}
                                             <div style={{ flex: 1 }} />
                                             {item.media_video_url && !locked && (
-                                                <button className={styles.muteToggle} onClick={(e) => toggleMute(item.id, e)}>
+                                                <button className={styles.muteToggle} onClick={(e) => toggleMute(item.id.toString(), e)}>
                                                     <Icon name={isMuted ? "volume_off" : "volume_up"} size={18} />
                                                 </button>
                                             )}
                                         </div>
 
-                                        {/* Overlay Content (Bottom) */}
                                         <div className={styles.overlayContent}>
                                             <h3 className={styles.cardTitle}>{item.name}</h3>
 
                                             <div className={styles.metaPillRow}>
-                                                {item.sets_default && <span className={styles.metaPill}>{item.sets_default} Sets</span>}
-                                                {item.reps_default && <span className={styles.metaPill}>{item.reps_default} Reps</span>}
-                                                {item.rest_seconds_default && <span className={styles.metaPill}>{item.rest_seconds_default}s Rest</span>}
-                                                {/* Fallback to legacy fields if needed */}
-                                                {!item.sets_default && item.sets && <span className={styles.metaPill}>{item.sets} Sets</span>}
+                                                {item.default_sets > 0 && <span className={styles.metaPill}>{item.default_sets} Sets</span>}
+                                                {item.default_reps_min > 0 && <span className={styles.metaPill}>{item.default_reps_min}{item.default_reps_max > item.default_reps_min ? `-${item.default_reps_max}` : ''} Reps</span>}
+                                                {item.default_rest_sec > 0 && <span className={styles.metaPill}>{item.default_rest_sec}s Rest</span>}
                                             </div>
                                         </div>
 

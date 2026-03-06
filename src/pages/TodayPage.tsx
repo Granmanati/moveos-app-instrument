@@ -10,7 +10,7 @@ import { safeSelect, safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 
 interface ExerciseLibrary {
-    id: string;
+    id: number | string;
     name: string;
     pattern: string;
     media_video_url: string;
@@ -22,7 +22,7 @@ interface SessionExerciseLog {
 }
 
 interface SessionExercise {
-    id: string;
+    id: number | string;
     is_completed: boolean;
     status: string;
     sets: number;
@@ -199,7 +199,7 @@ export default function TodayPage() {
         }
     };
 
-    const handleToggleComplete = async (sessionExerciseId: string, currentCompleted: boolean) => {
+    const handleToggleComplete = async (sessionExerciseId: string | number, currentCompleted: boolean) => {
         const newCompleted = !currentCompleted;
         // Optimistic update
         setExercises(prev => prev.map(ex =>
@@ -221,7 +221,7 @@ export default function TodayPage() {
             // Auto scroll logic (wrapped in setTimeout to let UI update first)
             setTimeout(() => {
                 // do not scroll if user has expanded a different card panel and is interacting
-                if (expandedCards.length > 0 && !expandedCards.includes(sessionExerciseId)) {
+                if (expandedCards.length > 0 && !expandedCards.includes(sessionExerciseId.toString())) {
                     return;
                 }
 
@@ -229,14 +229,14 @@ export default function TodayPage() {
                 if (idx !== -1) {
                     if (idx + 1 < exercises.length) {
                         const nextId = exercises[idx + 1].id;
-                        cardRefs.current[nextId]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        cardRefs.current[nextId.toString()]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                     }
                 }
             }, 150);
         }
     };
 
-    const handleSavePainLog = async (sessionExerciseId: string) => {
+    const handleSavePainLog = async (sessionExerciseId: string | number) => {
         if (!user) return;
         setSavingPain(prev => ({ ...prev, [sessionExerciseId]: true }));
         try {
@@ -423,7 +423,7 @@ export default function TodayPage() {
                                         <div
                                             key={`rail-${ex.id}`}
                                             className={styles.railNodeWrapper}
-                                            onClick={() => cardRefs.current[ex.id]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                                            onClick={() => cardRefs.current[ex.id.toString()]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
                                         >
                                             <div className={nodeClass} />
                                         </div>
@@ -435,14 +435,14 @@ export default function TodayPage() {
                                 {exercises.map((ex, i) => {
                                     const library = ex.exercise_library;
                                     const isCompleted = ex.is_completed;
-                                    const isExpanded = expandedCards.includes(ex.id);
+                                    const isExpanded = expandedCards.includes(ex.id.toString());
                                     const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
-                                    const currentPainScore = painScores[ex.id] || 0;
+                                    const currentPainScore = painScores[ex.id.toString()] || 0;
 
                                     return (
                                         <div
                                             key={ex.id}
-                                            ref={(el) => { cardRefs.current[ex.id] = el; }}
+                                            ref={(el) => { cardRefs.current[ex.id.toString()] = el; }}
                                             className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
                                         >
                                             <div className={styles.cardTopBar}>
@@ -473,7 +473,7 @@ export default function TodayPage() {
 
                                             <div
                                                 className={styles.hudWrapper}
-                                                onClick={() => toggleExpand(ex.id)}
+                                                onClick={() => toggleExpand(ex.id.toString())}
                                                 style={{ cursor: 'pointer' }}
                                             >
                                                 <VideoHUDPreview
@@ -506,7 +506,7 @@ export default function TodayPage() {
                                                                 type="range"
                                                                 min="0" max="10"
                                                                 value={currentPainScore}
-                                                                onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id]: parseInt(e.target.value) }))}
+                                                                onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id.toString()]: parseInt(e.target.value) }))}
                                                                 className={styles.painSlider}
                                                             />
                                                         </div>
@@ -518,17 +518,17 @@ export default function TodayPage() {
                                                     <textarea
                                                         className={styles.textarea}
                                                         placeholder="Clinical notes or joint sensations..."
-                                                        value={painNotes[ex.id] || ''}
-                                                        onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id]: e.target.value }))}
+                                                        value={painNotes[ex.id.toString()] || ''}
+                                                        onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id.toString()]: e.target.value }))}
                                                     />
 
                                                     <button
                                                         className={styles.ghostBtn}
                                                         style={{ width: '100%', marginTop: '4px', background: 'var(--surface-2)', border: 'none' }}
                                                         onClick={() => handleSavePainLog(ex.id)}
-                                                        disabled={savingPain[ex.id]}
+                                                        disabled={savingPain[ex.id.toString()]}
                                                     >
-                                                        {savingPain[ex.id] ? 'Saving...' : 'Save Log Record'}
+                                                        {savingPain[ex.id.toString()] ? 'Saving...' : 'Save Log Record'}
                                                     </button>
                                                 </div>
                                             )}
