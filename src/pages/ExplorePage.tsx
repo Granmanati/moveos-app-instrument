@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import styles from './ExplorePage.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -13,7 +13,6 @@ import { PrimaryButton } from '../components/ui/PrimaryButton';
 const PATTERNS = ['Todos', 'squat', 'hinge', 'push', 'pull', 'carry', 'regulate'];
 const EQUIPMENTS = ['Todos', 'bodyweight', 'bands', 'kettlebell', 'barbell', 'other'];
 const LEVELS = ['Todos', 'L1', 'L2', 'L3'];
-const FREE_TIER_LIMIT = 10;
 
 export default function ExplorePage() {
     const { user, tier } = useAuth();
@@ -30,14 +29,52 @@ export default function ExplorePage() {
     const [activePattern, setActivePattern] = useState('Todos');
     const [activeEquipment, setActiveEquipment] = useState('Todos');
     const [activeLevel, setActiveLevel] = useState('Todos');
-    const [limit, setLimit] = useState(30);
-    const [hasMore, setHasMore] = useState(true);
+    const [limit, setLimit] = useState(40);
+    const [hasMore, setHasMore] = useState(false);
     const [showLockModal, setShowLockModal] = useState(false);
 
     const [mutedVideos, setMutedVideos] = useState<Record<string, boolean>>({});
 
-    const toggleMute = (id: string) => {
-        setMutedVideos(prev => ({ ...prev, [id]: prev[id] === false }));
+    // Refs for videos to play/pause programmatically and observe
+    const videoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const id = entry.target.getAttribute('data-id');
+                if (!id) return;
+
+                if (entry.isIntersecting) {
+                    // attempt autoplay
+                    const vid = videoRefs.current[id];
+                    if (vid) {
+                        vid.play().catch(e => console.log('Autoplay blocked', e));
+                    }
+                } else {
+                    // pause when leaving
+                    const vid = videoRefs.current[id];
+                    if (vid) {
+                        vid.pause();
+                    }
+                }
+            });
+        }, { threshold: 0.6 }); // 60% of card must be visible to trigger
+
+        // observe all cards
+        Object.values(videoRefs.current).forEach(vid => {
+            if (vid && vid.parentElement) observer.observe(vid.parentElement);
+        });
+
+        return () => observer.disconnect();
+    }, [library, activePattern, activeEquipment, activeLevel, search]);
+
+    const toggleMute = (id: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        const currentRef = videoRefs.current[id];
+        if (currentRef) {
+            currentRef.muted = !currentRef.muted;
+            setMutedVideos(prev => ({ ...prev, [id]: currentRef.muted }));
+        }
     };
 
     const fetchExploreData = async () => {
@@ -62,7 +99,7 @@ export default function ExplorePage() {
 
             if (exData) {
                 setLibrary(exData);
-                setHasMore(exData.length === limit);
+                setHasMore(false); // MVP fetches all 40 at once
                 setViewState(exData.length > 0 ? 'success' : 'empty');
             }
         } catch (err: any) {
@@ -86,9 +123,15 @@ export default function ExplorePage() {
         return matchesSearch && matchesPattern && matchesEquipment && matchesLevel;
     });
 
-    const isLocked = (index: number) => {
-        return isFree && index >= FREE_TIER_LIMIT;
+    const isLocked = (item: any) => {
+        return isFree && item.tier_required === 'premium';
     };
+
+    // Remove FREE_TIER_LIMIT unused warning logic as well hook if not used. 
+    // And activeVideoId since it's just set for potential future use but not read inline. 
+    // Wait, activeVideoId is used to render? No, we used videoRefs.current[id].play().
+    // We can leave activeVideoId or read it in the UI if needed, for instance, a playing state logo, but let's just use it to avoid TS warning:
+    // We can console.log it or actually use it to display a 'Now Playing' debug or simply suppress warning by using it in a class.
 
     return (
         <AppShell
@@ -186,22 +229,42 @@ export default function ExplorePage() {
                 )}
 
                 {viewState === 'success' && filtered.length > 0 && (
-                    <div className={styles.grid}>
-                        {filtered.map((item, index) => {
-                            const locked = isLocked(index);
+                    <div className={styles.feedContainer}>
+                        {filtered.map((item) => {
+                            const locked = isLocked(item);
+                            const isMuted = mutedVideos[item.id] !== false; // default true
+
                             return (
                                 <div
                                     key={item.id}
+                                    data-id={item.id}
                                     className={`${styles.videoCard} ${locked ? styles.locked : ''}`}
                                     onClick={() => {
-                                        if (locked) setShowLockModal(true);
+                                        if (locked) {
+                                            setShowLockModal(true);
+                                        } else {
+                                            // Optional: toggle play/pause on tap
+                                            const vid = videoRefs.current[item.id];
+                                            if (vid) {
+                                                if (vid.paused) vid.play();
+                                                else vid.pause();
+                                            }
+                                        }
                                     }}
                                 >
                                     <div className={styles.videoContainer}>
                                         {item.media_video_url && !locked ? (
-                                            <video src={item.media_video_url} playsInline muted={mutedVideos[item.id] !== false} loop autoPlay preload="metadata" className={styles.thumbnailVideo} />
+                                            <video
+                                                ref={el => { videoRefs.current[item.id] = el; }}
+                                                src={item.media_video_url}
+                                                playsInline
+                                                muted={isMuted}
+                                                loop
+                                                preload="metadata"
+                                                className={styles.thumbnailVideo}
+                                            />
                                         ) : (
-                                            <div className={styles.thumbnailPlaceholder}>
+                                            <div ref={el => { videoRefs.current[item.id] = el as any; }} className={styles.thumbnailPlaceholder}>
                                                 <Icon name="play_circle" style={{ color: 'rgba(255,255,255,0.5)' }} size={48} />
                                             </div>
                                         )}
@@ -211,34 +274,34 @@ export default function ExplorePage() {
                                         {/* Top indicators */}
                                         <div className={styles.topRow}>
                                             <div className={styles.patternChip}>{item.pattern || 'Movement'}</div>
-                                            {item.media_video_url && (
-                                                <button className={styles.muteToggle} onClick={(e) => { e.stopPropagation(); toggleMute(item.id); }}>
-                                                    <Icon name={mutedVideos[item.id] !== false ? "volume_off" : "volume_up"} size={18} />
+                                            {item.equipment && (
+                                                <div className={styles.patternChip} style={{ marginLeft: '8px', background: 'rgba(255,255,255,0.1)' }}>{item.equipment}</div>
+                                            )}
+                                            <div style={{ flex: 1 }} />
+                                            {item.media_video_url && !locked && (
+                                                <button className={styles.muteToggle} onClick={(e) => toggleMute(item.id, e)}>
+                                                    <Icon name={isMuted ? "volume_off" : "volume_up"} size={18} />
                                                 </button>
                                             )}
                                         </div>
 
                                         {/* Overlay Content (Bottom) */}
                                         <div className={styles.overlayContent}>
-                                            <div className={styles.clinicalCues}>
-                                                <div className={styles.cue}><Icon name="info" size={14} /> <span>Focus: Neutral Spine</span></div>
-                                            </div>
-
                                             <h3 className={styles.cardTitle}>{item.name}</h3>
 
-                                            {(item.sets || item.reps || item.rest_seconds) && (
-                                                <div className={styles.metaPillRow}>
-                                                    {item.sets && <span className={styles.metaPill}>{item.sets} Sets</span>}
-                                                    {item.reps && <span className={styles.metaPill}>{item.reps} Reps</span>}
-                                                    {item.rest_seconds && <span className={styles.metaPill}>{item.rest_seconds}s Rest</span>}
-                                                </div>
-                                            )}
+                                            <div className={styles.metaPillRow}>
+                                                {item.sets_default && <span className={styles.metaPill}>{item.sets_default} Sets</span>}
+                                                {item.reps_default && <span className={styles.metaPill}>{item.reps_default} Reps</span>}
+                                                {item.rest_seconds_default && <span className={styles.metaPill}>{item.rest_seconds_default}s Rest</span>}
+                                                {/* Fallback to legacy fields if needed */}
+                                                {!item.sets_default && item.sets && <span className={styles.metaPill}>{item.sets} Sets</span>}
+                                            </div>
                                         </div>
 
                                         {locked && (
                                             <div className={styles.lockOverlay}>
                                                 <Icon name="lock" size={32} />
-                                                <span>PRO</span>
+                                                <span style={{ fontWeight: 600, letterSpacing: '1px' }}>PRO</span>
                                                 <div style={{ marginTop: '8px', minWidth: '160px' }}>
                                                     <PrimaryButton size="sm" onClick={(e) => { e.stopPropagation(); setShowLockModal(true); }}>
                                                         {t('exploreUnlockCTA')}
@@ -255,7 +318,7 @@ export default function ExplorePage() {
                             <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--sp-4) 0 var(--sp-8) 0' }}>
                                 <button
                                     className={styles.loadMoreBtn}
-                                    onClick={() => setLimit(prev => prev + 30)}
+                                    onClick={() => setLimit(prev => prev + 40)}
                                 >
                                     Load more
                                 </button>

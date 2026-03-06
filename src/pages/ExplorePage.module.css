@@ -112,23 +112,35 @@
     color: #fff;
 }
 
-.grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--sp-4);
+.feedContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scroll-snap-type: y mandatory;
+    height: calc(100dvh - 220px);
+    /* account for header and bottom nav roughly */
+    border-radius: 12px;
+    margin-bottom: var(--sp-4);
+    /* Hide scrollbar for cleaner look */
+    scrollbar-width: none;
+}
+
+.feedContainer::-webkit-scrollbar {
+    display: none;
 }
 
 .videoCard {
     background: #101015;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 14px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px rgba(0, 0, 0, 0.42);
-    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    /* forces it to take full height of feedContainer */
+    flex-shrink: 0;
     scroll-snap-align: start;
-    scroll-margin-top: var(--sp-4);
-    height: calc(100vh - 220px);
-    min-height: 480px;
-    max-height: 640px;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    /* Separator between scrolls */
 }
 
 .locked {
