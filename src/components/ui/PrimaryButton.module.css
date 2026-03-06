@@ -1,14 +1,14 @@
 .btn {
-    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    background: var(--accent);
     color: white;
-    border: none;
+    border: 1px solid var(--accent);
     border-radius: var(--radius-md);
-    font-weight: 700;
+    font-weight: 600;
     font-size: 15px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(45, 124, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
     cursor: pointer;
     transition: all var(--duration-fast) var(--ease-standard);
     font-family: var(--font-primary);
@@ -37,12 +37,12 @@
 }
 
 .btn:not(:disabled):hover {
-    box-shadow: var(--glow-accent);
+    opacity: 0.9;
 }
 
 .btn:not(:disabled):active {
     transform: scale(0.98);
-    box-shadow: 0 2px 4px rgba(45, 124, 255, 0.2);
+
 }
 
 .btn:disabled {

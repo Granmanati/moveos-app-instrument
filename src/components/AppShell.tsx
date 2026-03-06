@@ -17,6 +17,7 @@ export default function AppShell({ title, subtitle, customHeader, hideNav = fals
 
     return (
         <div className={styles.shell}>
+            <div className={styles.systemOverlay} />
             {customHeader ? (
                 <div className={styles.headerWrapper}>{customHeader}</div>
             ) : (title || subtitle) ? (

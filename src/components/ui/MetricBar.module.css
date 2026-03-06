@@ -1,0 +1,29 @@
+.metricBarContainer {
+    width: 100%;
+    background: var(--border-subtle);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+    position: relative;
+}
+
+.metricBarFill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    transition: width var(--duration-base) var(--ease-standard);
+}
+
+.fill-accent {
+    background: var(--accent);
+}
+
+.fill-success {
+    background: var(--state-success);
+}
+
+.fill-warning {
+    background: var(--state-warning);
+}
+
+.fill-alert {
+    background: var(--state-alert);
+}

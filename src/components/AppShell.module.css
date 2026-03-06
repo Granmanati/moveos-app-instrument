@@ -4,6 +4,42 @@
     height: 100%;
     flex: 1;
     overflow: hidden;
+    position: relative;
+}
+
+/* Subtle Structural Interface Layer */
+.systemOverlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+    max-width: 430px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--border-subtle);
+}
+
+.systemOverlay::before,
+.systemOverlay::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--text-secondary);
+}
+
+.systemOverlay::before {
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+}
+
+.systemOverlay::after {
+    right: 0;
+    border-left: none;
+    border-bottom: none;
 }
 
 .headerWrapper {
@@ -23,12 +59,15 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
+    position: relative;
+    z-index: 1;
 }
 
 .brandLabel {
-    font-size: 12px;
+    font-size: 10px;
+    font-family: var(--font-mono);
     letter-spacing: 1.2px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--accent);
     text-transform: uppercase;
     margin-bottom: 2px;
@@ -44,7 +83,7 @@
 
 .subtitle {
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     margin: 0;
 }
 

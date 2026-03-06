@@ -335,7 +335,7 @@ export default function TodayPage() {
             {/* Error State */}
             {viewState === 'error' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                    <Icon name="error" style={{ color: 'var(--state-warning)' }} size={48} />
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
                     <div style={{ marginTop: '16px', width: '200px' }}>
@@ -353,7 +353,7 @@ export default function TodayPage() {
 
             {viewState === 'empty' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="event_busy" style={{ color: 'var(--text-muted)' }} size={48} />
+                    <Icon name="event_busy" style={{ color: 'var(--text-secondary)' }} size={48} />
                     <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Session</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '250px' }}>Your daily execution block has not been initialized yet.</p>
                     <div style={{ marginTop: '24px', width: '100%' }}>
@@ -402,7 +402,7 @@ export default function TodayPage() {
                             <div>
                                 <h2 className={styles.sectionTitle}>Execution Pipeline</h2>
                             </div>
-                            <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600, fontFamily: 'monospace' }}>
+                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, fontFamily: 'monospace' }}>
                                 {totalCount - completedCount} BLOCKS REMAINING
                             </span>
                         </div>
@@ -493,7 +493,7 @@ export default function TodayPage() {
                                                 <div className={styles.patternExpanded}>
                                                     <div className={styles.reportPainTitle}>
                                                         Report Load/Pain
-                                                        {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-muted)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
+                                                        {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-secondary)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
                                                     </div>
 
                                                     <div className={styles.inputGroup}>
@@ -524,7 +524,7 @@ export default function TodayPage() {
 
                                                     <button
                                                         className={styles.ghostBtn}
-                                                        style={{ width: '100%', marginTop: '4px', background: 'var(--surface-2)', border: 'none' }}
+                                                        style={{ width: '100%', marginTop: '4px', background: 'var(--surface-subtle)', border: 'none' }}
                                                         onClick={() => handleSavePainLog(ex.id)}
                                                         disabled={savingPain[ex.id.toString()]}
                                                     >

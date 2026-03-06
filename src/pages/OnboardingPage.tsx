@@ -376,7 +376,7 @@ export default function OnboardingPage() {
                         <div className={styles.formGroup}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <label className={styles.label}>Current Pain Level ({formData.pain_current}/10)</label>
-                                <span className={styles.dynamicLabel} style={{ color: Number(formData.pain_current) >= 6 ? 'var(--danger)' : Number(formData.pain_current) >= 3 ? 'var(--warning)' : 'var(--accent)' }}>
+                                <span className={styles.dynamicLabel} style={{ color: Number(formData.pain_current) >= 6 ? 'var(--state-alert)' : Number(formData.pain_current) >= 3 ? 'var(--state-warning)' : 'var(--accent)' }}>
                                     {getPainText(Number(formData.pain_current))}
                                 </span>
                             </div>

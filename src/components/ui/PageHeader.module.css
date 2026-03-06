@@ -28,7 +28,7 @@
 }
 
 .backBtn:hover {
-    background: var(--surface-1);
+    background: var(--surface-subtle);
 }
 
 .titles {

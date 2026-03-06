@@ -144,7 +144,7 @@ export default function ExplorePage() {
                     />
 
                     <div className={styles.searchBar}>
-                        <Icon name="search" size={18} style={{ color: 'var(--text-muted)' }} />
+                        <Icon name="search" size={18} style={{ color: 'var(--text-secondary)' }} />
                         <input
                             type="text"
                             placeholder="Buscar patrón..."
@@ -206,7 +206,7 @@ export default function ExplorePage() {
 
                 {viewState === 'error' && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                        <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                        <Icon name="error" style={{ color: 'var(--state-warning)' }} size={48} />
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
                         <div style={{ marginTop: '16px', width: '200px' }}>
@@ -293,6 +293,12 @@ export default function ExplorePage() {
                                                 {item.default_sets > 0 && <span className={styles.metaPill}>{item.default_sets} Sets</span>}
                                                 {item.default_reps_min > 0 && <span className={styles.metaPill}>{item.default_reps_min}{item.default_reps_max > item.default_reps_min ? `-${item.default_reps_max}` : ''} Reps</span>}
                                                 {item.default_rest_sec > 0 && <span className={styles.metaPill}>{item.default_rest_sec}s Rest</span>}
+                                            </div>
+
+                                            <div className={styles.metaPillRow} style={{ marginTop: '8px', opacity: 0.7 }}>
+                                                {item.progression_level && <span className={styles.metaPill}>Lvl {item.progression_level}</span>}
+                                                {item.movement_complexity && <span className={styles.metaPill}>{item.movement_complexity}</span>}
+                                                {item.load_potential && <span className={styles.metaPill}>{item.load_potential} Load</span>}
                                             </div>
                                         </div>
 

@@ -1,0 +1,26 @@
+.input {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    border-radius: var(--radius-md);
+    padding: 0 var(--sp-3);
+    height: 48px;
+    font-size: 15px;
+    font-family: var(--font-primary);
+    transition: all var(--duration-fast) var(--ease-standard);
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--text-secondary);
+}
+
+.input:focus {
+    border-color: var(--accent);
+    /* Strict border focus without glowing drop shadow */
+    box-shadow: 0 0 0 1px var(--accent);
+}
+
+.fullWidth {
+    width: 100%;
+}

@@ -1,59 +1,48 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* =========================================================================
-   MOVE OS V1.4 GLOBAL TOKENS
-   Clinical + Technological Minimalist Aesthetic (Apple Health + Stripe)
+   MOVE OS V2.0 GLOBAL TOKENS
+   Clinical + Technological Minimalist Aesthetic
    ========================================================================= */
 
 :root {
   /* Colors - Base */
-  --bg-default: #070A12;
-  --surface-1: rgba(255, 255, 255, 0.04);
-  --surface-2: rgba(255, 255, 255, 0.06);
-  --surface-3: rgba(255, 255, 255, 0.1);
-  --border-1: rgba(255, 255, 255, 0.08);
-  --border-2: rgba(45, 124, 255, 0.22);
+  --bg-primary: #0B0F14;
+  --surface-subtle: #141A22;
+  --border-subtle: #1C2430;
 
   /* Colors - Brand & State */
   --accent: #2D7CFF;
-  --accent-2: #1F5FD6;
-  --danger: #FF4D4D;
-  --success: #00C853;
-  --warning: #FFB020;
+  --state-success: #18B67A;
+  --state-warning: #E8A23A;
+  --state-alert: #E45462;
 
   /* Typography */
-  --text-primary: rgba(255, 255, 255, 0.92);
-  --text-secondary: rgba(255, 255, 255, 0.65);
-  --text-muted: rgba(255, 255, 255, 0.45);
+  --text-primary: #F4F7FB;
+  --text-secondary: #8A93A3;
   --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
 
-  /* Geometry & Spacing */
+  /* Geometry & Spacing (8px Base Grid) */
   --radius-sm: 8px;
-  --radius-md: 14px;
-  --radius-lg: 18px;
-  --radius-xl: 22px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
   --radius-pill: 100px;
 
-  --sp-1: 4px;
-  --sp-2: 8px;
-  --sp-3: 12px;
-  --sp-4: 16px;
-  --sp-5: 24px;
-  --sp-6: 32px;
-  --sp-7: 48px;
+  --sp-1: 8px;
+  --sp-2: 16px;
+  --sp-3: 24px;
+  --sp-4: 32px;
+  --sp-5: 48px;
+  --sp-6: 64px;
 
   /* Effects */
-  --shadow-base: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-card: 0 20px 40px rgba(0, 0, 0, 0.40);
-  --shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  --glow-accent: 0 0 0 1px rgba(45, 124, 255, 0.25), 0 10px 30px rgba(45, 124, 255, 0.10);
-  --glow-border: 0 0 0 1px rgba(45, 124, 255, 0.15);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Animations */
   --duration-fast: 120ms;
   --duration-base: 220ms;
   --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* =========================================================================
@@ -70,13 +59,10 @@
 
 body {
   font-family: var(--font-primary);
-  background: var(--bg-default);
+  background: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.5;
   overflow-x: hidden;
-  /* Premium radial background glow */
-  background-image: radial-gradient(circle at 50% 0%, rgba(45, 124, 255, 0.08) 0%, transparent 70%);
-  background-attachment: fixed;
 }
 
 /* Base button reset for consistent rendering */
@@ -124,30 +110,29 @@ button {
    ========================================================================= */
 
 .primaryBtn {
-  background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+  background: var(--accent);
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0 var(--sp-4);
+  padding: 0 var(--sp-2);
   height: 48px;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(45, 124, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2);
   cursor: pointer;
   transition: all var(--duration-fast) var(--ease-standard);
   width: 100%;
 }
 
 .primaryBtn:hover {
-  box-shadow: var(--glow-accent);
+  opacity: 0.9;
 }
 
 .primaryBtn:active {
   transform: scale(0.98);
-  box-shadow: 0 2px 4px rgba(45, 124, 255, 0.2);
+  
 }
 
 .primaryBtn:disabled {
@@ -157,13 +142,13 @@ button {
 }
 
 .secondaryBtn {
-  background: var(--surface-1);
+  background: var(--surface-subtle);
   color: var(--text-primary);
-  border: 1px solid var(--border-1);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 0 var(--sp-4);
+  padding: 0 var(--sp-2);
   height: 48px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 15px;
   display: inline-flex;
   align-items: center;
@@ -174,8 +159,7 @@ button {
 }
 
 .secondaryBtn:hover {
-  background: var(--surface-2);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--border-subtle);
 }
 
 .secondaryBtn:active {
@@ -184,10 +168,9 @@ button {
 
 /* Global Card Rules */
 .base-card {
-  background: var(--surface-1);
-  border: 1px solid var(--border-1);
+  background: var(--surface-subtle);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card), var(--shadow-inset);
   transition: all var(--duration-base) var(--ease-standard);
   overflow: hidden;
 }
@@ -220,36 +203,17 @@ button {
   animation: pageEnter 220ms var(--ease-standard) forwards;
 }
 
-/* Bounce for exact icon hits */
-@keyframes iconBounce {
-  0% {
-    transform: translateY(0);
-  }
-
-  50% {
-    transform: translateY(-2px);
-  }
-
-  100% {
-    transform: translateY(0);
-  }
-}
-
-.animate-icon-bounce {
-  animation: iconBounce 180ms var(--ease-bounce);
-}
-
 /* Subtle glow pulse */
 @keyframes pulseGlow {
   0% {
-    box-shadow: 0 0 0 0 rgba(45, 124, 255, 0.4);
+    
   }
 
   70% {
-    box-shadow: 0 0 0 6px rgba(45, 124, 255, 0);
+    
   }
 
   100% {
-    box-shadow: 0 0 0 0 rgba(45, 124, 255, 0);
+    
   }
 }

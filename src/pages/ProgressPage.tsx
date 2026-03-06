@@ -157,7 +157,7 @@ export default function ProgressPage() {
 
                 {viewState === 'error' && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                        <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                        <Icon name="error" style={{ color: 'var(--state-warning)' }} size={48} />
                         <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
                         <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
                         <div style={{ marginTop: '16px', width: '200px' }}>
@@ -205,7 +205,7 @@ export default function ProgressPage() {
                             <div className={styles.chartUI}>
                                 {chartData.filter(d => d.pain !== null).length === 0 ? (
                                     <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
-                                        <Icon name="monitoring" style={{ color: 'var(--text-muted)' }} size={24} />
+                                        <Icon name="monitoring" style={{ color: 'var(--text-secondary)' }} size={24} />
                                         <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>NO PAIN LOGS IN WINDOW</h2>
                                     </div>
                                 ) : (
@@ -229,13 +229,13 @@ export default function ProgressPage() {
                             <div className={styles.chartUI}>
                                 {metrics.completed === 0 ? (
                                     <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
-                                        <Icon name="event_busy" style={{ color: 'var(--text-muted)' }} size={24} />
+                                        <Icon name="event_busy" style={{ color: 'var(--text-secondary)' }} size={24} />
                                         <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>COMPLETE 3 SESSIONS TO UNLOCK</h2>
                                     </div>
                                 ) : (
                                     <>
-                                        <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-1)', marginBottom: '12px' }}>
-                                            <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontFamily: 'monospace' }}>Window Adherence: <strong style={{ color: 'var(--text-primary)' }}>{metrics.adherence}%</strong></span>
+                                        <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '12px' }}>
+                                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>Window Adherence: <strong style={{ color: 'var(--text-primary)' }}>{metrics.adherence}%</strong></span>
                                         </div>
                                         <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
                                             <ResponsiveContainer width="100%" height="100%">

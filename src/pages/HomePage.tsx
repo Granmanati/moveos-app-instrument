@@ -8,6 +8,10 @@ import { Icon } from '../components/Icon';
 import { safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SecondaryButton } from '../components/ui/SecondaryButton';
+import { StatusBadge } from '../components/ui/StatusBadge';
+import { SystemCard } from '../components/ui/SystemCard';
+import { MetricBar } from '../components/ui/MetricBar';
+import { useI18n } from '../i18n/useI18n';
 
 interface HomeSnapshot {
     today: string;
@@ -21,6 +25,7 @@ interface HomeSnapshot {
 export default function HomePage() {
     const { user, profile } = useAuth();
     const navigate = useNavigate();
+    const { t } = useI18n();
 
     const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
@@ -55,7 +60,7 @@ export default function HomePage() {
         } catch (err: any) {
             // Unlikely to hit this heavily with safeRpc but just in case
             console.error(err);
-            setErrorMsg(err.message || 'Error al cargar los datos del sistema.');
+            setErrorMsg(err.message || t('error'));
             setViewState('error');
         }
     };
@@ -80,7 +85,7 @@ export default function HomePage() {
             await fetchDashboardData();
         } catch (err: any) {
             console.error('Error generating session:', err);
-            setErrorMsg(err.message || 'Error al generar la sesión. Intenta de nuevo.');
+            setErrorMsg(err.message || t('error'));
         } finally {
             setGenerating(false);
         }
@@ -93,15 +98,15 @@ export default function HomePage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
                         <div>
                             <p className={styles.greeting} style={{ fontSize: '12px', letterSpacing: '1.2px', color: '#2D7CFF', fontWeight: 700, margin: 0, paddingBottom: '2px', textTransform: 'uppercase' }}>MOVE OS</p>
-                            <p style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px', letterSpacing: '0.5px' }}>CONSISTENCY ENGINE v2.0</p>
-                            <h1 className={styles.title}>Hola, {profile?.full_name || 'Atleta'}</h1>
-                            <p className={styles.subtitle}>Fase {profile?.current_phase || 'Inicial'} · {profile?.role || 'user'}</p>
+                            <p style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '8px', letterSpacing: '0.5px', fontFamily: 'var(--font-mono)' }}>SYSTEM_STATUS: ONLINE</p>
+                            <h1 className={styles.title} style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', textTransform: 'uppercase' }}>NODE: {profile?.full_name || 'USER'}</h1>
+                            <p className={styles.subtitle} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', marginTop: '4px' }}>ADAPTIVE PHASE: {(profile?.current_phase || 'INITIAL').toUpperCase()}</p>
                         </div>
                         <div className={styles.avatar}>
                             <Icon name="person" />
                         </div>
                     </div>
-                    <p style={{ fontSize: '9px', color: 'var(--text-muted)', marginTop: '4px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                    <p style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '4px', letterSpacing: '0.5px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
                         RETURN &rarr; REGULATE &rarr; LOAD &rarr; ADAPT &rarr; BECOME
                     </p>
                 </header>
@@ -110,7 +115,7 @@ export default function HomePage() {
 
             {/* Compact inline System Alert */}
             {errorMsg && viewState === 'error' && (
-                <div style={{ background: 'rgba(231, 76, 60, 0.1)', color: 'var(--warning)', border: '1px solid rgba(231, 76, 60, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
+                <div style={{ background: 'rgba(231, 76, 60, 0.1)', color: 'var(--state-warning)', border: '1px solid rgba(231, 76, 60, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
                     <Icon name="info" size={16} />
                     <span>{errorMsg}</span>
                 </div>
@@ -120,75 +125,82 @@ export default function HomePage() {
             {viewState === 'loading' ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
                     <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                    <p style={{ marginTop: '12px', fontSize: '14px' }}>Calibrating system snapshot...</p>
+                    <p style={{ marginTop: '12px', fontSize: '14px' }}>{t('homeCalibrating')}</p>
                 </div>
             ) : snapshot ? (
                 <>
                     {/* Metrics Row */}
                     <section className={styles.metricsRow}>
-                        <div className={styles.metricCard}>
+                        <SystemCard padding="sm" className={styles.metricCard}>
                             <div className={styles.metricIconWrapper}>
                                 <Icon name="check_circle" className={styles.metricIcon} />
                             </div>
                             <span className={styles.metricValue}>{snapshot.sessions_30d}</span>
-                            <span className={styles.metricLabel}>Sessions (30d)</span>
-                        </div>
-                        <div className={styles.metricCard}>
+                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>RETURN VOLUME</span>
+                        </SystemCard>
+                        <SystemCard padding="sm" className={styles.metricCard}>
                             <div className={styles.metricIconWrapper}>
                                 <Icon name="data_usage" className={styles.metricIcon} />
                             </div>
                             <span className={styles.metricValue}>{snapshot.adherence_7d}%</span>
-                            <span className={styles.metricLabel}>Adherence (7d)</span>
-                        </div>
-                        <div className={styles.metricCard}>
+                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>RETURN RATE</span>
+                            <div style={{ width: '80%', marginTop: '4px' }}>
+                                <MetricBar value={snapshot.adherence_7d} color="accent" height={3} />
+                            </div>
+                        </SystemCard>
+                        <SystemCard padding="sm" className={styles.metricCard}>
                             <div className={styles.metricIconWrapper}>
                                 <Icon name="healing" className={styles.metricIcon} />
                             </div>
                             <span className={styles.metricValue}>{snapshot.avg_pain_7d}/10</span>
-                            <span className={styles.metricLabel}>Pain Avg (7d)</span>
-                        </div>
+                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>SYSTEM STRAIN</span>
+                            <div style={{ width: '80%', marginTop: '4px' }}>
+                                <MetricBar value={snapshot.avg_pain_7d * 10} color={snapshot.avg_pain_7d > 6 ? 'alert' : snapshot.avg_pain_7d > 3 ? 'warning' : 'success'} height={3} />
+                            </div>
+                        </SystemCard>
                     </section>
 
                     {/* System Status Card (Today's Session Handling) */}
                     <section className={styles.section}>
-                        <div className={styles.sessionCard}>
+                        <SystemCard className={styles.sessionCard}>
                             <div className={styles.sessionCardHeader}>
                                 <div>
-                                    <h2 className={styles.cardTitle}>System Status</h2>
-                                    <p className={styles.cardSubtitle}>
-                                        {snapshot.today_session ? `Phase of ${snapshot.today_session.phase}` : 'Ready for initial vector'}
+                                    <h2 className={styles.cardTitle} style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.5px' }}>ACTIVE MISSION</h2>
+                                    <p className={styles.cardSubtitle} style={{ fontFamily: 'var(--font-mono)' }}>
+                                        {snapshot.today_session ? `EXECUTE ADAPTATION: ${snapshot.today_session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
                                     </p>
                                 </div>
-                                <span className={`${styles.statusBadge} ${snapshot.today_session?.state === 'completed' ? styles.completed : styles.ready}`}>
-                                    {snapshot.today_session?.state === 'completed' ? 'Completed' : snapshot.today_session?.state === 'generated' ? 'Action Required' : 'Standby'}
-                                </span>
+                                <StatusBadge
+                                    status={snapshot.today_session?.state === 'completed' ? 'success' : snapshot.today_session?.state === 'generated' ? 'warning' : 'neutral'}
+                                    label={snapshot.today_session?.state === 'completed' ? 'ALIGNED' : snapshot.today_session?.state === 'generated' ? 'ACTION REQUIRED' : 'STANDBY'}
+                                />
                             </div>
 
                             {!snapshot.today_session ? (
                                 <div style={{ marginTop: '16px', width: '100%' }}>
                                     <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
-                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today’s Session'}
+                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : t('homeGenerateSession')}
                                     </PrimaryButton>
                                 </div>
                             ) : snapshot.today_session.state === 'generated' || snapshot.today_session.state === 'pending' ? (
                                 <div style={{ marginTop: '16px', width: '100%' }}>
                                     <PrimaryButton onClick={() => navigate('/today')}>
-                                        Open Today
+                                        {t('homeOpenToday')}
                                     </PrimaryButton>
                                 </div>
                             ) : (
                                 <div style={{ marginTop: '16px', width: '100%' }}>
                                     <SecondaryButton onClick={() => navigate('/progress')}>
-                                        View Progress
+                                        {t('homeViewProgress')}
                                     </SecondaryButton>
                                 </div>
                             )}
-                        </div>
+                        </SystemCard>
                     </section>
 
                     {/* 7-Day Consistency */}
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle}>Consistencia 7 días</h2>
+                        <h2 className={styles.sectionTitle} style={{ fontFamily: 'var(--font-mono)' }}>SYSTEM TELEMETRY (7D)</h2>
                         <div className={styles.consistencyRow}>
                             {snapshot.consistency_7d.map((dayData, i) => {
                                 const d = new Date(dayData.date + 'T00:00:00');

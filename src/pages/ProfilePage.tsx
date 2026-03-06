@@ -167,7 +167,7 @@ export default function ProfilePage() {
                         <button key={item.labelKey} className={styles.settingsRow}>
                             <div className={styles.settingsIcon}><Icon name={item.icon} size={20} /></div>
                             <span className={styles.settingsLabel}>{t(item.labelKey)}</span>
-                            <Icon name="chevron_right" style={{ color: 'var(--text-muted)' }} size={18} />
+                            <Icon name="chevron_right" style={{ color: 'var(--text-secondary)' }} size={18} />
                         </button>
                     ))}
 

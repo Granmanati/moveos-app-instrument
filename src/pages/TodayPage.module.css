@@ -34,8 +34,8 @@
     display: flex;
     align-items: center;
     gap: 4px;
-    background: var(--surface-1);
-    border: 1px solid var(--border-1);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-subtle);
     border-radius: 20px;
     padding: 4px 10px;
     font-size: 12px;
@@ -61,7 +61,7 @@
     font-weight: 600;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .patternList {
@@ -78,18 +78,18 @@
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 18px 40px rgba(0, 0, 0, 0.42);
+    
     transition: border-color var(--duration-base) var(--ease-standard),
         background-color var(--duration-base) var(--ease-standard);
 }
 
 .patternCard:hover {
-    border-color: rgba(45, 124, 255, 0.2);
+    border-color: var(--border-subtle);
 }
 
 .patternActive {
     border-color: var(--accent) !important;
-    background: var(--surface-2);
+    background: var(--surface-subtle);
 }
 
 .cardTopBar {
@@ -113,7 +113,7 @@
     border-radius: 12px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    
 }
 
 
@@ -127,7 +127,7 @@
 
 .checkboxBtn {
     background: transparent;
-    border: 1px solid var(--border-2);
+    border: 1px solid var(--border-subtle);
     border-radius: 50%;
     width: 28px;
     height: 28px;
@@ -142,7 +142,7 @@
 }
 
 .checkboxBtn:hover {
-    border-color: rgba(45, 124, 255, 0.5);
+    border-color: var(--border-subtle);
 }
 
 .completedCheckbox {
@@ -158,7 +158,7 @@
 .patternExpanded {
     margin-top: var(--sp-3);
     padding-top: var(--sp-3);
-    border-top: 1px solid var(--border-1);
+    border-top: 1px solid var(--border-subtle);
     display: flex;
     flex-direction: column;
     gap: var(--sp-2);
@@ -203,7 +203,7 @@
 .painSlider::-webkit-slider-runnable-track {
     width: 100%;
     height: 6px;
-    background: linear-gradient(to right, #2D7CFF, #E74C3C);
+    background: var(--surface-subtle);
     border-radius: 3px;
 }
 
@@ -217,13 +217,13 @@
     border: 2px solid #101015;
     cursor: pointer;
     margin-top: -7px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    
 }
 
 .textarea {
     width: 100%;
     background: #1A1A1F;
-    border: 1px solid var(--border-2);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     color: var(--text-primary);
     padding: 10px;
@@ -242,7 +242,7 @@
 
 .ghostBtn {
     background: transparent;
-    border: 1px solid var(--border-1);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     color: var(--text-secondary);
     font-family: var(--font-primary);
@@ -271,7 +271,7 @@
 
 .primaryBtn {
     height: 48px;
-    background: linear-gradient(135deg, #2D7CFF, #1F5FD6);
+    background: var(--surface-subtle);
     color: #fff;
     border: none;
     border-radius: var(--radius-md);
@@ -279,7 +279,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    box-shadow: 0 12px 28px rgba(45, 124, 255, 0.14);
+    
     transition: all var(--duration-base);
     display: flex;
     align-items: center;
@@ -295,9 +295,9 @@
 .primaryBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    box-shadow: none;
+    
     transform: none;
-    background: var(--surface-3);
+    background: var(--surface-subtle);
     /* Muted out */
     color: var(--text-secondary);
 }
@@ -322,7 +322,7 @@
 .modalContent {
     background: #101015;
     border: 1px solid rgba(255, 255, 255, 0.06);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+    
     border-radius: 20px;
     padding: var(--sp-6) var(--sp-5);
     width: 100%;
@@ -351,12 +351,12 @@
     width: 64px;
     height: 64px;
     border-radius: 16px;
-    background: linear-gradient(135deg, rgba(45, 124, 255, 0.2), rgba(31, 95, 214, 0.1));
+    background: var(--surface-subtle);
     color: var(--accent);
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid rgba(45, 124, 255, 0.3);
+    border: 1px solid var(--border-subtle);
     margin-bottom: var(--sp-2);
 }
 
@@ -409,7 +409,7 @@
     left: 50%;
     transform: translateX(-50%);
     width: 2px;
-    background: var(--border-1);
+    background: var(--border-subtle);
     z-index: 0;
 }
 
@@ -429,19 +429,19 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    background: var(--surface-1);
-    border: 2px solid var(--border-2);
+    background: var(--surface-subtle);
+    border: 2px solid var(--border-subtle);
     transition: all 0.2s ease;
 }
 
 .railNode.active {
     background: var(--accent);
     border-color: var(--accent);
-    box-shadow: 0 0 0 4px rgba(45, 124, 255, 0.15);
+    
 }
 
 .railNode.completed {
-    background: var(--surface-1);
+    background: var(--surface-subtle);
     border-color: var(--accent);
     display: flex;
     align-items: center;
@@ -464,8 +464,8 @@
 }
 
 .nextPreviewCard {
-    background: rgba(45, 124, 255, 0.05);
-    border: 1px solid rgba(45, 124, 255, 0.15);
+    background: var(--border-subtle);
+    border: 1px solid var(--border-subtle);
     border-radius: 8px;
     padding: 12px 16px;
     margin-bottom: var(--sp-4);

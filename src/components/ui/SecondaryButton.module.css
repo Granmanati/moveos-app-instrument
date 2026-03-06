@@ -1,7 +1,7 @@
 .btn {
-    background: var(--surface-1);
+    background: var(--surface-subtle);
     color: var(--text-primary);
-    border: 1px solid var(--border-1);
+    border: 1px solid var(--border-subtle);
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 15px;
@@ -36,7 +36,7 @@
 }
 
 .btn:not(:disabled):hover {
-    background: var(--surface-2);
+    background: var(--surface-subtle);
     border-color: rgba(255, 255, 255, 0.12);
 }
 

@@ -15,7 +15,7 @@
     justify-content: space-around;
     align-items: center;
     z-index: 100;
-    box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.5);
+    
 }
 
 .tab {
@@ -29,7 +29,7 @@
     min-width: 44px;
     border-radius: var(--radius-sm);
     text-decoration: none;
-    color: var(--text-muted);
+    color: var(--text-secondary);
     transition: color 0.18s ease;
     flex: 1;
     -webkit-tap-highlight-color: transparent;
@@ -54,18 +54,18 @@
     height: 2px;
     background: var(--accent);
     border-radius: 1px;
-    box-shadow: 0 0 6px rgba(45, 124, 255, 0.6);
+    
 }
 
 .icon {
     transition: all 0.18s ease;
-    color: var(--text-muted);
+    color: var(--text-secondary);
 }
 
 .iconActive {
     color: var(--accent);
-    animation: iconBounce 180ms var(--ease-bounce, cubic-bezier(0.34, 1.56, 0.64, 1));
-    filter: drop-shadow(0 3px 6px rgba(45, 124, 255, 0.35));
+    animation: iconBounce 180ms var(--ease-standard));
+    filter: drop-shadow(0 3px 6px var(--border-subtle));
 }
 
 @keyframes iconBounce {
