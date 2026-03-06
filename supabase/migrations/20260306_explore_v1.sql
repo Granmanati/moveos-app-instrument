@@ -48,10 +48,10 @@ VALUES
 ('Goblet Squat', 'squat', 'Dumbbell', 'https://vimeo.com/712345/placeholder', 3, '8-12', 90, 'free', 2),
 ('Front Squat', 'squat', 'Barbell', 'https://vimeo.com/712345/placeholder', 4, '6-8', 120, 'premium', 3),
 ('Bulgarian Split Squat', 'squat', 'Dumbbell', 'https://vimeo.com/712345/placeholder', 3, '8-12', 90, 'premium', 3),
-('Pistol Squat Progression', 'squat', 'Bodyweight', 'https://vimeo.com/712345/placeholder', 3, '5-8', 120, 'premium', 4),
+('Pistol Squat Progression', 'squat', 'Bodyweight', 'https://vimeo.com/712345/placeholder', 3, '5-8', 120, 'premium', 3),
 ('Zercher Squat', 'squat', 'Barbell', 'https://vimeo.com/712345/placeholder', 4, '6-10', 120, 'premium', 3),
 ('Hack Squat', 'squat', 'Machine', 'https://vimeo.com/712345/placeholder', 3, '10-15', 90, 'premium', 2),
-('Sissy Squat', 'squat', 'Bodyweight', 'https://vimeo.com/712345/placeholder', 3, '8-12', 90, 'premium', 4),
+('Sissy Squat', 'squat', 'Bodyweight', 'https://vimeo.com/712345/placeholder', 3, '8-12', 90, 'premium', 3),
 
 -- HINGE (8: 2 Free, 6 Premium)
 ('Glute Bridge', 'hinge', 'Bodyweight', 'https://vimeo.com/712345/placeholder', 3, '15-20', 60, 'free', 1),
