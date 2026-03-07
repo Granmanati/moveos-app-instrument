@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Icon } from './Icon';
 
 export default function ProtectedRoute() {
     const { user, profile, isLoading, tier, paywallDismissedUntil } = useAuth();
@@ -8,7 +9,7 @@ export default function ProtectedRoute() {
     if (isLoading) {
         return (
             <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+                <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
             </div>
         );
     }
@@ -22,7 +23,7 @@ export default function ProtectedRoute() {
     if (!profile) {
         return (
             <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+                <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
             </div>
         );
     }

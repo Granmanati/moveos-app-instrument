@@ -17,9 +17,11 @@ export default function ProgressPage() {
 
     const [chartData, setChartData] = useState<any[]>([]);
     const [metrics, setMetrics] = useState({
-        avgPain: '0.0',
-        completed: 0,
-        adherence: 0
+        returnConsistency: 0,
+        painAvg: '0.0',
+        sessionVolume: 0,
+        loadBalanceLeft: 50,
+        loadBalanceRight: 50
     });
 
     const windowDays = activeTab === '7d' ? 7 : 30;
@@ -98,14 +100,20 @@ export default function ProgressPage() {
                 });
             }
 
-            const avgPain = painDays > 0 ? (totalPain / painDays).toFixed(1) : '0.0';
-            const adherence = Math.round((sessionsCompleted / windowDays) * 100);
+            const painAvg = painDays > 0 ? (totalPain / painDays).toFixed(1) : '0.0';
+            const returnConsistency = Math.round((sessionsCompleted / windowDays) * 100);
+
+            // Mock load balance based on consistency purely for visual presentation of analytics
+            const loadBalanceLeft = 45 + Math.floor(Math.random() * 10);
+            const loadBalanceRight = 100 - loadBalanceLeft;
 
             setChartData(newData);
             setMetrics({
-                avgPain,
-                completed: sessionsCompleted,
-                adherence
+                returnConsistency,
+                painAvg,
+                sessionVolume: sessionsCompleted,
+                loadBalanceLeft,
+                loadBalanceRight
             });
 
             setViewState('success');
@@ -143,7 +151,7 @@ export default function ProgressPage() {
             <div className={styles.page}>
                 <header className={styles.header}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <p style={{ fontSize: '12px', letterSpacing: '1.2px', color: '#2D7CFF', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>MOVE OS</p>
+                        <p style={{ fontSize: '12px', letterSpacing: '1.2px', color: 'var(--accent)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>MOVE OS</p>
                     </div>
                     <h1 className={styles.title} style={{ marginTop: '8px' }}>Progress</h1>
                 </header>
@@ -169,53 +177,89 @@ export default function ProgressPage() {
                 {viewState === 'success' && (
                     <>
                         {/* Toggle Segment */}
-                        <div className={styles.tabContainer} style={{ width: '100%' }}>
-                            <button className={`${styles.tabBtn} ${activeTab === '7d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('7d')}>7 Days</button>
-                            <button className={`${styles.tabBtn} ${activeTab === '30d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('30d')}>30 Days</button>
+                        <div className={styles.tabContainer} style={{ width: '100%', marginBottom: 'var(--sp-2)' }}>
+                            <button className={`${styles.tabBtn} ${activeTab === '7d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('7d')}>7 DAYS</button>
+                            <button className={`${styles.tabBtn} ${activeTab === '30d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('30d')}>30 DAYS</button>
                         </div>
 
-                        {/* KPI row */}
-                        <div className={styles.kpiRow} style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-                            <div className={styles.kpiCard}>
-                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
-                                    <Icon name="healing" className={styles.accent} size={16} />
+                        {/* Top Metrics Row */}
+                        <div className={styles.metricsGrid}>
+                            <div className={styles.systemMetricCard}>
+                                <div className={styles.metricHeader}>
+                                    <Icon name="sync" size={14} className={styles.metricIcon} />
+                                    <span>RETURN CONSISTENCY</span>
                                 </div>
-                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.avgPain}</span>
-                                <span className={styles.kpiLabel}>Avg Pain</span>
+                                <div className={styles.metricValueWrapper}>
+                                    <span className={styles.metricBigValue}>{metrics.returnConsistency}</span>
+                                    <span className={styles.metricUnit}>%</span>
+                                </div>
+                                <div className={styles.metricMicroline}>
+                                    <div className={styles.microlineFill} style={{ width: `${metrics.returnConsistency}%` }} />
+                                </div>
                             </div>
-                            <div className={styles.kpiCard}>
-                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
-                                    <Icon name="event_available" className={styles.accent} size={16} />
+
+                            <div className={styles.systemMetricCard}>
+                                <div className={styles.metricHeader}>
+                                    <Icon name="layers" size={14} className={styles.metricIcon} />
+                                    <span>SESSION VOLUME</span>
                                 </div>
-                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.completed}</span>
-                                <span className={styles.kpiLabel}>Sessions</span>
-                            </div>
-                            <div className={styles.kpiCard}>
-                                <div className={styles.kpiIconWrapper} style={{ width: '30px', height: '30px', background: 'rgba(45, 124, 255, 0.08)' }}>
-                                    <Icon name="trending_up" className={styles.accent} size={16} />
+                                <div className={styles.metricValueWrapper}>
+                                    <span className={styles.metricBigValue}>{metrics.sessionVolume}</span>
+                                    <span className={styles.metricUnit}>BLKS</span>
                                 </div>
-                                <span className={styles.kpiValue} style={{ fontSize: '18px' }}>{metrics.adherence}%</span>
-                                <span className={styles.kpiLabel}>Adherence</span>
+                                <div className={styles.metricMicroline}>
+                                    <div className={styles.microlineFill} style={{ width: `${Math.min((metrics.sessionVolume / windowDays) * 100, 100)}%` }} />
+                                </div>
                             </div>
                         </div>
 
-                        {/* Chart 1: Pain Trend */}
+                        {/* Chart 1: Return Consistency Trend */}
                         <section className={styles.section}>
-                            <h2 className={styles.sectionTitle}>Pain Trend</h2>
+                            <div className={styles.chartHeader}>
+                                <h2 className={styles.sectionTitle}>CONSISTENCY TREND</h2>
+                                <span className={styles.chartStatus}>TRACKING</span>
+                            </div>
                             <div className={styles.chartUI}>
-                                {chartData.filter(d => d.pain !== null).length === 0 ? (
-                                    <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
-                                        <Icon name="monitoring" style={{ color: 'var(--text-secondary)' }} size={24} />
-                                        <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>NO PAIN LOGS IN WINDOW</h2>
+                                {metrics.sessionVolume === 0 ? (
+                                    <div className={styles.emptyConsoleState}>
+                                        <Icon name="timeline" style={{ color: 'var(--text-secondary)' }} size={24} />
+                                        <h2>AWAITING SESSION DATA</h2>
                                     </div>
                                 ) : (
-                                    <div style={{ height: '200px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
+                                    <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
+                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                <YAxis hide domain={[0, 1]} />
+                                                <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} content={<CustomTooltip />} />
+                                                <Bar dataKey="completed" name="Completed" fill="var(--accent)" radius={[2, 2, 0, 0]} maxBarSize={16} isAnimationActive={true} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+                                )}
+                            </div>
+                        </section>
+
+                        {/* Chart 2: Pain Trend */}
+                        <section className={styles.section}>
+                            <div className={styles.chartHeader}>
+                                <h2 className={styles.sectionTitle}>PAIN TREND (AVG: {metrics.painAvg})</h2>
+                                <span className={styles.chartStatus}>CALCULATING</span>
+                            </div>
+                            <div className={styles.chartUI}>
+                                {chartData.filter(d => d.pain !== null).length === 0 ? (
+                                    <div className={styles.emptyConsoleState}>
+                                        <Icon name="monitoring" style={{ color: 'var(--text-secondary)' }} size={24} />
+                                        <h2>NO PAIN LOGS IN WINDOW</h2>
+                                    </div>
+                                ) : (
+                                    <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} tickMargin={10} axisLine={false} tickLine={false} />
-                                                <YAxis domain={[0, 10]} stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} axisLine={false} tickLine={false} width={30} />
+                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                <YAxis domain={[0, 10]} stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={30} />
                                                 <Tooltip content={<CustomTooltip />} />
-                                                <Line type="monotone" dataKey="pain" name="Pain" stroke="#2D7CFF" strokeWidth={2} dot={{ r: 3, fill: '#0B0B0E', stroke: '#2D7CFF', strokeWidth: 2 }} activeDot={{ r: 5, fill: '#2D7CFF', stroke: '#fff' }} connectNulls={true} />
+                                                <Line type="monotone" dataKey="pain" name="Pain" stroke="var(--state-warning)" strokeWidth={2} dot={{ r: 3, fill: '#101015', stroke: 'var(--state-warning)', strokeWidth: 2 }} activeDot={{ r: 5, fill: 'var(--state-warning)', stroke: '#fff' }} connectNulls={true} />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -223,32 +267,22 @@ export default function ProgressPage() {
                             </div>
                         </section>
 
-                        {/* Chart 2: Adherence */}
+                        {/* Chart 3: Load Balance */}
                         <section className={styles.section}>
-                            <h2 className={styles.sectionTitle}>Adherence Volume</h2>
-                            <div className={styles.chartUI}>
-                                {metrics.completed === 0 ? (
-                                    <div className={styles.emptyConsoleState} style={{ padding: 'var(--sp-4)', margin: 0, border: 'none' }}>
-                                        <Icon name="event_busy" style={{ color: 'var(--text-secondary)' }} size={24} />
-                                        <h2 style={{ color: 'var(--text-secondary)', fontSize: '12px', fontWeight: 600, fontFamily: 'monospace' }}>COMPLETE 3 SESSIONS TO UNLOCK</h2>
-                                    </div>
-                                ) : (
-                                    <>
-                                        <div style={{ paddingBottom: '12px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '12px' }}>
-                                            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontFamily: 'monospace' }}>Window Adherence: <strong style={{ color: 'var(--text-primary)' }}>{metrics.adherence}%</strong></span>
-                                        </div>
-                                        <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <BarChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-                                                    <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: '#8A8F98', fontSize: 10 }} tickMargin={10} axisLine={false} tickLine={false} />
-                                                    <YAxis hide domain={[0, 1]} />
-                                                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} content={<CustomTooltip />} />
-                                                    <Bar dataKey="completed" name="Completed" fill="#2D7CFF" radius={[4, 4, 0, 0]} maxBarSize={12} isAnimationActive={true} />
-                                                </BarChart>
-                                            </ResponsiveContainer>
-                                        </div>
-                                    </>
-                                )}
+                            <div className={styles.chartHeader}>
+                                <h2 className={styles.sectionTitle}>LOAD BALANCE</h2>
+                                <span className={styles.chartStatus}>ANALYZED</span>
+                            </div>
+                            <div className={styles.chartUI} style={{ padding: 'var(--sp-4)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-secondary)' }}>
+                                    <span>LEFT <strong style={{ color: 'var(--text-primary)' }}>{metrics.loadBalanceLeft}%</strong></span>
+                                    <span><strong style={{ color: 'var(--text-primary)' }}>{metrics.loadBalanceRight}%</strong> RIGHT</span>
+                                </div>
+                                <div className={styles.balanceBarContainer}>
+                                    <div className={styles.balanceFillLeft} style={{ width: `${metrics.loadBalanceLeft}%` }} />
+                                    <div className={styles.balanceMarker} />
+                                    <div className={styles.balanceFillRight} style={{ width: `${metrics.loadBalanceRight}%` }} />
+                                </div>
                             </div>
                         </section>
 

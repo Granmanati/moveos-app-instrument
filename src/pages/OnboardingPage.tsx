@@ -230,7 +230,7 @@ export default function OnboardingPage() {
         },
         regulate: {
             title: 'REGULATE',
-            color: '#2D7CFF',
+            color: 'var(--accent)',
             bullets: [
                 'Build local tissue tolerance',
                 'Repattern faulty movement mechanics',

@@ -1,0 +1,115 @@
+.statusWrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--surface-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-pill);
+    position: relative;
+    overflow: hidden;
+}
+
+.nodeIndicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.statusText {
+    display: flex;
+    flex-direction: column;
+}
+
+.statusLabel {
+    font-size: 8px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.statusValue {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* State-specific colors */
+.aligned .nodeIndicator {
+    color: var(--state-success);
+}
+
+.aligned .statusValue {
+    color: var(--state-success);
+}
+
+.aligned {
+    border-color: rgba(24, 182, 122, 0.2);
+}
+
+.compensating .nodeIndicator {
+    color: var(--state-warning);
+}
+
+.compensating .statusValue {
+    color: var(--state-warning);
+}
+
+.compensating {
+    border-color: rgba(232, 162, 58, 0.2);
+}
+
+.overload .nodeIndicator {
+    color: var(--state-alert);
+}
+
+.overload .statusValue {
+    color: var(--state-alert);
+}
+
+.overload {
+    border-color: rgba(228, 84, 98, 0.2);
+}
+
+/* Animation / Motion Layer */
+.pulseLine {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    background: currentColor;
+    width: 100%;
+    opacity: 0.2;
+}
+
+@keyframes pulseGlow {
+    0% {
+        opacity: 0.2;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+
+    100% {
+        opacity: 0.2;
+    }
+}
+
+.aligned .pulseLine {
+    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
+    color: var(--state-success);
+}
+
+.compensating .pulseLine {
+    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
+    color: var(--state-warning);
+}
+
+.overload .pulseLine {
+    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
+    color: var(--state-alert);
+}

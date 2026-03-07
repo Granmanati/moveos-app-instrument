@@ -1,6 +1,7 @@
 import styles from './AuthPage.module.css';
 import { supabase } from '../lib/supabase';
 import { useState } from 'react';
+import { Icon } from '../components/Icon';
 
 export default function AuthPage() {
     const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ export default function AuthPage() {
                     disabled={loading}
                 >
                     {loading ? (
-                        <span className="material-symbols-outlined" style={{ animation: 'spin 1s linear infinite' }}>autorenew</span>
+                        <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={24} />
                     ) : (
                         <>
                             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className={styles.googleIcon} />

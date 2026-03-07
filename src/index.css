@@ -8,8 +8,12 @@
 :root {
   /* Colors - Base */
   --bg-primary: #0B0F14;
-  --surface-subtle: #141A22;
+  --surface-primary: #141A22;
+  --surface-secondary: #10161D;
   --border-subtle: #1C2430;
+
+  /* Backward compatibility for Phase 1-3 names */
+  --surface-subtle: var(--surface-primary);
 
   /* Colors - Brand & State */
   --accent: #2D7CFF;
@@ -20,6 +24,7 @@
   /* Typography */
   --text-primary: #F4F7FB;
   --text-secondary: #8A93A3;
+  --text-tertiary: #667085;
   --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
@@ -40,9 +45,19 @@
   --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.25);
 
   /* Animations */
-  --duration-fast: 120ms;
-  --duration-base: 220ms;
-  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-button: 120ms;
+  --duration-screen: 220ms;
+  --duration-pipeline: 500ms;
+  --duration-pulse: 600ms;
+  --duration-fill: 800ms;
+
+  --ease-primary: ease-out;
+  --ease-system: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Legacy mappings */
+  --duration-fast: var(--duration-button);
+  --duration-base: var(--duration-screen);
+  --ease-standard: var(--ease-system);
 }
 
 /* =========================================================================
@@ -79,7 +94,7 @@ button {
 #root {
   display: flex;
   justify-content: center;
-  min-height: 100vh;
+  min-height: 100dvh;
   width: 100%;
 }
 
@@ -90,7 +105,7 @@ button {
   background: transparent;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
 }
 
@@ -132,7 +147,7 @@ button {
 
 .primaryBtn:active {
   transform: scale(0.98);
-  
+
 }
 
 .primaryBtn:disabled {
@@ -205,15 +220,9 @@ button {
 
 /* Subtle glow pulse */
 @keyframes pulseGlow {
-  0% {
-    
-  }
+  0% {}
 
-  70% {
-    
-  }
+  70% {}
 
-  100% {
-    
-  }
+  100% {}
 }

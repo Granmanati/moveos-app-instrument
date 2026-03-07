@@ -159,38 +159,51 @@ export default function ExplorePage() {
                         )}
                     </div>
 
-                    <div className={styles.filterRow}>
-                        {PATTERNS.map((cat) => (
-                            <button
-                                key={cat}
-                                className={`${styles.filterChip} ${activePattern === cat ? styles.filterActive : ''}`}
-                                onClick={() => setActivePattern(cat)}
-                            >
-                                {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    <div className={styles.filterRow} style={{ paddingTop: 0 }}>
-                        {EQUIPMENTS.map((eq) => (
-                            <button
-                                key={eq}
-                                className={`${styles.filterChip} ${activeEquipment === eq ? styles.filterActive : ''}`}
-                                onClick={() => setActiveEquipment(eq)}
-                            >
-                                {eq.charAt(0).toUpperCase() + eq.slice(1)}
-                            </button>
-                        ))}
-                    </div>
-                    <div className={styles.filterRow} style={{ paddingTop: 0 }}>
-                        {LEVELS.map((lvl) => (
-                            <button
-                                key={lvl}
-                                className={`${styles.filterChip} ${activeLevel === lvl ? styles.filterActive : ''}`}
-                                onClick={() => setActiveLevel(lvl)}
-                            >
-                                {lvl}
-                            </button>
-                        ))}
+                    <div className={styles.filterSectionsContainer}>
+                        <div className={styles.filterSection}>
+                            <h3 className={styles.filterSectionTitle}>MOVEMENT PATTERN</h3>
+                            <div className={styles.filterRow}>
+                                {PATTERNS.filter(cat => cat !== 'Todos').map((cat) => (
+                                    <button
+                                        key={cat}
+                                        className={`${styles.filterChip} ${activePattern === cat ? styles.filterActive : ''}`}
+                                        onClick={() => setActivePattern(activePattern === cat ? 'Todos' : cat)}
+                                    >
+                                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className={styles.filterSection}>
+                            <h3 className={styles.filterSectionTitle}>EQUIPMENT</h3>
+                            <div className={styles.filterRow}>
+                                {EQUIPMENTS.filter(eq => eq !== 'Todos').map((eq) => (
+                                    <button
+                                        key={eq}
+                                        className={`${styles.filterChip} ${activeEquipment === eq ? styles.filterActive : ''}`}
+                                        onClick={() => setActiveEquipment(activeEquipment === eq ? 'Todos' : eq)}
+                                    >
+                                        {eq.charAt(0).toUpperCase() + eq.slice(1)}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className={styles.filterSection}>
+                            <h3 className={styles.filterSectionTitle}>LEVEL</h3>
+                            <div className={styles.filterRow}>
+                                {LEVELS.filter(lvl => lvl !== 'Todos').map((lvl) => (
+                                    <button
+                                        key={lvl}
+                                        className={`${styles.filterChip} ${activeLevel === lvl ? styles.filterActive : ''}`}
+                                        onClick={() => setActiveLevel(activeLevel === lvl ? 'Todos' : lvl)}
+                                    >
+                                        {lvl}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             }

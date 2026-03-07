@@ -1,0 +1,133 @@
+.missionCard {
+    background: var(--surface-primary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-3);
+    position: relative;
+    overflow: hidden;
+    transition: all var(--duration-screen) var(--ease-system);
+}
+
+.missionCard.interactive {
+    cursor: pointer;
+}
+
+.missionCard.interactive:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.missionCard.interactive:active {
+    transform: scale(0.98);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.contentLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+}
+
+.metadata {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.duration {
+    display: flex;
+    align-items: center;
+    color: var(--accent);
+}
+
+.indicatorContainer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+}
+
+.iconComplete {
+    color: var(--state-success);
+}
+
+.activeNode {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(45, 124, 255, 0.2);
+    animation: nodePulse var(--duration-pulse) infinite alternate var(--ease-system);
+}
+
+.pendingNode {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--border-subtle);
+    background: transparent;
+}
+
+@keyframes nodePulse {
+    0% {
+        box-shadow: 0 0 0 2px rgba(45, 124, 255, 0.1);
+        transform: scale(0.95);
+    }
+
+    100% {
+        box-shadow: 0 0 0 6px rgba(45, 124, 255, 0.25);
+        transform: scale(1.05);
+    }
+}
+
+.body {
+    margin-top: var(--sp-3);
+    position: relative;
+    z-index: 2;
+}
+
+.pipelineLine {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 2px;
+    height: 0;
+    background: var(--accent);
+    transition: height var(--duration-pipeline) var(--ease-system);
+}
+
+/* States */
+.active .pipelineLine {
+    height: 100%;
+}
+
+.completed {
+    opacity: 0.6;
+    background: var(--bg-primary);
+}
+
+.completed .pipelineLine {
+    height: 100%;
+    background: var(--state-success);
+}
+
+.completed:hover {
+    opacity: 1;
+}

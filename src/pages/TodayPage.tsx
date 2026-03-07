@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import styles from './TodayPage.module.css';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
@@ -8,6 +9,9 @@ import { Icon } from '../components/Icon';
 import { VideoHUDPreview } from '../components/VideoHUDPreview';
 import { safeSelect, safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { SystemHeader } from '../components/ui/SystemHeader';
+import { PrimaryCard } from '../components/ui/PrimaryCard';
+import { MissionCard } from '../components/ui/MissionCard';
 
 interface ExerciseLibrary {
     id: number | string;
@@ -31,7 +35,7 @@ interface SessionExercise {
     rest_sec: number;
     block_order: number;
     exercise_library: ExerciseLibrary;
-    session_exercise_logs: SessionExerciseLog[]; // From Supabase One-to-Many join
+    session_exercise_logs: SessionExerciseLog[];
 }
 
 export default function TodayPage() {
@@ -45,60 +49,13 @@ export default function TodayPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [generating, setGenerating] = useState(false);
 
-    // UI states
-    const [expandedCards, setExpandedCards] = useState<string[]>([]);
-    const [showPremiumGate, setShowPremiumGate] = useState(false);
-
-    // Refs for scrolling and observing
-    const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    const topObserverRef = useRef<HTMLDivElement>(null);
-    const [isStickyVisible, setIsStickyVisible] = useState(false);
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                setIsStickyVisible(!entry.isIntersecting);
-            },
-            { threshold: 0, rootMargin: '-60px 0px 0px 0px' }
-        );
-
-        if (topObserverRef.current) {
-            observer.observe(topObserverRef.current);
-        }
-
-        return () => observer.disconnect();
-    }, []);
-
-    // Load persisted expand state on session load
-    useEffect(() => {
-        if (session?.id) {
-            const saved = localStorage.getItem(`moveos:today:expanded:${session.id}`);
-            if (saved) {
-                try {
-                    setExpandedCards(JSON.parse(saved));
-                } catch (e) {
-                    console.error('Error parsing saved expanded cards', e);
-                }
-            }
-        }
-    }, [session?.id]);
-
-    const toggleExpand = (exId: string) => {
-        setExpandedCards(prev => {
-            const next = prev.includes(exId) ? prev.filter(id => id !== exId) : [...prev, exId];
-            if (session?.id) {
-                localStorage.setItem(`moveos:today:expanded:${session.id}`, JSON.stringify(next));
-            }
-            return next;
-        });
-    };
-
     // Form states for pain logging
     const [painScores, setPainScores] = useState<Record<string, number>>({});
     const [painNotes, setPainNotes] = useState<Record<string, string>>({});
     const [savingPain, setSavingPain] = useState<Record<string, boolean>>({});
+    const [expandedCards, setExpandedCards] = useState<string[]>([]);
+    const [showPremiumGate, setShowPremiumGate] = useState(false);
 
-    // Initial check for onboarding redirect flag
     useEffect(() => {
         if (location.state?.isNewOnboarding) {
             setShowPremiumGate(true);
@@ -113,7 +70,6 @@ export default function TodayPage() {
 
         try {
             const today = new Date().toISOString().split('T')[0];
-
             const queryInfo = supabase
                 .from('training_sessions')
                 .select(`
@@ -143,18 +99,15 @@ export default function TodayPage() {
             if (data) {
                 setSession(data);
                 if (data.session_exercises) {
-                    // Sort strictly by block_order
                     const sorted = [...data.session_exercises].sort((a: any, b: any) => a.block_order - b.block_order);
                     setExercises(sorted as any);
 
-                    // Initialize local state for pain scores if they exist
                     const initialScores: Record<string, number> = {};
                     sorted.forEach((ex: any) => {
                         if (ex.session_exercise_logs && ex.session_exercise_logs.length > 0) {
-                            // Take the most recent log (assuming ordered inserted, we take last element)
                             initialScores[ex.id] = ex.session_exercise_logs[ex.session_exercise_logs.length - 1].pain_score;
                         } else {
-                            initialScores[ex.id] = 0; // Default slider value
+                            initialScores[ex.id] = 0;
                         }
                     });
                     setPainScores(initialScores);
@@ -165,17 +118,15 @@ export default function TodayPage() {
                 setViewState('empty');
             }
         } catch (err: any) {
-            // Should be handled by safeSelect mostly, but just in case
             console.error(err);
-            setErrorMsg(err.message || "Un error inesperado ocurrió.");
+            setErrorMsg(err.message || "An unexpected error occurred.");
             setViewState('error');
         }
     };
 
     useEffect(() => {
         fetchSessionWithExercises();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [user]);
+    }, [user, profile]);
 
     const handleGenerateSession = async () => {
         if (!user) return;
@@ -190,7 +141,6 @@ export default function TodayPage() {
             }
             await fetchSessionWithExercises();
         } catch (err: any) {
-            // Unlikely with safeRpc
             console.error(err);
             setErrorMsg(err.message);
             setViewState('error');
@@ -201,7 +151,6 @@ export default function TodayPage() {
 
     const handleToggleComplete = async (sessionExerciseId: string | number, currentCompleted: boolean) => {
         const newCompleted = !currentCompleted;
-        // Optimistic update
         setExercises(prev => prev.map(ex =>
             ex.id === sessionExerciseId ? { ...ex, is_completed: newCompleted } : ex
         ));
@@ -213,26 +162,9 @@ export default function TodayPage() {
 
         if (error) {
             console.error('Error toggling completion:', error);
-            // Revert state on error
             setExercises(prev => prev.map(ex =>
                 ex.id === sessionExerciseId ? { ...ex, is_completed: currentCompleted } : ex
             ));
-        } else if (newCompleted) {
-            // Auto scroll logic (wrapped in setTimeout to let UI update first)
-            setTimeout(() => {
-                // do not scroll if user has expanded a different card panel and is interacting
-                if (expandedCards.length > 0 && !expandedCards.includes(sessionExerciseId.toString())) {
-                    return;
-                }
-
-                const idx = exercises.findIndex(ex => ex.id === sessionExerciseId);
-                if (idx !== -1) {
-                    if (idx + 1 < exercises.length) {
-                        const nextId = exercises[idx + 1].id;
-                        cardRefs.current[nextId.toString()]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                }
-            }, 150);
         }
     };
 
@@ -253,12 +185,7 @@ export default function TodayPage() {
                 });
 
             if (error) throw error;
-
-            // Close accordion if desired, or keep it open? UX v1.1 asks to 'Persist expand/collapse state'. 
-            // Better to keep it open or just clear notes. Let's not auto-close.
-            setPainNotes(prev => ({ ...prev, [sessionExerciseId]: '' })); // Clear notes after save
-
-            // Optionally update the exercises list locally so they know they have a saved log
+            setPainNotes(prev => ({ ...prev, [sessionExerciseId]: '' }));
             setExercises(prev => prev.map(ex => {
                 if (ex.id === sessionExerciseId) {
                     const existingLogs = ex.session_exercise_logs || [];
@@ -288,58 +215,36 @@ export default function TodayPage() {
         }
     };
 
-    const allCompleted = exercises.length > 0 && exercises.every(ex => ex.is_completed);
+    const toggleExpand = (exId: string) => {
+        setExpandedCards(prev => prev.includes(exId) ? prev.filter(id => id !== exId) : [...prev, exId]);
+    };
 
     const getBlockName = (order: number) => {
         const mapping: Record<number, string> = { 1: 'SQUAT', 2: 'HINGE', 3: 'PUSH', 4: 'PULL', 5: 'CARRY', 6: 'REGULATE' };
         return mapping[order] || `BLOCK ${order}`;
     };
 
-    const getLoadImpact = (ex: any, currentPainScore: number) => {
-        let impact = 'low'; // default
-        const order = ex.block_order;
-        const sets = ex.sets;
-        const reps = ex.reps_min;
-
-        if (order === 6) impact = 'low'; // REGULATE
-        else if (order === 5) impact = 'moderate'; // CARRY default
-        else if (order === 1 || order === 2) impact = 'moderate'; // SQUAT/HINGE default
-
-        if (sets >= 4 && reps <= 6) impact = 'high';
-
-        // user pain >= 6 reduces one level
-        if (currentPainScore >= 6) {
-            if (impact === 'high') impact = 'moderate';
-            else if (impact === 'moderate') impact = 'low';
-        }
-
-        return impact;
-    };
-
     const completedCount = exercises.filter(ex => ex.is_completed).length;
     const totalCount = exercises.length;
-    const upcomingBlock = exercises.find(ex => !ex.is_completed);
+    const allCompleted = totalCount > 0 && completedCount === totalCount;
+    const remainingCount = totalCount - completedCount;
+
+    // Pipeline Logic
+    const currentBlock = exercises.find(ex => !ex.is_completed);
+    const currentIndex = currentBlock ? exercises.indexOf(currentBlock) : -1;
+    const nextBlock = currentIndex !== -1 && currentIndex + 1 < exercises.length ? exercises[currentIndex + 1] : null;
+    const remainingBlocks = exercises.filter(ex => !ex.is_completed && ex.id !== currentBlock?.id && ex.id !== nextBlock?.id);
 
     return (
-        <AppShell
-            title={`Phase of ${session?.phase || profile?.current_phase || 'Foundation'}`}
-            subtitle={new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-        >
-            <div className={`${styles.stickyMiniProgress} ${isStickyVisible ? styles.stickyVisible : ''}`}>
-                <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{completedCount}/{totalCount} completed</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
-                    {upcomingBlock ? `Next: ${getBlockName(upcomingBlock.block_order)}` : 'Ready to complete'}
-                </div>
-            </div>
+        <AppShell customHeader={<SystemHeader />}>
 
-            {/* Error State */}
             {viewState === 'error' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="error" style={{ color: 'var(--state-warning)' }} size={48} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>Error de Sistema</h2>
+                    <Icon name="error" style={{ color: 'var(--state-alert)' }} size={48} />
+                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
                     <div style={{ marginTop: '16px', width: '200px' }}>
-                        <PrimaryButton onClick={fetchSessionWithExercises}>Reintentar</PrimaryButton>
+                        <PrimaryButton onClick={fetchSessionWithExercises}>Retry Connection</PrimaryButton>
                     </div>
                 </div>
             )}
@@ -354,223 +259,194 @@ export default function TodayPage() {
             {viewState === 'empty' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
                     <Icon name="event_busy" style={{ color: 'var(--text-secondary)' }} size={48} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Session</h2>
+                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Mission</h2>
                     <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '250px' }}>Your daily execution block has not been initialized yet.</p>
                     <div style={{ marginTop: '24px', width: '100%' }}>
-                        <PrimaryButton
-                            onClick={handleGenerateSession}
-                            disabled={generating}
-                        >
-                            {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Today\'s Session'}
+                        <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
+                            {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Mission'}
                         </PrimaryButton>
                     </div>
                 </div>
             )}
 
             {viewState === 'success' && session && (
-                <>
-                    <section className={styles.section}>
+                <div className={styles.pipelineLayout}>
+
+                    {/* Pipeline Meta Header */}
+                    <div className={styles.pipelineHeader}>
+                        <h2 className={styles.missionTitle}>MISSION: {session?.phase || 'ADAPTIVE'}</h2>
+                        <span className={styles.missionDate}>
+                            {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()}
+                        </span>
+                    </div>
+
+                    {/* Session Progress */}
+                    <motion.section layout transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
                         <div className={styles.progressContainer}>
                             <div className={styles.progressText}>
-                                <span>Session progress</span>
-                                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{completedCount} / {totalCount} blocks completed</span>
+                                <span>PIPELINE PROGRESS</span>
+                                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{completedCount} / {totalCount} BLOCKS</span>
                             </div>
                             <div className={styles.progressBarBg}>
                                 <div className={styles.progressBarFill} style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} />
                             </div>
                         </div>
+                    </section>
 
-                        <div className={styles.nextPreviewCard}>
-                            {upcomingBlock ? (
-                                <>
-                                    <Icon name="arrow_forward" size={16} style={{ color: 'var(--accent)' }} />
-                                    <span style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                        Next up: <strong style={{ color: 'var(--text-primary)' }}>{getBlockName(upcomingBlock.block_order)}</strong> — {upcomingBlock.sets}×{upcomingBlock.reps_min}–{upcomingBlock.reps_max} · {upcomingBlock.rest_sec}s
-                                    </span>
-                                </>
-                            ) : (
-                                <>
-                                    <Icon name="check_circle" size={16} style={{ color: '#4caf50' }} />
-                                    <span style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
-                                        Session ready to complete.
-                                    </span>
-                                </>
-                            )}
-                        </div>
+                    </motion.section>
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingBottom: '8px' }}>
-                            <div>
-                                <h2 className={styles.sectionTitle}>Execution Pipeline</h2>
-                            </div>
-                            <span style={{ fontSize: '11px', color: 'var(--text-secondary)', fontWeight: 600, fontFamily: 'monospace' }}>
-                                {totalCount - completedCount} BLOCKS REMAINING
-                            </span>
-                        </div>
-
-                        <div ref={topObserverRef} />
-
-                        <div className={styles.executionLayout}>
-                            <div className={styles.executionRail}>
-                                {exercises.map((ex) => {
-                                    const isCompleted = ex.is_completed;
-                                    const isActive = !isCompleted && ex.id === upcomingBlock?.id;
-
-                                    let nodeClass = styles.railNode;
-                                    if (isCompleted) nodeClass += ` ${styles.completed}`;
-                                    else if (isActive) nodeClass += ` ${styles.active}`;
-
-                                    return (
-                                        <div
-                                            key={`rail-${ex.id}`}
-                                            className={styles.railNodeWrapper}
-                                            onClick={() => cardRefs.current[ex.id.toString()]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                                        >
-                                            <div className={nodeClass} />
+                    <AnimatePresence mode="popLayout">
+                        {/* Current Block */}
+                        <motion.section layout key={currentBlock ? `current-${currentBlock.id}` : 'alldone'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
+                            <h3 className={styles.sectionTitle}>CURRENT BLOCK</h3>
+                            {currentBlock ? (
+                                <PrimaryCard
+                                    title={`${getBlockName(currentBlock.block_order)} //`}
+                                    subtitle={`${currentBlock.sets}x${currentBlock.reps_min}-${currentBlock.reps_max} · ${currentBlock.rest_sec}s REST`}
+                                >
+                                    <div className={styles.currentBlockContent}>
+                                        <div className={styles.hudWrapper}>
+                                            <VideoHUDPreview
+                                                videoUrl={currentBlock.exercise_library?.media_video_url}
+                                                pattern={currentBlock.exercise_library?.pattern}
+                                                name={currentBlock.exercise_library?.name || 'Unknown Pattern'}
+                                                sets={currentBlock.sets}
+                                                repsMin={currentBlock.reps_min}
+                                                repsMax={currentBlock.reps_max}
+                                                restSeconds={currentBlock.rest_sec}
+                                            />
                                         </div>
-                                    );
-                                })}
-                            </div>
 
-                            <div className={`${styles.patternList} ${styles.patternListWrapper}`}>
-                                {exercises.map((ex, i) => {
-                                    const library = ex.exercise_library;
-                                    const isCompleted = ex.is_completed;
-                                    const isExpanded = expandedCards.includes(ex.id.toString());
-                                    const hasPainLog = ex.session_exercise_logs && ex.session_exercise_logs.length > 0;
-                                    const currentPainScore = painScores[ex.id.toString()] || 0;
-
-                                    return (
-                                        <div
-                                            key={ex.id}
-                                            ref={(el) => { cardRefs.current[ex.id.toString()] = el; }}
-                                            className={`${styles.patternCard} ${isExpanded ? styles.patternActive : ''}`}
-                                        >
-                                            <div className={styles.cardTopBar}>
-                                                <button
-                                                    className={`${styles.checkboxBtn} ${isCompleted ? styles.completedCheckbox : ''}`}
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleToggleComplete(ex.id, ex.is_completed);
-                                                    }}
-                                                    aria-label={isCompleted ? "Mark incomplete" : "Mark complete"}
-                                                >
-                                                    <Icon name="check" className={styles.checkIcon} />
-                                                </button>
-                                                <div className={styles.blockLabel} style={{ flexShrink: 0 }}>
-                                                    <span style={{ color: 'var(--accent)', fontWeight: 600, marginRight: '4px' }}>{i + 1} //</span>
-                                                    <span>{getBlockName(ex.block_order)}</span>
-                                                </div>
-                                                <div style={{ flex: 1 }} />
-                                                {(() => {
-                                                    const impact = getLoadImpact(ex, currentPainScore);
-                                                    return (
-                                                        <span className={`${styles.impactChip} ${styles[`impact_${impact}`]}`}>
-                                                            {impact === 'low' ? 'Low Impact' : impact === 'moderate' ? 'Mod Impact' : 'High Impact'}
-                                                        </span>
-                                                    );
-                                                })()}
-                                            </div>
-
-                                            <div
-                                                className={styles.hudWrapper}
-                                                onClick={() => toggleExpand(ex.id.toString())}
-                                                style={{ cursor: 'pointer' }}
+                                        {/* Action Bar */}
+                                        <div className={styles.actionBar}>
+                                            <button
+                                                className={styles.actionBtn}
+                                                onClick={() => toggleExpand(currentBlock.id.toString())}
                                             >
-                                                <VideoHUDPreview
-                                                    videoUrl={library?.media_video_url}
-                                                    pattern={library?.pattern}
-                                                    name={library?.name || 'Unknown Pattern'}
-                                                    sets={ex.sets}
-                                                    repsMin={ex.reps_min}
-                                                    repsMax={ex.reps_max}
-                                                    restSeconds={ex.rest_sec}
-                                                    className={styles.hudComponent}
-                                                />
-                                            </div>
-
-                                            {/* Expandable Accordion for Pain Logging */}
-                                            {isExpanded && (
-                                                <div className={styles.patternExpanded}>
-                                                    <div className={styles.reportPainTitle}>
-                                                        Report Load/Pain
-                                                        {hasPainLog && <span style={{ marginLeft: '8px', color: 'var(--text-secondary)', fontSize: '10px', fontWeight: 'normal' }}>(Last Saved: {currentPainScore}/10)</span>}
-                                                    </div>
-
-                                                    <div className={styles.inputGroup}>
-                                                        <div className={styles.inputLabel}>
-                                                            <span>No Pain</span>
-                                                            <span>Severe</span>
-                                                        </div>
-                                                        <div className={styles.sliderContainer}>
-                                                            <input
-                                                                type="range"
-                                                                min="0" max="10"
-                                                                value={currentPainScore}
-                                                                onChange={(e) => setPainScores(prev => ({ ...prev, [ex.id.toString()]: parseInt(e.target.value) }))}
-                                                                className={styles.painSlider}
-                                                            />
-                                                        </div>
-                                                        <div style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: 'var(--text-primary)', marginTop: '-8px' }}>
-                                                            {currentPainScore}
-                                                        </div>
-                                                    </div>
-
-                                                    <textarea
-                                                        className={styles.textarea}
-                                                        placeholder="Clinical notes or joint sensations..."
-                                                        value={painNotes[ex.id.toString()] || ''}
-                                                        onChange={(e) => setPainNotes(prev => ({ ...prev, [ex.id.toString()]: e.target.value }))}
-                                                    />
-
-                                                    <button
-                                                        className={styles.ghostBtn}
-                                                        style={{ width: '100%', marginTop: '4px', background: 'var(--surface-subtle)', border: 'none' }}
-                                                        onClick={() => handleSavePainLog(ex.id)}
-                                                        disabled={savingPain[ex.id.toString()]}
-                                                    >
-                                                        {savingPain[ex.id.toString()] ? 'Saving...' : 'Save Log Record'}
-                                                    </button>
-                                                </div>
-                                            )}
+                                                <Icon name="healing" size={16} />
+                                                <span>REPORT STRAIN</span>
+                                            </button>
+                                            <PrimaryButton
+                                                onClick={() => handleToggleComplete(currentBlock.id, currentBlock.is_completed)}
+                                                style={{ margin: 0 }}
+                                            >
+                                                <Icon name="check" size={18} style={{ marginRight: '8px' }} />
+                                                MARK COMPLETED
+                                            </PrimaryButton>
                                         </div>
-                                    )
-                                })}
-                            </div>
-                        </div>
-                    </section>
 
-                    <section className={styles.actionSection} style={{ marginTop: '24px' }}>
-                        <PrimaryButton
-                            disabled={!allCompleted || session.state === 'completed'}
-                            onClick={handleCompleteSession}
-                        >
-                            {session.state === 'completed' ? 'Session Already Completed' : 'Complete Session'}
-                        </PrimaryButton>
-                    </section>
-                </>
-            )}
+                                        {/* Pain/Strain Reporting */}
+                                        {expandedCards.includes(currentBlock.id.toString()) && (
+                                            <div className={styles.strainPanel}>
+                                                <div className={styles.sliderContainer}>
+                                                    <div className={styles.strainHeader}>
+                                                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>STRAIN LEVEL</span>
+                                                        <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{painScores[currentBlock.id.toString()] || 0}/10</span>
+                                                    </div>
+                                                    <input
+                                                        type="range"
+                                                        min="0" max="10"
+                                                        value={painScores[currentBlock.id.toString()] || 0}
+                                                        onChange={(e) => setPainScores(prev => ({ ...prev, [currentBlock.id.toString()]: parseInt(e.target.value) }))}
+                                                        className={styles.painSlider}
+                                                    />
+                                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="Add clinical notes..."
+                                                            className={styles.strainInput}
+                                                            value={painNotes[currentBlock.id.toString()] || ''}
+                                                            onChange={(e) => setPainNotes(prev => ({ ...prev, [currentBlock.id.toString()]: e.target.value }))}
+                                                        />
+                                                        <button
+                                                            className={styles.saveBtn}
+                                                            onClick={() => handleSavePainLog(currentBlock.id)}
+                                                        >
+                                                            {savingPain[currentBlock.id.toString()] ? '...' : 'SAVE'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </PrimaryCard>
+                            ) : (
+                                <div className={styles.allDoneState}>
+                                    <Icon name="check_circle" size={48} style={{ color: 'var(--state-success)', margin: '0 0 16px 0' }} />
+                                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>PIPELINE COMPLETED</h3>
+                                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>All blocks execution confirmed.</p>
+                                </div>
+                            )}
+                        </motion.section>
 
-            {showPremiumGate && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <div className={styles.modalIconBox}>
-                            <Icon name="bolt" size={32} />
-                        </div>
-                        <h2 className={styles.modalTitle}>System Engine Lock</h2>
-                        <p className={styles.modalText}>
-                            Enable dynamic load adjustment and execution tracking by removing restrictions.
-                        </p>
-                        <div className={styles.modalActions}>
-                            <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
-                                Upgrade Pipeline
-                            </button>
-                            <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)} style={{ border: 'none' }}>
-                                Acknowledge Basic Mode
-                            </button>
-                        </div>
-                    </div>
+                        {/* Next Block */}
+                        {nextBlock && (
+                            <motion.section layout key={`next-${nextBlock.id}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
+                                <h3 className={styles.sectionTitle}>NEXT BLOCK</h3>
+                                <MissionCard
+                                    title={getBlockName(nextBlock.block_order)}
+                                    subtitle={`${nextBlock.exercise_library?.name}`}
+                                    duration={`${nextBlock.sets}x${nextBlock.reps_min}-${nextBlock.reps_max}`}
+                                    status="upcoming"
+                                />
+                            </motion.section>
+                        )}
+
+                        {/* Remaining Blocks */}
+                        {remainingBlocks.length > 0 && (
+                            <motion.section layout key="remaining" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
+                                <h3 className={styles.sectionTitle}>{remainingCount - 1} BLOCKS REMAINING</h3>
+                                <div className={styles.remainingList}>
+                                    {remainingBlocks.map(ex => (
+                                        <div key={ex.id} className={styles.remainingItem}>
+                                            <div className={styles.remainingMarker} />
+                                            <span className={styles.remainingName}>{getBlockName(ex.block_order)}</span>
+                                            <div style={{ flex: 1 }} />
+                                            <span className={styles.remainingMeta}>{ex.sets}x{ex.reps_min}-{ex.reps_max}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </motion.section>
+                        )}
+                    </AnimatePresence>
+
+                    {/* Action Footer */}
+            <div className={styles.actionFooter}>
+                <PrimaryButton
+                    disabled={!allCompleted || session.state === 'completed'}
+                    onClick={handleCompleteSession}
+                >
+                    {session.state === 'completed' ? 'MISSION ALREADY VERIFIED' : 'VERIFY MISSION COMPLETION'}
+                </PrimaryButton>
+            </div>
+
+        </div>
+    )
+}
+
+{
+    showPremiumGate && (
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <div className={styles.modalIconBox}>
+                    <Icon name="lock" size={32} />
                 </div>
-            )}
-        </AppShell>
+                <h2 className={styles.modalTitle}>SYSTEM ENGINE LOCK</h2>
+                <p className={styles.modalText}>
+                    Enable dynamic load adjustment and execution tracking.
+                </p>
+                <div className={styles.modalActions}>
+                    <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
+                        UPGRADE PIPELINE
+                    </button>
+                    <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)}>
+                        ACKNOWLEDGE
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+}
+        </AppShell >
     );
 }

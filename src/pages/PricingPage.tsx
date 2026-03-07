@@ -140,7 +140,7 @@ export default function PricingPage() {
                                 $29 <span>/ month</span>
                             </p>
                         </div>
-                        <Icon name="bolt" size={28} style={{ color: '#2D7CFF' }} />
+                        <Icon name="bolt" size={28} style={{ color: 'var(--accent)' }} />
                     </div>
                     <ul className={styles.planFeatures}>
                         <li><Icon name="check_circle" size={14} active /><span>Everything in Premium</span></li>

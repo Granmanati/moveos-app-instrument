@@ -1,14 +1,13 @@
 import styles from './BottomNav.module.css';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, ListChecks, Compass, LineChart, User } from 'lucide-react';
+import { LayoutGrid, ListChecks, LineChart, User } from 'lucide-react';
 import { useI18n } from '../i18n/useI18n';
 
 const NAV_ITEMS = [
     { path: '/', label: 'navHome' as const, Icon: LayoutGrid },
-    { path: '/today', label: 'navToday' as const, Icon: ListChecks },
-    { path: '/explore', label: 'navExplore' as const, Icon: Compass },
+    { path: '/today', label: 'navMission' as const, Icon: ListChecks },
     { path: '/progress', label: 'navProgress' as const, Icon: LineChart },
-    { path: '/profile', label: 'navProfile' as const, Icon: User },
+    { path: '/profile', label: 'navSystem' as const, Icon: User },
 ];
 
 export default function BottomNav() {
@@ -29,7 +28,7 @@ export default function BottomNav() {
                         <>
                             <item.Icon
                                 size={22}
-                                strokeWidth={isActive ? 2.2 : 1.8}
+                                strokeWidth={1.5}
                                 className={`${styles.icon} ${isActive ? styles.iconActive : ''}`}
                             />
                             <span className={styles.label}>{t(item.label)}</span>

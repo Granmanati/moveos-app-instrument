@@ -57,10 +57,7 @@
     border-color: var(--accent);
 }
 
-.searchBar .material-symbols-outlined {
-    font-size: 20px;
-    color: var(--text-secondary);
-}
+
 
 .searchInput {
     flex: 1;
@@ -86,30 +83,58 @@
     padding: 0;
 }
 
+.filterSectionsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-top: var(--sp-2);
+}
+
+.filterSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+}
+
+.filterSectionTitle {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
 .filterRow {
     display: flex;
     gap: var(--sp-2);
     overflow-x: auto;
-    padding-bottom: 2px;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+}
+
+.filterRow::-webkit-scrollbar {
+    display: none;
 }
 
 .filterChip {
-    padding: 6px 12px;
-    border-radius: 20px;
+    padding: 6px 14px;
+    border-radius: var(--radius-sm);
     border: 1px solid var(--border-subtle);
-    background: transparent;
-    color: var(--text-secondary);
+    background: var(--surface-secondary);
+    color: var(--text-primary);
     font-family: var(--font-primary);
     font-size: 12px;
+    font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
     transition: all var(--duration-base);
 }
 
 .filterActive {
-    background: var(--accent);
+    background: var(--surface-primary);
     border-color: var(--accent);
-    color: #fff;
+    color: var(--accent);
 }
 
 .feedContainer {
@@ -296,11 +321,6 @@
     gap: 8px;
 }
 
-.lockOverlay .material-symbols-outlined {
-    font-size: 32px;
-    color: var(--text-secondary);
-}
-
 .lockOverlay span:last-of-type {
     font-size: 12px;
     font-weight: 700;
@@ -317,7 +337,7 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    
+
     transition: transform var(--duration-base);
 }
 
@@ -354,10 +374,6 @@
     font-size: 14px;
 }
 
-.emptyState .material-symbols-outlined {
-    font-size: 48px;
-}
-
 /* Modal Overlay (Copied from TodayPage) */
 .modalOverlay {
     position: fixed;
@@ -378,7 +394,7 @@
 .modalContent {
     background: #101015;
     border: 1px solid rgba(255, 255, 255, 0.06);
-    
+
     border-radius: 20px;
     padding: var(--sp-6) var(--sp-5);
     width: 100%;
@@ -447,7 +463,7 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;

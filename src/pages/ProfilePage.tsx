@@ -12,7 +12,7 @@ import { supabase } from '../lib/supabase';
 const planColors: Record<string, string> = {
     free: '#8A8A96',
     premium: '#FFB020',
-    pro: '#2D7CFF',
+    pro: 'var(--accent)',
     admin: '#FF4D4D',
 };
 
@@ -98,7 +98,7 @@ export default function ProfilePage() {
         return (
             <div className={styles.activePlanCard}>
                 <div className={styles.upgradeHeader}>
-                    <Icon name="workspace_premium" style={{ color: '#2D7CFF' }} size={22} />
+                    <Icon name="workspace_premium" style={{ color: 'var(--accent)' }} size={22} />
                     <h2 className={styles.upgradeTitle}>{t('profileSubscription')}</h2>
                     <span className={styles.statusLine}>{t('profileActive')}</span>
                 </div>

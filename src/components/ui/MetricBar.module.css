@@ -9,7 +9,7 @@
 .metricBarFill {
     height: 100%;
     border-radius: var(--radius-pill);
-    transition: width var(--duration-base) var(--ease-standard);
+    transition: width var(--duration-fill) var(--ease-system);
 }
 
 .fill-accent {

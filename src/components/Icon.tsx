@@ -78,7 +78,7 @@ export const Icon: React.FC<IconProps> = ({
             style={{
                 ...style
             }}
-            strokeWidth={2}
+            strokeWidth={1.5}
             aria-hidden="true"
         />
     );

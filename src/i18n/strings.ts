@@ -21,6 +21,8 @@ type Strings = {
     navExplore: string;
     navProgress: string;
     navProfile: string;
+    navMission: string;
+    navSystem: string;
     // Home
     homeGreeting: string;
     homePhase: string;
@@ -186,6 +188,8 @@ const en: Strings = {
     navExplore: 'Explore',
     navProgress: 'Progress',
     navProfile: 'Profile',
+    navMission: 'Mission',
+    navSystem: 'System',
     homeGreeting: 'Hello',
     homePhase: 'Phase',
     homeSystemStatus: 'System Status',
@@ -342,6 +346,8 @@ const es: Strings = {
     navExplore: 'Explorar',
     navProgress: 'Progreso',
     navProfile: 'Perfil',
+    navMission: 'Misión',
+    navSystem: 'Sistema',
     homeGreeting: 'Hola',
     homePhase: 'Fase',
     homeSystemStatus: 'Estado del sistema',

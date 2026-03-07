@@ -261,7 +261,7 @@ select.input {
 .segmentActive {
     background: var(--surface-subtle);
     color: var(--text-primary);
-    
+
 }
 
 .wearableList {
@@ -299,7 +299,7 @@ select.input {
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
     padding: var(--sp-5);
-    
+
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
@@ -347,10 +347,6 @@ select.input {
     line-height: 1.4;
 }
 
-.phaseBullets li .material-symbols-outlined {
-    color: var(--text-secondary);
-    margin-top: 2px;
-}
 
 .sysNote {
     font-size: 11px;
@@ -388,7 +384,7 @@ select.input {
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    
+
     transition: all var(--duration-base);
 }
 
@@ -399,7 +395,7 @@ select.input {
 .primaryBtn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    
+
     transform: none;
 }
 
@@ -427,7 +423,7 @@ select.input {
     padding: var(--sp-6) var(--sp-5);
     width: 100%;
     max-width: 400px;
-    
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -479,7 +475,7 @@ select.input {
 .toggleActive {
     background: var(--surface-subtle);
     color: var(--text-primary);
-    
+
 }
 
 .saveBadge {

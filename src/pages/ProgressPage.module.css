@@ -21,61 +21,91 @@
     margin-top: 4px;
 }
 
-.kpiRow {
+.metricsGrid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    /* User requested 2 clean cards */
+    grid-template-columns: 1fr 1fr;
     gap: var(--sp-3);
+    margin-bottom: var(--sp-2);
 }
 
-.kpiCard {
+.systemMetricCard {
     background: var(--surface-subtle);
     border: 1px solid var(--border-subtle);
     border-radius: var(--radius-lg);
-    padding: var(--sp-4) var(--sp-2);
+    padding: var(--sp-3);
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    text-align: center;
-    transition: border-color var(--duration-base);
+    gap: 8px;
 }
 
-.kpiCard:hover {
-    border-color: var(--border-subtle);
-}
-
-.kpiIconWrapper {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: var(--border-subtle);
+.metricHeader {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 2px;
-}
-
-.kpiIcon {
-    font-size: 20px;
-}
-
-.kpiValue {
-    font-size: 22px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.kpiLabel {
+    gap: 6px;
     font-size: 10px;
+    font-family: var(--font-mono);
     color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.metricIcon {
+    color: var(--accent);
+}
+
+.metricValueWrapper {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.metricBigValue {
+    font-size: 24px;
+    font-family: var(--font-mono);
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.metricUnit {
+    font-size: 12px;
+    font-family: var(--font-mono);
+    color: var(--text-tertiary);
+}
+
+.metricMicroline {
+    width: 100%;
+    height: 4px;
+    background: var(--bg-base);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 2px;
+}
+
+.microlineFill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
 }
 
 .section {
     display: flex;
     flex-direction: column;
     gap: var(--sp-3);
+    margin-bottom: var(--sp-4);
+}
+
+.chartHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+}
+
+.chartStatus {
+    font-size: 9px;
+    font-family: var(--font-mono);
+    color: var(--accent);
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .sectionTitle {
@@ -85,119 +115,95 @@
     letter-spacing: 0.8px;
     text-transform: uppercase;
     color: var(--text-secondary);
-}
-
-/* Removed legacy checkIn row styles as adherence is now drawn via Recharts */
-
-.trendCard {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-}
-
-.trendRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: var(--sp-3) var(--sp-4);
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.trendRow:last-child {
-    border-bottom: none;
-}
-
-.trendLabel {
-    font-size: 13px;
-    color: var(--text-secondary);
-}
-
-.trendRight {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.trendRight .material-symbols-outlined {
-    font-size: 18px;
-}
-
-.trendText {
-    font-size: 13px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    color: var(--text-primary);
-}
-
-.trendValue {
-    font-size: 13px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    color: var(--text-primary);
+    margin: 0;
 }
 
 .emptyConsoleState {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    padding: var(--sp-8) var(--sp-4);
-    gap: var(--sp-3);
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-lg);
-    margin-top: var(--sp-4);
+    padding: var(--sp-6) var(--sp-4);
+    gap: var(--sp-2);
+    min-height: 140px;
+}
+
+.emptyConsoleState h2 {
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+    margin: 0;
 }
 
 .tabContainer {
     display: flex;
-    background: var(--surface-subtle);
-    border-radius: 8px;
-    padding: 2px;
+    background: var(--bg-base);
+    border-radius: var(--radius-sm);
+    padding: 3px;
     border: 1px solid var(--border-subtle);
 }
 
 .tabBtn {
-    padding: 4px 12px;
+    padding: 6px 12px;
     font-size: 11px;
-    font-weight: 600;
+    font-family: var(--font-mono);
+    font-weight: 500;
     color: var(--text-secondary);
     background: transparent;
     border: none;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: all var(--duration-base);
+    transition: all var(--duration-fast);
 }
 
 .tabActive {
-    background: var(--surface-subtle);
+    background: var(--surface-secondary);
     color: var(--text-primary);
-    
 }
 
 .chartUI {
-    background: #101015;
-    border: 1px solid #1A1A1F;
-    border-radius: 14px;
-    padding: var(--sp-4);
+    background: var(--surface-subtle);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: var(--sp-3);
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
-    
 }
 
-.chartTitle {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.chartLineContainer {
-    height: 120px;
+.balanceBarContainer {
+    width: 100%;
+    height: 12px;
+    background: var(--bg-base);
+    border-radius: 6px;
     display: flex;
-    flex-direction: column;
-    gap: 8px;
+    overflow: hidden;
+    position: relative;
+}
+
+.balanceFillLeft {
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.8;
+}
+
+.balanceFillRight {
+    height: 100%;
+    background: var(--state-info);
+    opacity: 0.4;
+}
+
+.balanceMarker {
+    position: absolute;
+    left: 50%;
+    top: -2px;
+    bottom: -2px;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(-50%);
+    z-index: 2;
 }
 
 /* Removed fake SVG path properties and fake bar flex containers since Recharts uses standard SVGs directly */

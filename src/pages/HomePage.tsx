@@ -7,9 +7,10 @@ import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import { SecondaryButton } from '../components/ui/SecondaryButton';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { SystemCard } from '../components/ui/SystemCard';
+import { SystemHeader } from '../components/ui/SystemHeader';
+import { SystemStatusIndicator } from '../components/ui/SystemStatusIndicator';
+import { PrimaryCard } from '../components/ui/PrimaryCard';
+import { MetricCard } from '../components/ui/MetricCard';
 import { MetricBar } from '../components/ui/MetricBar';
 import { useI18n } from '../i18n/useI18n';
 
@@ -29,7 +30,6 @@ export default function HomePage() {
 
     const dayLabels = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
 
-    // Possible states: 'loading' | 'error' | 'success'
     const [viewState, setViewState] = useState<'loading' | 'error' | 'success'>('loading');
     const [snapshot, setSnapshot] = useState<HomeSnapshot | null>(null);
     const [errorMsg, setErrorMsg] = useState('');
@@ -58,7 +58,6 @@ export default function HomePage() {
                 setErrorMsg('No data returned.');
             }
         } catch (err: any) {
-            // Unlikely to hit this heavily with safeRpc but just in case
             console.error(err);
             setErrorMsg(err.message || t('error'));
             setViewState('error');
@@ -91,116 +90,105 @@ export default function HomePage() {
         }
     };
 
-    return (
-        <AppShell
-            customHeader={
-                <header className={styles.header} style={{ flexDirection: 'column', gap: '8px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
-                        <div>
-                            <p className={styles.greeting} style={{ fontSize: '12px', letterSpacing: '1.2px', color: '#2D7CFF', fontWeight: 700, margin: 0, paddingBottom: '2px', textTransform: 'uppercase' }}>MOVE OS</p>
-                            <p style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '8px', letterSpacing: '0.5px', fontFamily: 'var(--font-mono)' }}>SYSTEM_STATUS: ONLINE</p>
-                            <h1 className={styles.title} style={{ fontFamily: 'var(--font-mono)', fontSize: '20px', textTransform: 'uppercase' }}>NODE: {profile?.full_name || 'USER'}</h1>
-                            <p className={styles.subtitle} style={{ fontFamily: 'var(--font-mono)', fontSize: '10px', marginTop: '4px' }}>ADAPTIVE PHASE: {(profile?.current_phase || 'INITIAL').toUpperCase()}</p>
-                        </div>
-                        <div className={styles.avatar}>
-                            <Icon name="person" />
-                        </div>
-                    </div>
-                    <p style={{ fontSize: '9px', color: 'var(--text-secondary)', marginTop: '4px', letterSpacing: '0.5px', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>
-                        RETURN &rarr; REGULATE &rarr; LOAD &rarr; ADAPT &rarr; BECOME
-                    </p>
-                </header>
-            }
-        >
+    // Calculate system state based on adherence and pain
+    let sysState: 'aligned' | 'compensating' | 'overload' = 'aligned';
+    let sysLabel = 'OPTIMAL';
+    if (snapshot) {
+        if (snapshot.avg_pain_7d >= 6) {
+            sysState = 'overload';
+            sysLabel = 'HIGH STRAIN';
+        } else if (snapshot.avg_pain_7d >= 3 || snapshot.adherence_7d < 50) {
+            sysState = 'compensating';
+            sysLabel = 'COMPENSATING';
+        }
+    }
 
-            {/* Compact inline System Alert */}
+    return (
+        <AppShell customHeader={<SystemHeader />}>
+
             {errorMsg && viewState === 'error' && (
-                <div style={{ background: 'rgba(231, 76, 60, 0.1)', color: 'var(--state-warning)', border: '1px solid rgba(231, 76, 60, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
+                <div style={{ background: 'rgba(228, 84, 98, 0.1)', color: 'var(--state-alert)', border: '1px solid rgba(228, 84, 98, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
                     <Icon name="info" size={16} />
                     <span>{errorMsg}</span>
                 </div>
             )}
 
-            {/* Content Loading Skeleton or Actual Data */}
             {viewState === 'loading' ? (
                 <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
                     <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
                     <p style={{ marginTop: '12px', fontSize: '14px' }}>{t('homeCalibrating')}</p>
                 </div>
             ) : snapshot ? (
-                <>
-                    {/* Metrics Row */}
-                    <section className={styles.metricsRow}>
-                        <SystemCard padding="sm" className={styles.metricCard}>
-                            <div className={styles.metricIconWrapper}>
-                                <Icon name="check_circle" className={styles.metricIcon} />
-                            </div>
-                            <span className={styles.metricValue}>{snapshot.sessions_30d}</span>
-                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>RETURN VOLUME</span>
-                        </SystemCard>
-                        <SystemCard padding="sm" className={styles.metricCard}>
-                            <div className={styles.metricIconWrapper}>
-                                <Icon name="data_usage" className={styles.metricIcon} />
-                            </div>
-                            <span className={styles.metricValue}>{snapshot.adherence_7d}%</span>
-                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>RETURN RATE</span>
-                            <div style={{ width: '80%', marginTop: '4px' }}>
-                                <MetricBar value={snapshot.adherence_7d} color="accent" height={3} />
-                            </div>
-                        </SystemCard>
-                        <SystemCard padding="sm" className={styles.metricCard}>
-                            <div className={styles.metricIconWrapper}>
-                                <Icon name="healing" className={styles.metricIcon} />
-                            </div>
-                            <span className={styles.metricValue}>{snapshot.avg_pain_7d}/10</span>
-                            <span className={styles.metricLabel} style={{ fontFamily: 'var(--font-mono)' }}>SYSTEM STRAIN</span>
-                            <div style={{ width: '80%', marginTop: '4px' }}>
-                                <MetricBar value={snapshot.avg_pain_7d * 10} color={snapshot.avg_pain_7d > 6 ? 'alert' : snapshot.avg_pain_7d > 3 ? 'warning' : 'success'} height={3} />
-                            </div>
-                        </SystemCard>
+                <div className={styles.dashboardLayout}>
+                    {/* 1. System Status */}
+                    <section className={styles.systemStatusSection}>
+                        <div className={styles.nodeIdentity}>
+                            <h2 className={styles.nodeLabel}>NODE IDENTITY</h2>
+                            <h1 className={styles.nodeName}>{profile?.full_name || 'USER'}</h1>
+                        </div>
+                        <SystemStatusIndicator state={sysState} label={sysLabel} />
                     </section>
 
-                    {/* System Status Card (Today's Session Handling) */}
+                    {/* 2. Active Mission */}
                     <section className={styles.section}>
-                        <SystemCard className={styles.sessionCard}>
-                            <div className={styles.sessionCardHeader}>
-                                <div>
-                                    <h2 className={styles.cardTitle} style={{ fontFamily: 'var(--font-mono)', fontSize: '14px', letterSpacing: '0.5px' }}>ACTIVE MISSION</h2>
-                                    <p className={styles.cardSubtitle} style={{ fontFamily: 'var(--font-mono)' }}>
-                                        {snapshot.today_session ? `EXECUTE ADAPTATION: ${snapshot.today_session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
-                                    </p>
-                                </div>
-                                <StatusBadge
-                                    status={snapshot.today_session?.state === 'completed' ? 'success' : snapshot.today_session?.state === 'generated' ? 'warning' : 'neutral'}
-                                    label={snapshot.today_session?.state === 'completed' ? 'ALIGNED' : snapshot.today_session?.state === 'generated' ? 'ACTION REQUIRED' : 'STANDBY'}
-                                />
-                            </div>
-
+                        <h3 className={styles.sectionTitle}>ACTIVE MISSION</h3>
+                        <PrimaryCard
+                            title={snapshot.today_session ? `PHASE: ${snapshot.today_session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
+                            subtitle={snapshot.today_session && snapshot.today_session.state === 'completed' ? 'MISSION ALIGNED AND COMPLETED' : 'ADAPTIVE PROTOCOL READY'}
+                        >
                             {!snapshot.today_session ? (
-                                <div style={{ marginTop: '16px', width: '100%' }}>
+                                <div style={{ marginTop: '16px' }}>
                                     <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
-                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : t('homeGenerateSession')}
+                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'GENERATE PROTOCOL'}
                                     </PrimaryButton>
                                 </div>
-                            ) : snapshot.today_session.state === 'generated' || snapshot.today_session.state === 'pending' ? (
-                                <div style={{ marginTop: '16px', width: '100%' }}>
-                                    <PrimaryButton onClick={() => navigate('/today')}>
-                                        {t('homeOpenToday')}
-                                    </PrimaryButton>
+                            ) : snapshot.today_session.state === 'completed' ? (
+                                <div className={styles.missionCompletedState}>
+                                    <Icon name="check_circle" size={32} style={{ color: 'var(--state-success)' }} />
                                 </div>
                             ) : (
-                                <div style={{ marginTop: '16px', width: '100%' }}>
-                                    <SecondaryButton onClick={() => navigate('/progress')}>
-                                        {t('homeViewProgress')}
-                                    </SecondaryButton>
+                                <div style={{ marginTop: '16px' }}>
+                                    <PrimaryButton onClick={() => navigate('/today')}>
+                                        EXECUTE ADAPTATION
+                                    </PrimaryButton>
                                 </div>
                             )}
-                        </SystemCard>
+                        </PrimaryCard>
                     </section>
 
-                    {/* 7-Day Consistency */}
+                    {/* 3. System Metrics */}
                     <section className={styles.section}>
-                        <h2 className={styles.sectionTitle} style={{ fontFamily: 'var(--font-mono)' }}>SYSTEM TELEMETRY (7D)</h2>
+                        <h3 className={styles.sectionTitle}>SYSTEM METRICS</h3>
+                        <div className={styles.metricsGrid}>
+                            <MetricCard
+                                label="RETURN VOL"
+                                value={snapshot.sessions_30d}
+                                icon={<Icon name="check_circle" size={16} />}
+                            />
+                            <MetricCard
+                                label="RETURN RATE"
+                                value={`${snapshot.adherence_7d}%`}
+                                icon={<Icon name="data_usage" size={16} />}
+                            >
+                                <MetricBar value={snapshot.adherence_7d} color="accent" height={2} />
+                            </MetricCard>
+                            <MetricCard
+                                label="STRAIN"
+                                value={`${snapshot.avg_pain_7d}/10`}
+                                icon={<Icon name="healing" size={16} />}
+                            >
+                                <MetricBar
+                                    value={snapshot.avg_pain_7d * 10}
+                                    color={snapshot.avg_pain_7d >= 6 ? 'alert' : snapshot.avg_pain_7d >= 3 ? 'warning' : 'success'}
+                                    height={2}
+                                />
+                            </MetricCard>
+                        </div>
+                    </section>
+
+                    {/* 4. Recent Activity */}
+                    <section className={styles.section}>
+                        <h3 className={styles.sectionTitle}>RECENT ACTIVITY (7D)</h3>
                         <div className={styles.consistencyRow}>
                             {snapshot.consistency_7d.map((dayData, i) => {
                                 const d = new Date(dayData.date + 'T00:00:00');
@@ -213,21 +201,20 @@ export default function HomePage() {
                                         <div
                                             className={styles.dayDot}
                                             style={{
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                ...(isToday && !done ? { background: 'transparent', border: '2px solid var(--accent)' } :
+                                                ...(isToday && !done ? { border: '1px solid var(--accent)', background: 'transparent' } :
                                                     done ? { background: 'var(--accent)', color: '#fff' } :
-                                                        { background: '#1A1A1F' })
+                                                        { background: 'var(--surface-secondary)' })
                                             }}
                                         >
-                                            {done && <Icon name="check" size={16} style={{ color: '#fff' }} />}
+                                            {done && <Icon name="check" size={14} style={{ color: '#fff' }} />}
                                         </div>
-                                        <span className={styles.dayLabel} style={isToday ? { color: 'var(--accent)', fontWeight: 600 } : {}}>{dayName}</span>
+                                        <span className={styles.dayLabel} style={isToday ? { color: 'var(--text-primary)', fontWeight: 600 } : {}}>{dayName}</span>
                                     </div>
                                 );
                             })}
                         </div>
                     </section>
-                </>
+                </div>
             ) : null}
         </AppShell>
     );
