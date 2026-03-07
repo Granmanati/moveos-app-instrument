@@ -12,6 +12,7 @@ interface VideoHUDPreviewProps {
     repsText?: string;
     restSeconds?: number;
     className?: string;
+    hideHUD?: boolean;
 }
 
 export function VideoHUDPreview({
@@ -23,7 +24,8 @@ export function VideoHUDPreview({
     repsMax,
     repsText,
     restSeconds,
-    className = ''
+    className = '',
+    hideHUD = false
 }: VideoHUDPreviewProps) {
     const [isMuted, setIsMuted] = useState(true);
 
@@ -54,30 +56,32 @@ export function VideoHUDPreview({
 
             <div className={styles.scrim}></div>
 
-            <div className={styles.topRow}>
-                <div className={styles.patternChip}>{pattern || 'Movement'}</div>
-                {videoUrl && (
+            {videoUrl && !hideHUD && (
+                <div className={styles.topRow}>
+                    <div className={styles.patternChip}>{pattern || 'Movement'}</div>
                     <button className={styles.muteToggle} onClick={toggleMute} aria-label="Toggle mute">
                         <Icon name={isMuted ? "volume_off" : "volume_up"} size={18} />
                     </button>
-                )}
-            </div>
+                </div>
+            )}
 
-            <div className={styles.overlayContent}>
-                <h3 className={styles.cardTitle}>{name}</h3>
+            {!hideHUD && (
+                <div className={styles.overlayContent}>
+                    <h3 className={styles.cardTitle}>{name}</h3>
 
-                {hasMeta && (
-                    <div className={styles.metaPillRow}>
-                        {sets && <span className={styles.metaPill}>{sets} Sets</span>}
-                        {(repsText || repsMin) && (
-                            <span className={styles.metaPill}>
-                                {repsText ? repsText : (repsMax ? `${repsMin}-${repsMax} Reps` : `${repsMin} Reps`)}
-                            </span>
-                        )}
-                        {restSeconds && <span className={styles.metaPill}>{restSeconds}s Rest</span>}
-                    </div>
-                )}
-            </div>
+                    {hasMeta && (
+                        <div className={styles.metaPillRow}>
+                            {sets && <span className={styles.metaPill}>{sets} Sets</span>}
+                            {(repsText || repsMin) && (
+                                <span className={styles.metaPill}>
+                                    {repsText ? repsText : (repsMax ? `${repsMin}-${repsMax} Reps` : `${repsMin} Reps`)}
+                                </span>
+                            )}
+                            {restSeconds && <span className={styles.metaPill}>{restSeconds}s Rest</span>}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

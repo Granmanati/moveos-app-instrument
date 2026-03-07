@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './MissionPage.module.css';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -36,7 +36,6 @@ interface SessionExercise {
 export default function MissionPage() {
     const { user, profile } = useAuth();
     const navigate = useNavigate();
-    const location = useLocation();
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [session, setSession] = useState<any>(null);
@@ -261,7 +260,7 @@ export default function MissionPage() {
                         <div className={styles.timelineLine} />
 
                         <AnimatePresence mode="popLayout">
-                            {exercises.map((ex, idx) => {
+                            {exercises.map((ex) => {
                                 const isActiveNode = ex.id === activeStepId;
                                 const isCompleted = ex.is_completed;
                                 // Node visual state:

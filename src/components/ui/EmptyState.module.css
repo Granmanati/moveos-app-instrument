@@ -1,0 +1,31 @@
+.emptyBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--mo-space-4);
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-strong);
+    padding: var(--mo-space-8);
+    border-radius: var(--mo-radius-lg);
+}
+
+.iconBox {
+    color: var(--mo-color-text-tertiary);
+    margin-bottom: var(--mo-space-2);
+}
+
+.title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    margin: 0;
+}
+
+.message {
+    font-size: 13px;
+    color: var(--mo-color-text-secondary);
+    margin: 0 0 var(--mo-space-2) 0;
+    max-width: 250px;
+    line-height: 1.4;
+}
