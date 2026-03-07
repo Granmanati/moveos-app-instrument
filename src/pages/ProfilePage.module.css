@@ -1,0 +1,151 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    padding: var(--mo-space-4) var(--mo-space-6) 120px;
+    gap: var(--mo-space-8);
+}
+
+/* Node Identity Block */
+.identityBlock {
+    display: flex;
+    align-items: center;
+    gap: var(--mo-space-4);
+    background: var(--mo-color-surface-secondary);
+    padding: var(--mo-space-4) var(--mo-space-5);
+    border-radius: var(--mo-radius-lg);
+    border: 1px solid var(--mo-color-border-subtle);
+}
+
+.avatarPlaceholder {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--mo-radius-pill);
+    background: var(--mo-color-surface-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-text-tertiary);
+    flex-shrink: 0;
+}
+
+.identityData {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nodeName {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    color: var(--mo-color-text-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.memberSince {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-secondary);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+.phaseLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* Metrics Grid */
+.metricsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--mo-space-3);
+}
+
+/* Sections */
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mo-space-4);
+}
+
+.manageBtn {
+    background: var(--mo-color-surface-tertiary);
+    color: var(--mo-color-text-primary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: var(--mo-radius-md);
+    padding: 0 var(--mo-space-4);
+    height: 40px;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    cursor: pointer;
+    transition: all var(--mo-duration-fast) var(--mo-ease-system);
+}
+
+.manageBtn:hover {
+    background: var(--mo-color-border-strong);
+}
+
+/* Settings Entry Card */
+.settingsEntry {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: var(--mo-radius-lg);
+    padding: var(--mo-space-4);
+    cursor: pointer;
+    transition: background var(--mo-duration-fast);
+}
+
+.settingsEntry:hover {
+    background: var(--mo-color-surface-tertiary);
+}
+
+.entryInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--mo-space-4);
+}
+
+.entryIconBox {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--mo-radius-md);
+    background: var(--mo-color-surface-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-text-secondary);
+}
+
+.entryText {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.entryTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+}
+
+.entryDesc {
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+}
+
+.entryArrow {
+    color: var(--mo-color-text-tertiary);
+}

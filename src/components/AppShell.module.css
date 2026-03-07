@@ -16,8 +16,8 @@
     opacity: 0.4;
     max-width: 430px;
     margin: 0 auto;
-    border-left: 1px solid var(--border-subtle);
-    border-right: 1px solid var(--border-subtle);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
 }
 
 .systemOverlay::before,
@@ -27,7 +27,7 @@
     top: 0;
     width: 8px;
     height: 8px;
-    border: 1px solid var(--text-secondary);
+    border: 1px solid var(--mo-color-text-secondary);
 }
 
 .systemOverlay::before {
@@ -53,7 +53,7 @@
 .header {
     width: 100%;
     margin: 0 auto;
-    padding: 24px 16px var(--sp-2) 16px;
+    padding: 24px 16px var(--mo-space-4) 16px;
     padding-top: max(24px, env(safe-area-inset-top));
     flex-shrink: 0;
     display: flex;
@@ -68,7 +68,7 @@
     font-family: var(--font-mono);
     letter-spacing: 1.2px;
     font-weight: 600;
-    color: var(--accent);
+    color: var(--primary);
     text-transform: uppercase;
     margin-bottom: 2px;
 }
@@ -76,14 +76,14 @@
 .title {
     font-size: 26px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
     line-height: 1.1;
     margin: 0;
 }
 
 .subtitle {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     margin: 0;
 }
 
@@ -107,7 +107,7 @@
     padding-bottom: calc(72px + env(safe-area-inset-bottom) + 16px);
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
+    gap: var(--mo-space-8);
     min-height: min-content;
 }
 

@@ -1,23 +1,23 @@
 .metricCard {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--sp-2);
+    padding: var(--mo-space-4);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    transition: all var(--duration-screen) var(--ease-system);
+    transition: all var(--mo-duration-base) var(--mo-ease-system);
 }
 
 .header {
     display: flex;
     width: 100%;
-    margin-bottom: var(--sp-1);
+    margin-bottom: var(--mo-space-2);
     min-height: 24px;
 }
 
 .iconWrapper {
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -30,16 +30,16 @@
 .value {
     font-size: 20px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
     line-height: 1;
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
 }
 
 .label {
     font-size: 10px;
     font-weight: 500;
     font-family: var(--font-mono);
-    color: var(--text-tertiary);
+    color: var(--mo-color-text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }

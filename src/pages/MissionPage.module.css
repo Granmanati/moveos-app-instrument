@@ -1,324 +1,309 @@
 .pipelineLayout {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
-    padding: var(--sp-4) 0;
+    padding: var(--mo-space-4) var(--mo-space-6) 120px;
+    gap: var(--mo-space-8);
 }
 
-.pipelineHeader {
+.errorBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: var(--mo-space-4);
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-strong);
+    padding: var(--mo-space-8);
+    border-radius: var(--mo-radius-md);
+}
+
+.loadingSkeleton {
+    padding: var(--mo-space-6);
+}
+
+/* 2. Session Context */
+.contextHeader {
+    display: flex;
+    justify-content: space-between;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: var(--mo-radius-md);
+    padding: var(--mo-space-4) var(--mo-space-5);
+}
+
+.contextRow {
     display: flex;
     flex-direction: column;
     gap: 2px;
 }
 
-.missionTitle {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-family: var(--font-primary);
-    letter-spacing: -0.5px;
-    margin: 0;
-}
-
-.missionDate {
+.contextLabel {
+    font-family: var(--mo-font-mono);
     font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--text-tertiary);
-    letter-spacing: 1px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.05em;
 }
 
-.section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--sp-2);
-}
-
-.sectionTitle {
-    font-size: 11px;
+.contextValue {
+    font-family: var(--mo-font-sans);
+    font-size: 13px;
     font-weight: 600;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0 0 4px 0;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.05em;
 }
 
-.progressContainer {
-    background: var(--surface-secondary);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--sp-3);
+/* 3. Session Progress Section */
+.progressSection {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
+    gap: var(--mo-space-3);
 }
 
-.progressText {
+.progressHeader {
     display: flex;
     justify-content: space-between;
-    font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-    letter-spacing: 0.5px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mo-color-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.progressNumbers {
+    color: var(--mo-color-text-primary);
 }
 
 .progressBarBg {
     height: 4px;
-    background: var(--surface-primary);
+    background: var(--mo-color-surface-tertiary);
     border-radius: 2px;
     overflow: hidden;
+    width: 100%;
 }
 
 .progressBarFill {
     height: 100%;
-    background: var(--accent);
-    transition: width var(--duration-screen) var(--ease-system);
+    background: var(--mo-color-accent-system);
+    transition: width var(--mo-duration-base) var(--mo-ease-system);
 }
 
-.currentBlockContent {
+/* 4. Execution Pipeline */
+.timelineContainer {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
-    margin-top: var(--sp-3);
-}
-
-.hudWrapper {
-    height: 220px;
-    width: 100%;
-    border-radius: var(--radius-md);
-    overflow: hidden;
     position: relative;
-    border: 1px solid var(--border-subtle);
+    padding-left: 28px;
+    /* space for the timeline nodes */
+    gap: var(--mo-space-5);
 }
 
-.actionBar {
+.timelineLine {
+    position: absolute;
+    top: 12px;
+    bottom: 24px;
+    left: 8px;
+    /* 16px node / 2 */
+    width: 2px;
+    background: var(--mo-color-border-subtle);
+    z-index: 0;
+}
+
+.timelineItem {
+    position: relative;
+    z-index: 1;
     display: flex;
-    gap: var(--sp-2);
+    flex-direction: column;
 }
 
-.actionBtn {
-    flex: 1;
+.timelineNode {
+    position: absolute;
+    left: -28px;
+    top: 8px;
+    /* Align with content optical center */
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--mo-color-bg-primary);
+    border: 2px solid var(--mo-color-border-strong);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    background: transparent;
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    color: var(--text-secondary);
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    cursor: pointer;
-    transition: all var(--duration-base) var(--ease-standard);
+    transition: all var(--mo-duration-base);
 }
 
-.actionBtn:hover {
-    border-color: var(--text-tertiary);
-    color: var(--text-primary);
+.nodepending {
+    /* default styles */
 }
 
-.strainPanel {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--sp-3);
-    margin-top: var(--sp-2);
+.nodeactive {
+    border-color: var(--mo-color-accent-system);
 }
 
-.strainHeader {
+.nodePulse {
+    width: 8px;
+    height: 8px;
+    background: var(--mo-color-accent-system);
+    border-radius: 50%;
+    animation: pulseNode var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
+}
+
+@keyframes pulseNode {
+    from {
+        opacity: 0.4;
+        transform: scale(0.8);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+}
+
+.nodecompleted {
+    background: var(--mo-color-state-success);
+    border-color: var(--mo-color-state-success);
+    color: var(--mo-color-bg-primary);
+}
+
+/* Content Blocks */
+.timelineContent {
+    width: 100%;
+}
+
+.collapsedRow {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
-    margin-bottom: var(--sp-2);
+    align-items: center;
+    padding: var(--mo-space-3) 0;
+    border-bottom: 1px solid transparent;
 }
 
-.sliderContainer {
+.collapsedTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mo-color-text-secondary);
+}
+
+.collapsedMeta {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+}
+
+.collapsedCompleted .collapsedTitle {
+    color: var(--mo-color-text-primary);
+}
+
+/* 5. Execution Block */
+.executionBlock {
     display: flex;
     flex-direction: column;
+    gap: var(--mo-space-4);
+    margin-top: var(--mo-space-4);
 }
 
-.painSlider {
+.executionBox {
     width: 100%;
-    appearance: none;
-    -webkit-appearance: none;
-    background: var(--surface-secondary);
-    height: 4px;
-    border-radius: 2px;
-    outline: none;
+    height: 180px;
+    border-radius: var(--mo-radius-sm);
+    overflow: hidden;
+    position: relative;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-strong);
 }
 
-.painSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    background: var(--text-primary);
-    cursor: pointer;
+.parametersGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--mo-space-2);
 }
 
-.strainInput {
-    flex: 1;
-    background: var(--surface-secondary);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-sm);
-    color: var(--text-primary);
-    font-size: 13px;
-    padding: 0 12px;
-    font-family: var(--font-primary);
-    outline: none;
-}
-
-.saveBtn {
-    padding: 0 16px;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
-    border-radius: var(--radius-sm);
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    cursor: pointer;
-}
-
-.allDoneState {
-    background: rgba(24, 182, 122, 0.05);
-    border: 1px solid rgba(24, 182, 122, 0.1);
-    border-radius: var(--radius-md);
-    padding: var(--sp-6) var(--sp-4);
+.paramBox {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.remainingList {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--sp-3);
-}
-
-.remainingItem {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-subtle);
-}
-
-.remainingItem:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-}
-
-.remainingMarker {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--text-tertiary);
-}
-
-.remainingName {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-.remainingMeta {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-}
-
-.actionFooter {
-    margin-top: var(--sp-4);
-}
-
-.modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(11, 15, 20, 0.9);
-    backdrop-filter: blur(8px);
-    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    padding: var(--sp-4);
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-strong);
+    border-radius: var(--mo-radius-sm);
+    padding: var(--mo-space-3);
+    gap: 4px;
 }
 
-.modalContent {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
-    border-radius: var(--radius-md);
-    padding: var(--sp-6);
-    width: 100%;
-    max-width: 320px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+.paramLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
 }
 
-.modalIconBox {
-    background: rgba(45, 124, 255, 0.1);
-    border-radius: 50%;
-    width: 64px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    margin-bottom: var(--sp-4);
-}
-
-.modalTitle {
+.paramValue {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
-    margin: 0 0 8px 0;
-    letter-spacing: 0.5px;
+    color: var(--mo-color-text-primary);
 }
 
-.modalText {
-    font-size: 13px;
-    color: var(--text-secondary);
-    line-height: 1.5;
-    margin: 0 0 24px 0;
-}
-
-.modalActions {
+/* 6. Block Completion State */
+.blockCompletionState {
     display: flex;
     flex-direction: column;
-    gap: 12px;
-    width: 100%;
+    gap: var(--mo-space-4);
+    background: rgba(24, 182, 122, 0.05);
+    border: 1px solid rgba(24, 182, 122, 0.15);
+    border-radius: var(--mo-radius-md);
+    padding: var(--mo-space-4);
 }
 
-.modalActions .primaryBtn {
-    width: 100%;
-    padding: 14px;
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    border-radius: var(--radius-sm);
-    font-size: 13px;
+.completionBanner {
+    display: flex;
+    align-items: center;
+    gap: var(--mo-space-3);
+}
+
+.completionText {
+    display: flex;
+    flex-direction: column;
+}
+
+.completionTitle {
+    font-size: 14px;
     font-weight: 600;
-    letter-spacing: 0.5px;
-    cursor: pointer;
+    color: var(--mo-color-text-primary);
 }
 
-.modalActions .ghostBtn {
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
+.completionSub {
     font-size: 12px;
+    color: var(--mo-color-text-secondary);
+}
+
+/* 7. Mission Completion State */
+.missionCompletionState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-strong);
+    border-radius: var(--mo-radius-lg);
+    padding: var(--mo-space-8);
+    text-align: center;
+    margin-top: var(--mo-space-6);
+}
+
+.missionCompletionIcon {
+    color: var(--mo-color-state-success);
+    margin-bottom: var(--mo-space-4);
+}
+
+.missionCompletionTitle {
+    font-size: 20px;
     font-weight: 600;
-    cursor: pointer;
+    color: var(--mo-color-text-primary);
+    margin: 0 0 8px 0;
+    letter-spacing: 0.05em;
+}
+
+.missionCompletionDesc {
+    font-size: 13px;
+    color: var(--mo-color-text-secondary);
+    margin: 0;
 }

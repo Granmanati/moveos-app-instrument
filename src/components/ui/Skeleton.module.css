@@ -9,9 +9,9 @@
 
 .skeletonCard {
     background: var(--bg-card);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
     display: flex;
     flex-direction: column;
 }

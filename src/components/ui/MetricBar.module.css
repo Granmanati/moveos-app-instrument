@@ -1,6 +1,6 @@
 .metricBarContainer {
     width: 100%;
-    background: var(--border-subtle);
+    background: var(--border);
     border-radius: var(--radius-pill);
     overflow: hidden;
     position: relative;
@@ -9,21 +9,21 @@
 .metricBarFill {
     height: 100%;
     border-radius: var(--radius-pill);
-    transition: width var(--duration-fill) var(--ease-system);
+    transition: width var(--mo-duration-progress) var(--mo-ease-system);
 }
 
 .fill-accent {
-    background: var(--accent);
+    background: var(--primary);
 }
 
 .fill-success {
-    background: var(--state-success);
+    background: var(--success);
 }
 
 .fill-warning {
-    background: var(--state-warning);
+    background: var(--warning);
 }
 
 .fill-alert {
-    background: var(--state-alert);
+    background: var(--destructive);
 }

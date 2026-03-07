@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     background: #0B0B0E;
-    color: var(--text-primary);
+    color: var(--foreground);
     position: relative;
     box-sizing: border-box;
 }
@@ -14,10 +14,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
     background: rgba(11, 11, 14, 0.9);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--border);
     position: sticky;
     top: 0;
     z-index: 10;
@@ -26,7 +26,7 @@
 .backBtn {
     background: transparent;
     border: none;
-    color: var(--text-primary);
+    color: var(--foreground);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -34,11 +34,11 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    transition: background var(--duration-base);
+    transition: background var(--mo-duration-base);
 }
 
 .backBtn:hover {
-    background: var(--surface-subtle);
+    background: var(--card);
 }
 
 .backSpace {
@@ -58,12 +58,12 @@
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 .progressSubtitle {
     font-size: 10px;
-    color: var(--accent);
+    color: var(--primary);
     margin-bottom: 4px;
     font-weight: 600;
 }
@@ -71,14 +71,14 @@
 .progressBar {
     width: 100%;
     height: 4px;
-    background: var(--surface-subtle);
+    background: var(--card);
     border-radius: 2px;
     overflow: hidden;
 }
 
 .progressFill {
     height: 100%;
-    background: var(--accent);
+    background: var(--primary);
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -86,15 +86,15 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: var(--sp-6) var(--sp-4);
-    padding-bottom: calc(var(--sp-6) + 80px);
+    padding: var(--mo-space-16) var(--mo-space-8);
+    padding-bottom: calc(var(--mo-space-16) + 80px);
     /* Leave room for bottom bar */
 }
 
 .stepContainer {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-5);
+    gap: var(--mo-space-12);
     animation: fadeIn 0.3s ease-out;
 }
 
@@ -119,39 +119,39 @@
 
 .subtitle {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     line-height: 1.5;
 }
 
 .systemAlert {
     background: rgba(231, 76, 60, 0.1);
-    color: var(--state-warning);
+    color: var(--warning);
     border: 1px solid rgba(231, 76, 60, 0.2);
-    padding: var(--sp-3);
+    padding: var(--mo-space-6);
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 13px;
-    margin-bottom: var(--sp-4);
+    margin-bottom: var(--mo-space-8);
 }
 
 .formGroup {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
+    gap: var(--mo-space-4);
 }
 
 .grid2 {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--sp-4);
+    gap: var(--mo-space-8);
 }
 
 .label {
     font-size: 14px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
 }
 
 .dynamicLabel {
@@ -160,19 +160,19 @@
 }
 
 .input {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--sp-3) var(--sp-4);
-    color: var(--text-primary);
+    padding: var(--mo-space-6) var(--mo-space-8);
+    color: var(--foreground);
     font-family: inherit;
     font-size: 15px;
     outline: none;
-    transition: border-color var(--duration-base);
+    transition: border-color var(--mo-duration-base);
 }
 
 .input:focus {
-    border-color: var(--accent);
+    border-color: var(--primary);
 }
 
 select.input {
@@ -180,68 +180,68 @@ select.input {
 }
 
 .textarea {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--sp-4);
-    color: var(--text-primary);
+    padding: var(--mo-space-8);
+    color: var(--foreground);
     font-family: inherit;
     font-size: 15px;
     outline: none;
     resize: none;
-    transition: border-color var(--duration-base);
+    transition: border-color var(--mo-duration-base);
 }
 
 .textarea:focus {
-    border-color: var(--accent);
+    border-color: var(--primary);
 }
 
 .cardsGrid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
 }
 
 .selectCard {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: var(--sp-4);
-    color: var(--text-secondary);
+    padding: var(--mo-space-8);
+    color: var(--mo-color-text-secondary);
     font-weight: 500;
     font-size: 14px;
     text-align: center;
     cursor: pointer;
-    transition: all var(--duration-base);
+    transition: all var(--mo-duration-base);
 }
 
 .selectedCard {
-    background: var(--border-subtle);
-    border-color: var(--accent);
-    color: var(--accent);
+    background: var(--border);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .rangeInput {
     width: 100%;
-    margin-top: var(--sp-1);
-    accent-color: var(--accent);
+    margin-top: var(--mo-space-2);
+    accent-color: var(--primary);
 }
 
 .rangeLabels {
     display: flex;
     justify-content: space-between;
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     font-weight: 500;
     margin-top: 2px;
 }
 
 .segmentControl {
     display: flex;
-    background: var(--surface-subtle);
+    background: var(--card);
     border-radius: var(--radius-md);
     padding: 4px;
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
     gap: 4px;
 }
 
@@ -249,61 +249,61 @@ select.input {
     flex: 1;
     background: transparent;
     border: none;
-    padding: var(--sp-2) 0;
+    padding: var(--mo-space-4) 0;
     font-size: 12px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     border-radius: 10px;
     cursor: pointer;
-    transition: all var(--duration-base);
+    transition: all var(--mo-duration-base);
 }
 
 .segmentActive {
-    background: var(--surface-subtle);
-    color: var(--text-primary);
+    background: var(--card);
+    color: var(--foreground);
 
 }
 
 .wearableList {
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
 }
 
 .wearableBtn {
     background: transparent;
-    border: 1px solid var(--border-subtle);
-    color: var(--text-primary);
+    border: 1px solid var(--border);
+    color: var(--foreground);
     border-radius: var(--radius-md);
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
     display: flex;
     align-items: center;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
     font-size: 15px;
     font-weight: 500;
     cursor: pointer;
-    transition: all var(--duration-base);
+    transition: all var(--mo-duration-base);
 }
 
 .wearableBtn:hover {
-    background: var(--surface-subtle);
+    background: var(--card);
 }
 
 .wearableActive {
-    border-color: var(--accent);
-    background: var(--border-subtle);
+    border-color: var(--primary);
+    background: var(--border);
 }
 
 .phaseCard {
     background: #101015;
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 14px;
-    padding: var(--sp-5);
+    padding: var(--mo-space-12);
 
     display: flex;
     flex-direction: column;
-    gap: var(--sp-4);
-    margin-top: var(--sp-4);
+    gap: var(--mo-space-8);
+    margin-top: var(--mo-space-8);
 }
 
 .phaseHeader {
@@ -311,15 +311,15 @@ select.input {
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    border-bottom: 1px solid var(--border-subtle);
-    padding-bottom: var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--mo-space-8);
 }
 
 .phaseLabel {
     font-size: 11px;
     font-weight: 700;
     letter-spacing: 1.5px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 .phaseTitle {
@@ -335,7 +335,7 @@ select.input {
     margin: 0;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
 }
 
 .phaseBullets li {
@@ -343,19 +343,19 @@ select.input {
     align-items: flex-start;
     gap: 12px;
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     line-height: 1.4;
 }
 
 
 .sysNote {
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     font-family: monospace;
     text-align: center;
-    margin-top: var(--sp-2);
-    padding-top: var(--sp-3);
-    border-top: 1px dashed var(--border-subtle);
+    margin-top: var(--mo-space-4);
+    padding-top: var(--mo-space-6);
+    border-top: 1px dashed var(--border);
 }
 
 .bottomBar {
@@ -365,19 +365,19 @@ select.input {
     transform: translateX(-50%);
     width: 100%;
     max-width: 430px;
-    padding: var(--sp-4);
-    background: var(--surface-subtle);
+    padding: var(--mo-space-8);
+    background: var(--card);
     z-index: 10;
 }
 
 .primaryBtn {
     width: 100%;
     height: 54px;
-    background: var(--surface-subtle);
-    color: #fff;
+    background: var(--card);
+    color: var(--foreground);
     border: none;
     border-radius: var(--radius-md);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-size: 16px;
     font-weight: 600;
     display: flex;
@@ -385,7 +385,7 @@ select.input {
     align-items: center;
     cursor: pointer;
 
-    transition: all var(--duration-base);
+    transition: all var(--mo-duration-base);
 }
 
 .primaryBtn:active {
@@ -412,15 +412,15 @@ select.input {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
     animation: fadeIn 0.4s ease-out;
 }
 
 .paywallContent {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: 24px;
-    padding: var(--sp-6) var(--sp-5);
+    padding: var(--mo-space-16) var(--mo-space-12);
     width: 100%;
     max-width: 400px;
 
@@ -433,35 +433,35 @@ select.input {
 .paywallHeader h2 {
     font-size: 28px;
     font-weight: 800;
-    margin: 0 0 var(--sp-2) 0;
+    margin: 0 0 var(--mo-space-4) 0;
     letter-spacing: -0.5px;
 }
 
 .paywallHeader p {
     font-size: 15px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     line-height: 1.5;
-    margin: 0 0 var(--sp-5) 0;
+    margin: 0 0 var(--mo-space-12) 0;
 }
 
 .billingToggle {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 4px;
     width: 100%;
-    margin-bottom: var(--sp-5);
+    margin-bottom: var(--mo-space-12);
 }
 
 .toggleBtn {
     flex: 1;
     background: transparent;
     border: none;
-    padding: var(--sp-2) 0;
+    padding: var(--mo-space-4) 0;
     font-size: 13px;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s;
@@ -473,8 +473,8 @@ select.input {
 }
 
 .toggleActive {
-    background: var(--surface-subtle);
-    color: var(--text-primary);
+    background: var(--card);
+    color: var(--foreground);
 
 }
 
@@ -490,7 +490,7 @@ select.input {
 
 .paywallPriceBox {
     width: 100%;
-    margin-bottom: var(--sp-6);
+    margin-bottom: var(--mo-space-16);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -499,25 +499,25 @@ select.input {
 
 .priceLabel {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 .priceAmount {
     font-size: 48px;
     font-weight: 800;
     letter-spacing: -1px;
-    color: var(--text-primary);
+    color: var(--foreground);
 }
 
 .priceAmount span {
     font-size: 18px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     font-weight: 600;
 }
 
 .trialPill {
-    background: var(--border-subtle);
-    color: var(--accent);
+    background: var(--border);
+    color: var(--primary);
     padding: 6px 16px;
     border-radius: 20px;
     font-size: 13px;
@@ -529,22 +529,22 @@ select.input {
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
 }
 
 .secondaryBtn {
     background: transparent;
     border: none;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    padding: var(--sp-3);
+    padding: var(--mo-space-6);
     transition: color 0.2s;
 }
 
 .secondaryBtn:hover {
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 /* Toggles for Step 5 */
@@ -552,9 +552,9 @@ select.input {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
-    padding: var(--sp-4);
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: var(--mo-space-8);
     border-radius: var(--radius-md);
     cursor: pointer;
     transition: border-color 0.2s;
@@ -573,19 +573,19 @@ select.input {
 .toggleText span {
     font-size: 15px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
 }
 
 .toggleText small {
     font-size: 12px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     line-height: 1.4;
-    padding-right: var(--sp-4);
+    padding-right: var(--mo-space-8);
 }
 
 .toggleCheckbox {
     width: 20px;
     height: 20px;
-    accent-color: var(--accent);
+    accent-color: var(--primary);
     cursor: pointer;
 }

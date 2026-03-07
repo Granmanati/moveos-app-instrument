@@ -29,7 +29,7 @@
     min-width: 44px;
     border-radius: var(--radius-sm);
     text-decoration: none;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     transition: color 0.18s ease;
     flex: 1;
     -webkit-tap-highlight-color: transparent;
@@ -37,11 +37,11 @@
 }
 
 .tab:hover {
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 .active {
-    color: var(--accent);
+    color: var(--primary);
 }
 
 .active::after {
@@ -52,20 +52,20 @@
     transform: translateX(-50%);
     width: 18px;
     height: 2px;
-    background: var(--accent);
+    background: var(--primary);
     border-radius: 1px;
     
 }
 
 .icon {
     transition: all 0.18s ease;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
 }
 
 .iconActive {
-    color: var(--accent);
-    animation: iconBounce 180ms var(--ease-standard));
-    filter: drop-shadow(0 3px 6px var(--border-subtle));
+    color: var(--primary);
+    animation: iconBounce 180ms var(--mo-ease-standard));
+    filter: drop-shadow(0 3px 6px var(--border));
 }
 
 @keyframes iconBounce {
@@ -92,5 +92,5 @@
 }
 
 .active .label {
-    color: var(--accent);
+    color: var(--primary);
 }

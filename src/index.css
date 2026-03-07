@@ -1,64 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap');
-
-/* =========================================================================
-   MOVE OS V2.0 GLOBAL TOKENS
-   Clinical + Technological Minimalist Aesthetic
-   ========================================================================= */
-
-:root {
-  /* Colors - Base */
-  --bg-primary: #0B0F14;
-  --surface-primary: #141A22;
-  --surface-secondary: #10161D;
-  --border-subtle: #1C2430;
-
-  /* Backward compatibility for Phase 1-3 names */
-  --surface-subtle: var(--surface-primary);
-
-  /* Colors - Brand & State */
-  --accent: #2D7CFF;
-  --state-success: #18B67A;
-  --state-warning: #E8A23A;
-  --state-alert: #E45462;
-
-  /* Typography */
-  --text-primary: #F4F7FB;
-  --text-secondary: #8A93A3;
-  --text-tertiary: #667085;
-  --font-primary: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', monospace;
-
-  /* Geometry & Spacing (8px Base Grid) */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-pill: 100px;
-
-  --sp-1: 8px;
-  --sp-2: 16px;
-  --sp-3: 24px;
-  --sp-4: 32px;
-  --sp-5: 48px;
-  --sp-6: 64px;
-
-  /* Effects */
-  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.25);
-
-  /* Animations */
-  --duration-button: 120ms;
-  --duration-screen: 220ms;
-  --duration-pipeline: 500ms;
-  --duration-pulse: 600ms;
-  --duration-fill: 800ms;
-
-  --ease-primary: ease-out;
-  --ease-system: cubic-bezier(0.4, 0, 0.2, 1);
-
-  /* Legacy mappings */
-  --duration-fast: var(--duration-button);
-  --duration-base: var(--duration-screen);
-  --ease-standard: var(--ease-system);
-}
+@import './tokens.css';
 
 /* =========================================================================
    GLOBAL RESET
@@ -73,16 +14,16 @@
 }
 
 body {
-  font-family: var(--font-primary);
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
   line-height: 1.5;
   overflow-x: hidden;
 }
 
 /* Base button reset for consistent rendering */
 button {
-  font-family: var(--font-primary);
+  font-family: var(--font-sans);
   /* Touch target safety */
   touch-action: manipulation;
 }
@@ -125,11 +66,11 @@ button {
    ========================================================================= */
 
 .primaryBtn {
-  background: var(--accent);
+  background: var(--primary);
   color: white;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0 var(--sp-2);
+  padding: 0 var(--mo-space-4);
   height: 48px;
   font-weight: 500;
   font-size: 15px;
@@ -137,7 +78,7 @@ button {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-standard);
+  transition: all var(--mo-duration-fast) var(--mo-ease-system);
   width: 100%;
 }
 
@@ -147,7 +88,6 @@ button {
 
 .primaryBtn:active {
   transform: scale(0.98);
-
 }
 
 .primaryBtn:disabled {
@@ -157,11 +97,11 @@ button {
 }
 
 .secondaryBtn {
-  background: var(--surface-subtle);
-  color: var(--text-primary);
-  border: 1px solid var(--border-subtle);
+  background: var(--card);
+  color: var(--foreground);
+  border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0 var(--sp-2);
+  padding: 0 var(--mo-space-4);
   height: 48px;
   font-weight: 500;
   font-size: 15px;
@@ -169,12 +109,12 @@ button {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--duration-fast) var(--ease-standard);
+  transition: all var(--mo-duration-fast) var(--mo-ease-system);
   width: 100%;
 }
 
 .secondaryBtn:hover {
-  background: var(--border-subtle);
+  background: var(--border);
 }
 
 .secondaryBtn:active {
@@ -183,10 +123,10 @@ button {
 
 /* Global Card Rules */
 .base-card {
-  background: var(--surface-subtle);
-  border: 1px solid var(--border-subtle);
+  background: var(--card);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  transition: all var(--duration-base) var(--ease-standard);
+  transition: all var(--mo-duration-base) var(--mo-ease-system);
   overflow: hidden;
 }
 
@@ -215,7 +155,7 @@ button {
 }
 
 .animate-page-enter {
-  animation: pageEnter 220ms var(--ease-standard) forwards;
+  animation: pageEnter 220ms var(--mo-ease-system) forwards;
 }
 
 /* Subtle glow pulse */

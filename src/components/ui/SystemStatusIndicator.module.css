@@ -3,8 +3,8 @@
     align-items: center;
     gap: 8px;
     padding: 6px 12px;
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-pill);
     position: relative;
     overflow: hidden;
@@ -24,7 +24,7 @@
 .statusLabel {
     font-size: 8px;
     font-family: var(--font-mono);
-    color: var(--text-tertiary);
+    color: var(--mo-color-text-tertiary);
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
@@ -39,11 +39,11 @@
 
 /* State-specific colors */
 .aligned .nodeIndicator {
-    color: var(--state-success);
+    color: var(--success);
 }
 
 .aligned .statusValue {
-    color: var(--state-success);
+    color: var(--success);
 }
 
 .aligned {
@@ -51,11 +51,11 @@
 }
 
 .compensating .nodeIndicator {
-    color: var(--state-warning);
+    color: var(--warning);
 }
 
 .compensating .statusValue {
-    color: var(--state-warning);
+    color: var(--warning);
 }
 
 .compensating {
@@ -63,11 +63,11 @@
 }
 
 .overload .nodeIndicator {
-    color: var(--state-alert);
+    color: var(--destructive);
 }
 
 .overload .statusValue {
-    color: var(--state-alert);
+    color: var(--destructive);
 }
 
 .overload {
@@ -100,16 +100,16 @@
 }
 
 .aligned .pulseLine {
-    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
-    color: var(--state-success);
+    animation: pulseGlow var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
+    color: var(--success);
 }
 
 .compensating .pulseLine {
-    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
-    color: var(--state-warning);
+    animation: pulseGlow var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
+    color: var(--warning);
 }
 
 .overload .pulseLine {
-    animation: pulseGlow var(--duration-pulse) infinite alternate var(--ease-system);
-    color: var(--state-alert);
+    animation: pulseGlow var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
+    color: var(--destructive);
 }

@@ -99,7 +99,7 @@ export default function PricingPage() {
                 {/* Current plan label */}
                 {isTrialing && (
                     <div className={styles.trialBanner}>
-                        <Icon name="workspace_premium" size={16} style={{ color: '#FFB020' }} />
+                        <Icon name="workspace_premium" size={16} style={{ color: 'var(--warning)' }} />
                         <span>Trial active · {trialDaysLeft} {t('profileTrialDaysLeft')}</span>
                     </div>
                 )}
@@ -116,7 +116,7 @@ export default function PricingPage() {
                                 <p className={styles.planBilling}>{t('paywallBilledAnnually')}</p>
                             )}
                         </div>
-                        <Icon name="workspace_premium" size={28} style={{ color: '#FFB020' }} />
+                        <Icon name="workspace_premium" size={28} style={{ color: 'var(--warning)' }} />
                     </div>
                     <ul className={styles.planFeatures}>
                         <li><Icon name="check_circle" size={14} active /><span>Full execution library (200+ exercises)</span></li>
@@ -140,7 +140,7 @@ export default function PricingPage() {
                                 $29 <span>/ month</span>
                             </p>
                         </div>
-                        <Icon name="bolt" size={28} style={{ color: 'var(--accent)' }} />
+                        <Icon name="bolt" size={28} style={{ color: 'var(--primary)' }} />
                     </div>
                     <ul className={styles.planFeatures}>
                         <li><Icon name="check_circle" size={14} active /><span>Everything in Premium</span></li>

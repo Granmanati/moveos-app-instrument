@@ -1,11 +1,11 @@
 .missionCard {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--sp-3);
+    padding: var(--mo-space-6);
     position: relative;
     overflow: hidden;
-    transition: all var(--duration-screen) var(--ease-system);
+    transition: all var(--mo-duration-base) var(--mo-ease-system);
 }
 
 .missionCard.interactive {
@@ -35,7 +35,7 @@
 .title {
     font-size: 16px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
     letter-spacing: -0.2px;
 }
 
@@ -45,7 +45,7 @@
     gap: 12px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -53,7 +53,7 @@
 .duration {
     display: flex;
     align-items: center;
-    color: var(--accent);
+    color: var(--primary);
 }
 
 .indicatorContainer {
@@ -65,23 +65,23 @@
 }
 
 .iconComplete {
-    color: var(--state-success);
+    color: var(--success);
 }
 
 .activeNode {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--primary);
     box-shadow: 0 0 0 4px rgba(45, 124, 255, 0.2);
-    animation: nodePulse var(--duration-pulse) infinite alternate var(--ease-system);
+    animation: nodePulse var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
 }
 
 .pendingNode {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 2px solid var(--border-subtle);
+    border: 2px solid var(--border);
     background: transparent;
 }
 
@@ -98,7 +98,7 @@
 }
 
 .body {
-    margin-top: var(--sp-3);
+    margin-top: var(--mo-space-6);
     position: relative;
     z-index: 2;
 }
@@ -109,8 +109,8 @@
     bottom: 0;
     width: 2px;
     height: 0;
-    background: var(--accent);
-    transition: height var(--duration-pipeline) var(--ease-system);
+    background: var(--primary);
+    transition: height var(--mo-duration-slow) var(--mo-ease-system);
 }
 
 /* States */
@@ -120,12 +120,12 @@
 
 .completed {
     opacity: 0.6;
-    background: var(--bg-primary);
+    background: var(--background);
 }
 
 .completed .pipelineLine {
     height: 100%;
-    background: var(--state-success);
+    background: var(--success);
 }
 
 .completed:hover {

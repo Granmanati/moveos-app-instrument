@@ -107,7 +107,7 @@ export default function HomePage() {
         <AppShell sublabel="SYSTEM ACTIVE">
 
             {errorMsg && viewState === 'error' && (
-                <div style={{ background: 'rgba(228, 84, 98, 0.1)', color: 'var(--state-alert)', border: '1px solid rgba(228, 84, 98, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
+                <div style={{ background: 'rgba(228, 84, 98, 0.1)', color: 'var(--destructive)', border: '1px solid rgba(228, 84, 98, 0.2)', padding: 'var(--mo-space-6)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--mo-space-8)' }}>
                     <Icon name="info" size={16} />
                     <span>{errorMsg}</span>
                 </div>
@@ -165,7 +165,7 @@ export default function HomePage() {
                                 </div>
                             ) : snapshot.today_session.state === 'completed' ? (
                                 <div className={styles.missionCompletedState}>
-                                    <Icon name="check_circle" size={32} style={{ color: 'var(--state-success)' }} />
+                                    <Icon name="check_circle" size={32} style={{ color: 'var(--success)' }} />
                                 </div>
                             ) : (
                                 <div style={{ marginTop: '16px' }}>
@@ -222,14 +222,14 @@ export default function HomePage() {
                                         <div
                                             className={styles.dayDot}
                                             style={{
-                                                ...(isToday && !done ? { border: '1px solid var(--accent)', background: 'transparent' } :
-                                                    done ? { background: 'var(--accent)', color: '#fff' } :
-                                                        { background: 'var(--surface-secondary)' })
+                                                ...(isToday && !done ? { border: '1px solid var(--primary)', background: 'transparent' } :
+                                                    done ? { background: 'var(--primary)', color: 'var(--foreground)' } :
+                                                        { background: 'var(--surface-muted)' })
                                             }}
                                         >
-                                            {done && <Icon name="check" size={14} style={{ color: '#fff' }} />}
+                                            {done && <Icon name="check" size={14} style={{ color: 'var(--foreground)' }} />}
                                         </div>
-                                        <span className={styles.dayLabel} style={isToday ? { color: 'var(--text-primary)', fontWeight: 600 } : {}}>{dayName}</span>
+                                        <span className={styles.dayLabel} style={isToday ? { color: 'var(--foreground)', fontWeight: 600 } : {}}>{dayName}</span>
                                     </div>
                                 );
                             })}

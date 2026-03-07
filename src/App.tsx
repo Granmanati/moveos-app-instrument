@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import MissionPage from './pages/MissionPage';
 import ProgressPage from './pages/ProgressPage';
-import SystemPage from './pages/SystemPage';
+import ProfilePage from './pages/ProfilePage';
+import SettingsPage from './pages/SettingsPage';
+import ExplorePage from './pages/ExplorePage';
 import PricingPage from './pages/PricingPage';
 import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
@@ -34,8 +36,10 @@ export default function App() {
                 <Route path="/">
                   <Route index element={<HomePage />} />
                   <Route path="mission" element={<MissionPage />} />
+                  <Route path="explore" element={<ExplorePage />} />
                   <Route path="progress" element={<ProgressPage />} />
-                  <Route path="system" element={<SystemPage />} />
+                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="settings" element={<SettingsPage />} />
                   <Route path="pricing" element={<PricingPage />} />
                 </Route>
               </Route>

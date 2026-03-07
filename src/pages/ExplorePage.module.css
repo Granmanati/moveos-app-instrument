@@ -1,0 +1,254 @@
+.page {
+    display: flex;
+    flex-direction: column;
+    padding: var(--mo-space-4) var(--mo-space-6) 120px;
+    gap: var(--mo-space-6);
+}
+
+/* 2. Search Bar */
+.searchContainer {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: var(--mo-radius-lg);
+    overflow: hidden;
+    transition: all var(--mo-duration-fast);
+}
+
+.searchContainer:focus-within {
+    border-color: var(--mo-color-accent-system);
+}
+
+.searchIcon {
+    position: absolute;
+    left: var(--mo-space-4);
+    color: var(--mo-color-text-tertiary);
+}
+
+.searchInput {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    padding-left: 44px;
+    padding-right: var(--mo-space-4);
+    color: var(--mo-color-text-primary);
+    font-family: var(--mo-font-sans);
+    font-size: 14px;
+    outline: none;
+}
+
+.searchInput::placeholder {
+    color: var(--mo-color-text-tertiary);
+}
+
+/* 5. Library Card */
+.libraryCard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--mo-space-4);
+    background: var(--mo-color-bg-primary);
+    border: 1px solid var(--mo-color-border-strong);
+    border-radius: var(--mo-radius-md);
+    cursor: pointer;
+    transition: background var(--mo-duration-fast);
+}
+
+.libraryCard:hover {
+    background: var(--mo-color-surface-secondary);
+}
+
+.libraryInfo {
+    display: flex;
+    align-items: center;
+    gap: var(--mo-space-3);
+}
+
+.libraryIcon {
+    color: var(--mo-color-text-primary);
+}
+
+.libraryTitle {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.05em;
+}
+
+.librarySub {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.libraryArrow {
+    color: var(--mo-color-text-tertiary);
+}
+
+/* Discover Feed */
+.feedContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mo-space-6);
+}
+
+/* 3. Video Card */
+.videoCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mo-space-3);
+    width: 100%;
+}
+
+.videoWrapper {
+    width: 100%;
+    aspect-ratio: 4/5;
+    /* Approximates 70% card height and sets a solid vertical layout */
+    background-size: cover;
+    background-position: center;
+    border-radius: var(--mo-radius-lg);
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--mo-color-border-strong);
+}
+
+.videoOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 15, 20, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background var(--mo-duration-fast);
+    cursor: pointer;
+}
+
+.videoWrapper:hover .videoOverlay {
+    background: rgba(11, 15, 20, 0.5);
+}
+
+.playButton {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(11, 15, 20, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-text-primary);
+    transition: transform var(--mo-duration-base);
+}
+
+.videoWrapper:hover .playButton {
+    transform: scale(1.05);
+}
+
+.videoBadges {
+    position: absolute;
+    bottom: var(--mo-space-4);
+    left: var(--mo-space-4);
+    right: var(--mo-space-4);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.categoryTag {
+    background: rgba(11, 15, 20, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.1em;
+}
+
+.durationTag {
+    background: rgba(11, 15, 20, 0.8);
+    backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-secondary);
+}
+
+.videoInfo {
+    padding: 0 var(--mo-space-2);
+}
+
+.videoTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    line-height: 1.4;
+    letter-spacing: 0.02em;
+}
+
+/* 4. Premium Insight Card */
+.premiumCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-strong);
+    border-radius: var(--mo-radius-lg);
+    padding: var(--mo-space-8);
+    gap: var(--mo-space-4);
+    margin: var(--mo-space-4) 0;
+}
+
+.premiumIconBox {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(45, 124, 255, 0.1);
+    /* Primary/accent with opacity */
+    color: var(--mo-color-accent-system);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.premiumContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--mo-space-2);
+    align-items: center;
+}
+
+.premiumLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.1em;
+}
+
+.premiumTitle {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+}
+
+.premiumDesc {
+    margin: 0;
+    font-size: 13px;
+    color: var(--mo-color-text-secondary);
+    line-height: 1.5;
+}

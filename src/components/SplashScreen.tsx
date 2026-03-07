@@ -33,28 +33,28 @@ export function SplashScreen({ onComplete }: SplashScreenProps) {
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <motion.circle
                                 cx="12" cy="12" r="9"
-                                stroke="var(--accent, #FFB020)" strokeWidth="1.5"
+                                stroke="var(--accent, var(--warning))" strokeWidth="1.5"
                                 initial={{ pathLength: 0, opacity: 0 }}
                                 animate={{ pathLength: 1, opacity: 1 }}
                                 transition={{ duration: 0.8, ease: "easeInOut" }}
                             />
                             <motion.path
                                 d="M12 3V21"
-                                stroke="var(--accent, #FFB020)" strokeWidth="1.5" strokeLinecap="round"
+                                stroke="var(--accent, var(--warning))" strokeWidth="1.5" strokeLinecap="round"
                                 initial={{ pathLength: 0, opacity: 0 }}
                                 animate={{ pathLength: 1, opacity: 1 }}
                                 transition={{ duration: 0.6, delay: 0.2, ease: "easeInOut" }}
                             />
                             <motion.path
                                 d="M3 12H21"
-                                stroke="var(--accent, #FFB020)" strokeWidth="1.5" strokeLinecap="round"
+                                stroke="var(--accent, var(--warning))" strokeWidth="1.5" strokeLinecap="round"
                                 initial={{ pathLength: 0, opacity: 0 }}
                                 animate={{ pathLength: 1, opacity: 1 }}
                                 transition={{ duration: 0.6, delay: 0.4, ease: "easeInOut" }}
                             />
                             <motion.circle
                                 cx="12" cy="12" r="3"
-                                fill="#0B0F14" stroke="var(--accent, #FFB020)" strokeWidth="1.5"
+                                fill="var(--background)" stroke="var(--accent, var(--warning))" strokeWidth="1.5"
                                 initial={{ scale: 0, opacity: 0 }}
                                 animate={{ scale: [0, 1.5, 1], opacity: 1 }}
                                 transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}

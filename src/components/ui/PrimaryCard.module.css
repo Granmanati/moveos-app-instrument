@@ -1,11 +1,11 @@
 .primaryCard {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: var(--sp-3);
+    padding: var(--mo-space-6);
     position: relative;
     overflow: hidden;
-    transition: all var(--duration-screen) var(--ease-system);
+    transition: all var(--mo-duration-base) var(--mo-ease-system);
 }
 
 .primaryCard.interactive {
@@ -17,21 +17,21 @@
 }
 
 .header {
-    margin-bottom: var(--sp-2);
+    margin-bottom: var(--mo-space-4);
 }
 
 .title {
     font-size: 14px;
     font-weight: 500;
     font-family: var(--font-mono);
-    color: var(--text-primary);
+    color: var(--foreground);
     letter-spacing: 0.5px;
     text-transform: uppercase;
 }
 
 .subtitle {
     font-size: 13px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     margin-top: 4px;
 }
 

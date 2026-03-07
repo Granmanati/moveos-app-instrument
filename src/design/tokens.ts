@@ -1,27 +1,27 @@
 export const tokens = {
     colors: {
         background: {
-            primary: '#0B0F14',
+            primary: 'var(--background)',
         },
         surface: {
-            primary: '#141A22',
-            secondary: '#10161D',
+            primary: 'var(--card)',
+            secondary: 'var(--surface-muted)',
         },
         border: {
-            subtle: '#1C2430',
+            subtle: 'var(--border)',
         },
         text: {
-            primary: '#F4F7FB',
-            secondary: '#8A93A3',
-            tertiary: '#667085',
+            primary: 'var(--foreground)',
+            secondary: 'var(--mo-color-text-secondary)',
+            tertiary: 'var(--mo-color-text-tertiary)',
         },
         brand: {
-            accent: '#2D7CFF',
+            accent: 'var(--primary)',
         },
         state: {
-            aligned: '#18B67A',     // Success
-            compensating: '#E8A23A', // Warning
-            overload: '#E45462',    // Alert
+            aligned: 'var(--success)',     // Success
+            compensating: 'var(--warning)', // Warning
+            overload: 'var(--destructive)',    // Alert
         }
     },
     typography: {
@@ -52,8 +52,8 @@ export const tokens = {
         pill: '100px',
     },
     borders: {
-        thin: '1px solid var(--border-subtle)',
-        active: '1px solid var(--accent)',
+        thin: '1px solid var(--border)',
+        active: '1px solid var(--primary)',
     },
     icons: {
         strokeWidth: 1.5,

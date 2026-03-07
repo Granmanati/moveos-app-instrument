@@ -10,8 +10,8 @@ import { VideoHUDPreview } from '../components/VideoHUDPreview';
 import { safeSelect, safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { PrimaryCard } from '../components/ui/PrimaryCard';
-import { MissionCard } from '../components/ui/MissionCard';
 import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
+import EmptyState from '../components/ui/EmptyState';
 
 interface ExerciseLibrary {
     id: number | string;
@@ -19,10 +19,6 @@ interface ExerciseLibrary {
     pattern: string;
     media_video_url: string;
     level: number;
-}
-
-interface SessionExerciseLog {
-    pain_score: number;
 }
 
 interface SessionExercise {
@@ -35,7 +31,6 @@ interface SessionExercise {
     rest_sec: number;
     block_order: number;
     exercise_library: ExerciseLibrary;
-    session_exercise_logs: SessionExerciseLog[];
 }
 
 export default function MissionPage() {
@@ -49,19 +44,8 @@ export default function MissionPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [generating, setGenerating] = useState(false);
 
-    // Form states for pain logging
-    const [painScores, setPainScores] = useState<Record<string, number>>({});
-    const [painNotes, setPainNotes] = useState<Record<string, string>>({});
-    const [savingPain, setSavingPain] = useState<Record<string, boolean>>({});
-    const [expandedCards, setExpandedCards] = useState<string[]>([]);
-    const [showPremiumGate, setShowPremiumGate] = useState(false);
-
-    useEffect(() => {
-        if (location.state?.isNewOnboarding) {
-            setShowPremiumGate(true);
-            window.history.replaceState({}, document.title);
-        }
-    }, [location]);
+    // Timeline routing
+    const [activeStepId, setActiveStepId] = useState<string | number | null>(null);
 
     const fetchSessionWithExercises = async () => {
         if (!user) return;
@@ -78,9 +62,6 @@ export default function MissionPage() {
                         id, status, is_completed, sets, reps_min, reps_max, rest_sec, block_order,
                         exercise_library (
                             id, name, pattern, media_video_url, level
-                        ),
-                        session_exercise_logs (
-                            pain_score
                         )
                     )
                 `)
@@ -102,15 +83,14 @@ export default function MissionPage() {
                     const sorted = [...data.session_exercises].sort((a: any, b: any) => a.block_order - b.block_order);
                     setExercises(sorted as any);
 
-                    const initialScores: Record<string, number> = {};
-                    sorted.forEach((ex: any) => {
-                        if (ex.session_exercise_logs && ex.session_exercise_logs.length > 0) {
-                            initialScores[ex.id] = ex.session_exercise_logs[ex.session_exercise_logs.length - 1].pain_score;
-                        } else {
-                            initialScores[ex.id] = 0;
-                        }
-                    });
-                    setPainScores(initialScores);
+                    // Initialize active step purely based on first incomplete
+                    const firstIncomplete = sorted.find(e => !e.is_completed);
+                    if (firstIncomplete) {
+                        setActiveStepId(firstIncomplete.id);
+                    } else if (sorted.length > 0) {
+                        // All completed, stay on last just in case, but session might be marked complete
+                        setActiveStepId(sorted[sorted.length - 1].id);
+                    }
                 }
                 setViewState('success');
             } else {
@@ -149,56 +129,37 @@ export default function MissionPage() {
         }
     };
 
-    const handleToggleComplete = async (sessionExerciseId: string | number, currentCompleted: boolean) => {
-        const newCompleted = !currentCompleted;
+    const markBlockCompleted = async (sessionExerciseId: string | number) => {
+        // Optimistic update
         setExercises(prev => prev.map(ex =>
-            ex.id === sessionExerciseId ? { ...ex, is_completed: newCompleted } : ex
+            ex.id === sessionExerciseId ? { ...ex, is_completed: true } : ex
         ));
 
         const { error } = await supabase
             .from('session_exercises')
-            .update({ is_completed: newCompleted })
+            .update({ is_completed: true })
             .eq('id', sessionExerciseId);
 
         if (error) {
             console.error('Error toggling completion:', error);
+            // Revert
             setExercises(prev => prev.map(ex =>
-                ex.id === sessionExerciseId ? { ...ex, is_completed: currentCompleted } : ex
+                ex.id === sessionExerciseId ? { ...ex, is_completed: false } : ex
             ));
         }
+        // Note: we intentionally DO NOT advance activeStepId here. 
+        // We let the UI render the "Block completed" intermediate state.
     };
 
-    const handleSavePainLog = async (sessionExerciseId: string | number) => {
-        if (!user) return;
-        setSavingPain(prev => ({ ...prev, [sessionExerciseId]: true }));
-        try {
-            const score = painScores[sessionExerciseId] || 0;
-            const notes = painNotes[sessionExerciseId] || '';
-
-            const { error } = await supabase
-                .from('session_exercise_logs')
-                .insert({
-                    user_id: user.id,
-                    session_exercise_id: sessionExerciseId,
-                    pain_score: score,
-                    notes: notes
-                });
-
-            if (error) throw error;
-            setPainNotes(prev => ({ ...prev, [sessionExerciseId]: '' }));
-            setExercises(prev => prev.map(ex => {
-                if (ex.id === sessionExerciseId) {
-                    const existingLogs = ex.session_exercise_logs || [];
-                    return { ...ex, session_exercise_logs: [...existingLogs, { pain_score: score }] };
-                }
-                return ex;
-            }));
-
-        } catch (err: any) {
-            console.error('Error saving pain log:', err);
-            alert('Failed to save log.');
-        } finally {
-            setSavingPain(prev => ({ ...prev, [sessionExerciseId]: false }));
+    const advanceToNextBlock = () => {
+        const currentIdx = exercises.findIndex(ex => ex.id === activeStepId);
+        if (currentIdx !== -1 && currentIdx + 1 < exercises.length) {
+            setActiveStepId(exercises[currentIdx + 1].id);
+            // Scroll to top or just let layout animate
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            // End of blocks reached
+            setActiveStepId(null);
         }
     };
 
@@ -215,10 +176,6 @@ export default function MissionPage() {
         }
     };
 
-    const toggleExpand = (exId: string) => {
-        setExpandedCards(prev => prev.includes(exId) ? prev.filter(id => id !== exId) : [...prev, exId]);
-    };
-
     const getBlockName = (order: number) => {
         const mapping: Record<number, string> = { 1: 'SQUAT', 2: 'HINGE', 3: 'PUSH', 4: 'PULL', 5: 'CARRY', 6: 'REGULATE' };
         return mapping[order] || `BLOCK ${order}`;
@@ -227,226 +184,191 @@ export default function MissionPage() {
     const completedCount = exercises.filter(ex => ex.is_completed).length;
     const totalCount = exercises.length;
     const allCompleted = totalCount > 0 && completedCount === totalCount;
-    const remainingCount = totalCount - completedCount;
-
-    // Pipeline Logic
-    const currentBlock = exercises.find(ex => !ex.is_completed);
-    const currentIndex = currentBlock ? exercises.indexOf(currentBlock) : -1;
-    const nextBlock = currentIndex !== -1 && currentIndex + 1 < exercises.length ? exercises[currentIndex + 1] : null;
-    const remainingBlocks = exercises.filter(ex => !ex.is_completed && ex.id !== currentBlock?.id && ex.id !== nextBlock?.id);
 
     return (
-        <AppShell sublabel="ADAPTIVE MOVEMENT SYSTEM">
+        <AppShell title="MISSION" sublabel="Execute adaptation protocol">
 
             {viewState === 'error' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="error" style={{ color: 'var(--state-alert)' }} size={48} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
-                    <div style={{ marginTop: '16px', width: '200px' }}>
-                        <PrimaryButton onClick={fetchSessionWithExercises}>Retry Connection</PrimaryButton>
+                <div style={{ padding: 'var(--mo-space-8)' }}>
+                    <div className={styles.errorBox}>
+                        <Icon name="error" style={{ color: 'var(--mo-color-state-alert)' }} size={24} />
+                        <span>{errorMsg}</span>
+                        <PrimaryButton onClick={fetchSessionWithExercises}>Retry</PrimaryButton>
                     </div>
                 </div>
             )}
 
             {viewState === 'loading' && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', padding: 'var(--sp-4)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Skeleton width={180} height={32} />
-                        <Skeleton width={100} height={20} />
+                <div className={styles.loadingSkeleton}>
+                    <Skeleton width="100%" height={80} borderRadius="var(--mo-radius-md)" />
+                    <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
+                        <div style={{ width: '2px', background: 'var(--mo-color-surface-muted)', height: '400px', marginLeft: '12px' }} />
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            <SkeletonCard style={{ height: 200 }} />
+                            <SkeletonCard style={{ height: 60 }} />
+                        </div>
                     </div>
-                    <Skeleton width="100%" height={40} borderRadius="var(--radius-full)" />
-                    <Skeleton width="60%" height={28} style={{ marginTop: '16px' }} />
-                    <SkeletonCard style={{ height: 350 }} />
-                    <Skeleton width="40%" height={28} style={{ marginTop: '24px' }} />
-                    <SkeletonCard style={{ height: 100 }} />
                 </div>
             )}
 
             {viewState === 'empty' && (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                    <Icon name="event_busy" style={{ color: 'var(--text-secondary)' }} size={48} />
-                    <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>No Active Mission</h2>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px', maxWidth: '250px' }}>Your daily execution block has not been initialized yet.</p>
-                    <div style={{ marginTop: '24px', width: '100%' }}>
-                        <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
-                            {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'Generate Mission'}
-                        </PrimaryButton>
-                    </div>
-                </div>
+                <EmptyState
+                    icon="event_busy"
+                    title="No Active Mission"
+                    message="Your system adaptation execution block has not been initialized for today."
+                    actionLabel={generating ? 'Generating...' : 'INITIALIZE MISSION'}
+                    onAction={handleGenerateSession}
+                    disabled={generating}
+                />
             )}
 
             {viewState === 'success' && session && (
                 <div className={styles.pipelineLayout}>
 
-                    {/* Pipeline Meta Header */}
-                    <div className={styles.pipelineHeader}>
-                        <h2 className={styles.missionTitle}>MISSION: {session?.phase || 'ADAPTIVE'}</h2>
-                        <span className={styles.missionDate}>
-                            {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()}
-                        </span>
+                    {/* 2. Session Context Section */}
+                    <div className={styles.contextHeader}>
+                        <div className={styles.contextRow}>
+                            <span className={styles.contextLabel}>PHASE</span>
+                            <span className={styles.contextValue}>{session?.phase?.toUpperCase() || 'ADAPTIVE'}</span>
+                        </div>
+                        <div className={styles.contextRow}>
+                            <span className={styles.contextLabel}>DATE</span>
+                            <span className={styles.contextValue}>
+                                {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase()}
+                            </span>
+                        </div>
+                        <div className={styles.contextRow}>
+                            <span className={styles.contextLabel}>STATUS</span>
+                            <span className={styles.contextValue} style={{ color: allCompleted ? 'var(--mo-color-state-success)' : 'var(--mo-color-accent-system)' }}>
+                                {allCompleted ? 'VERIFIED' : 'ACTIVE'}
+                            </span>
+                        </div>
                     </div>
 
-                    {/* Session Progress */}
-                    <motion.section layout transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
-                        <div className={styles.progressContainer}>
-                            <div className={styles.progressText}>
-                                <span>PIPELINE PROGRESS</span>
-                                <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>{completedCount} / {totalCount} BLOCKS</span>
-                            </div>
-                            <div className={styles.progressBarBg}>
-                                <div className={styles.progressBarFill} style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} />
-                            </div>
+                    {/* 3. Session Progress Section */}
+                    <div className={styles.progressSection}>
+                        <div className={styles.progressHeader}>
+                            <span>PIPELINE PROGRESS</span>
+                            <span className={styles.progressNumbers}>{completedCount} / {totalCount} BLOCKS</span>
                         </div>
-                    </motion.section>
+                        <div className={styles.progressBarBg}>
+                            <div className={styles.progressBarFill} style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} />
+                        </div>
+                    </div>
 
-                    <AnimatePresence mode="popLayout">
-                        {/* Current Block */}
-                        <motion.section layout key={currentBlock ? `current-${currentBlock.id}` : 'alldone'} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
-                            <h3 className={styles.sectionTitle}>CURRENT BLOCK</h3>
-                            {currentBlock ? (
-                                <PrimaryCard
-                                    title={`${getBlockName(currentBlock.block_order)} //`}
-                                    subtitle={`${currentBlock.sets}x${currentBlock.reps_min}-${currentBlock.reps_max} · ${currentBlock.rest_sec}s REST`}
-                                >
-                                    <div className={styles.currentBlockContent}>
-                                        <div className={styles.hudWrapper}>
-                                            <VideoHUDPreview
-                                                videoUrl={currentBlock.exercise_library?.media_video_url}
-                                                pattern={currentBlock.exercise_library?.pattern}
-                                                name={currentBlock.exercise_library?.name || 'Unknown Pattern'}
-                                                sets={currentBlock.sets}
-                                                repsMin={currentBlock.reps_min}
-                                                repsMax={currentBlock.reps_max}
-                                                restSeconds={currentBlock.rest_sec}
-                                            />
+                    {/* 4. Execution Pipeline */}
+                    <div className={styles.timelineContainer}>
+                        <div className={styles.timelineLine} />
+
+                        <AnimatePresence mode="popLayout">
+                            {exercises.map((ex, idx) => {
+                                const isActiveNode = ex.id === activeStepId;
+                                const isCompleted = ex.is_completed;
+                                // Node visual state:
+                                const nodeState = isCompleted ? 'completed' : (isActiveNode ? 'active' : 'pending');
+
+                                return (
+                                    <motion.div
+                                        key={ex.id}
+                                        className={styles.timelineItem}
+                                        layout
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                    >
+                                        <div className={`${styles.timelineNode} ${styles['node' + nodeState]}`}>
+                                            {nodeState === 'completed' && <Icon name="check" size={12} />}
+                                            {nodeState === 'active' && <div className={styles.nodePulse} />}
                                         </div>
 
-                                        {/* Action Bar */}
-                                        <div className={styles.actionBar}>
-                                            <button
-                                                className={styles.actionBtn}
-                                                onClick={() => toggleExpand(currentBlock.id.toString())}
-                                            >
-                                                <Icon name="healing" size={16} />
-                                                <span>REPORT STRAIN</span>
-                                            </button>
-                                            <PrimaryButton
-                                                onClick={() => handleToggleComplete(currentBlock.id, currentBlock.is_completed)}
-                                                style={{ margin: 0 }}
-                                            >
-                                                <Icon name="check" size={18} style={{ marginRight: '8px' }} />
-                                                MARK COMPLETED
-                                            </PrimaryButton>
-                                        </div>
-
-                                        {/* Pain/Strain Reporting */}
-                                        {expandedCards.includes(currentBlock.id.toString()) && (
-                                            <div className={styles.strainPanel}>
-                                                <div className={styles.sliderContainer}>
-                                                    <div className={styles.strainHeader}>
-                                                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>STRAIN LEVEL</span>
-                                                        <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{painScores[currentBlock.id.toString()] || 0}/10</span>
+                                        <div className={styles.timelineContent}>
+                                            {isActiveNode ? (
+                                                !isCompleted ? (
+                                                    /* 5. Exercise execution block */
+                                                    <PrimaryCard
+                                                        title={`${getBlockName(ex.block_order)} // ${ex.exercise_library?.name}`}
+                                                        subtitle="EXECUTION BLOCK"
+                                                    >
+                                                        <div className={styles.executionBlock}>
+                                                            <div className={styles.executionBox}>
+                                                                <VideoHUDPreview
+                                                                    videoUrl={ex.exercise_library?.media_video_url}
+                                                                    pattern={ex.exercise_library?.pattern}
+                                                                    name={ex.exercise_library?.name}
+                                                                    sets={ex.sets}
+                                                                    repsMin={ex.reps_min}
+                                                                    repsMax={ex.reps_max}
+                                                                    restSeconds={ex.rest_sec}
+                                                                    hideHUD={true} // Simplify UI inside card
+                                                                />
+                                                            </div>
+                                                            <div className={styles.parametersGrid}>
+                                                                <div className={styles.paramBox}>
+                                                                    <span className={styles.paramLabel}>SETS</span>
+                                                                    <span className={styles.paramValue}>{ex.sets}</span>
+                                                                </div>
+                                                                <div className={styles.paramBox}>
+                                                                    <span className={styles.paramLabel}>REPS</span>
+                                                                    <span className={styles.paramValue}>{ex.reps_min}-{ex.reps_max}</span>
+                                                                </div>
+                                                                <div className={styles.paramBox}>
+                                                                    <span className={styles.paramLabel}>REST</span>
+                                                                    <span className={styles.paramValue}>{ex.rest_sec}s</span>
+                                                                </div>
+                                                            </div>
+                                                            <PrimaryButton onClick={() => markBlockCompleted(ex.id)}>
+                                                                MARK BLOCK COMPLETED
+                                                            </PrimaryButton>
+                                                        </div>
+                                                    </PrimaryCard>
+                                                ) : (
+                                                    /* 6. Block completion state */
+                                                    <div className={styles.blockCompletionState}>
+                                                        <div className={styles.completionBanner}>
+                                                            <Icon name="check_circle" size={24} style={{ color: 'var(--mo-color-state-success)' }} />
+                                                            <div className={styles.completionText}>
+                                                                <span className={styles.completionTitle}>BLOCK COMPLETED</span>
+                                                                <span className={styles.completionSub}>{getBlockName(ex.block_order)} adaptation recorded</span>
+                                                            </div>
+                                                        </div>
+                                                        <PrimaryButton onClick={advanceToNextBlock}>
+                                                            NEXT BLOCK <Icon name="arrow_forward" size={16} style={{ marginLeft: '4px' }} />
+                                                        </PrimaryButton>
                                                     </div>
-                                                    <input
-                                                        type="range"
-                                                        min="0" max="10"
-                                                        value={painScores[currentBlock.id.toString()] || 0}
-                                                        onChange={(e) => setPainScores(prev => ({ ...prev, [currentBlock.id.toString()]: parseInt(e.target.value) }))}
-                                                        className={styles.painSlider}
-                                                    />
-                                                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                                                        <input
-                                                            type="text"
-                                                            placeholder="Add clinical notes..."
-                                                            className={styles.strainInput}
-                                                            value={painNotes[currentBlock.id.toString()] || ''}
-                                                            onChange={(e) => setPainNotes(prev => ({ ...prev, [currentBlock.id.toString()]: e.target.value }))}
-                                                        />
-                                                        <button
-                                                            className={styles.saveBtn}
-                                                            onClick={() => handleSavePainLog(currentBlock.id)}
-                                                        >
-                                                            {savingPain[currentBlock.id.toString()] ? '...' : 'SAVE'}
-                                                        </button>
-                                                    </div>
+                                                )
+                                            ) : (
+                                                /* Collapsed pending/completed row */
+                                                <div className={`${styles.collapsedRow} ${isCompleted ? styles.collapsedCompleted : ''}`}>
+                                                    <span className={styles.collapsedTitle}>{getBlockName(ex.block_order)}</span>
+                                                    <span className={styles.collapsedMeta}>{ex.sets}x{ex.reps_max}</span>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </PrimaryCard>
-                            ) : (
-                                <div className={styles.allDoneState}>
-                                    <Icon name="check_circle" size={48} style={{ color: 'var(--state-success)', margin: '0 0 16px 0' }} />
-                                    <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: 'var(--text-primary)' }}>PIPELINE COMPLETED</h3>
-                                    <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>All blocks execution confirmed.</p>
-                                </div>
-                            )}
-                        </motion.section>
-
-                        {/* Next Block */}
-                        {nextBlock && (
-                            <motion.section layout key={`next-${nextBlock.id}`} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
-                                <h3 className={styles.sectionTitle}>NEXT BLOCK</h3>
-                                <MissionCard
-                                    title={getBlockName(nextBlock.block_order)}
-                                    subtitle={`${nextBlock.exercise_library?.name}`}
-                                    duration={`${nextBlock.sets}x${nextBlock.reps_min}-${nextBlock.reps_max}`}
-                                    status="pending"
-                                />
-                            </motion.section>
-                        )}
-
-                        {/* Remaining Blocks */}
-                        {remainingBlocks.length > 0 && (
-                            <motion.section layout key="remaining" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }} className={styles.section}>
-                                <h3 className={styles.sectionTitle}>{remainingCount - 1} BLOCKS REMAINING</h3>
-                                <div className={styles.remainingList}>
-                                    {remainingBlocks.map(ex => (
-                                        <div key={ex.id} className={styles.remainingItem}>
-                                            <div className={styles.remainingMarker} />
-                                            <span className={styles.remainingName}>{getBlockName(ex.block_order)}</span>
-                                            <div style={{ flex: 1 }} />
-                                            <span className={styles.remainingMeta}>{ex.sets}x{ex.reps_min}-{ex.reps_max}</span>
+                                            )}
                                         </div>
-                                    ))}
-                                </div>
-                            </motion.section>
-                        )}
-                    </AnimatePresence>
+                                    </motion.div>
+                                );
+                            })}
+                        </AnimatePresence>
+                    </div>
 
-                    {/* Action Footer */}
-                    <div className={styles.actionFooter}>
-                        <PrimaryButton
-                            disabled={!allCompleted || session.state === 'completed'}
-                            onClick={handleCompleteSession}
+                    {/* 7. Mission completion state */}
+                    {allCompleted && activeStepId === null && (
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className={styles.missionCompletionState}
                         >
-                            {session.state === 'completed' ? 'MISSION ALREADY VERIFIED' : 'VERIFY MISSION COMPLETION'}
-                        </PrimaryButton>
-                    </div>
+                            <div className={styles.missionCompletionIcon}>
+                                <Icon name="verified" size={48} />
+                            </div>
+                            <h2 className={styles.missionCompletionTitle}>MISSION COMPLETED</h2>
+                            <p className={styles.missionCompletionDesc}>System adaptation recorded successfully.</p>
 
-                </div>
-            )}
-
-            {showPremiumGate && (
-                <div className={styles.modalOverlay}>
-                    <div className={styles.modalContent}>
-                        <div className={styles.modalIconBox}>
-                            <Icon name="lock" size={32} />
-                        </div>
-                        <h2 className={styles.modalTitle}>SYSTEM ENGINE LOCK</h2>
-                        <p className={styles.modalText}>
-                            Enable dynamic load adjustment and execution tracking.
-                        </p>
-                        <div className={styles.modalActions}>
-                            <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
-                                UPGRADE PIPELINE
-                            </button>
-                            <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)}>
-                                ACKNOWLEDGE
-                            </button>
-                        </div>
-                    </div>
+                            <div style={{ width: '100%', marginTop: '24px' }}>
+                                <PrimaryButton onClick={handleCompleteSession}>
+                                    RETURN TO SYSTEM DASHBOARD
+                                </PrimaryButton>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             )}
         </AppShell>

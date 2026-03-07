@@ -6,19 +6,20 @@ import { useLocation } from 'react-router-dom';
 import { SystemHeader } from './ui/SystemHeader';
 
 interface AppShellProps {
+    title?: string;
     sublabel?: string;
     hideNav?: boolean;
     children: ReactNode;
 }
 
-export default function AppShell({ sublabel, hideNav = false, children }: AppShellProps) {
+export default function AppShell({ title, sublabel, hideNav = false, children }: AppShellProps) {
     const location = useLocation();
 
     return (
         <div className={styles.shell}>
             <div className={styles.systemOverlay} />
             <div className={styles.headerWrapper}>
-                <SystemHeader sublabel={sublabel} />
+                <SystemHeader title={title} sublabel={sublabel} />
             </div>
 
             <main className={`${styles.content} ${hideNav ? styles.contentFullHeight : ''}`}>

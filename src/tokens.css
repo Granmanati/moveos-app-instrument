@@ -1,0 +1,410 @@
+/* ==========================================================================
+   MOVE OS — Design Tokens
+   Version: 1.0
+   Status: Canonical CSS Token Reference
+   Purpose: Shared design tokens for MOVE OS product UI
+   ========================================================================== */
+
+:root {
+    /* ==========================================================================
+     1. COLOR — CORE BRAND
+     ========================================================================== */
+
+    --mo-color-bg-primary: #0b0f14;
+    --mo-color-bg-secondary: #10161d;
+    --mo-color-surface-primary: #141a22;
+    --mo-color-surface-secondary: #121821;
+    --mo-color-surface-tertiary: #18212c;
+
+    --mo-color-border-subtle: #1c2430;
+    --mo-color-border-strong: #253142;
+
+    --mo-color-accent-system: #2d7cff;
+    --mo-color-accent-system-hover: #3b86ff;
+    --mo-color-accent-system-active: #2468d8;
+
+    --mo-color-text-primary: #f4f7fb;
+    --mo-color-text-secondary: #8a93a3;
+    --mo-color-text-tertiary: #667085;
+    --mo-color-text-inverse: #0b0f14;
+
+    /* ==========================================================================
+     2. COLOR — HEALTH STATE SYSTEM
+     ========================================================================== */
+
+    --mo-color-state-aligned: #18b67a;
+    --mo-color-state-tension: #f5b546;
+    --mo-color-state-risk: #f05a67;
+
+    --mo-color-state-success: #18b67a;
+    --mo-color-state-warning: #f5b546;
+    --mo-color-state-alert: #f05a67;
+
+    /* Soft background tints for badges / panels */
+    --mo-color-state-aligned-bg: rgba(24, 182, 122, 0.12);
+    --mo-color-state-tension-bg: rgba(245, 181, 70, 0.12);
+    --mo-color-state-risk-bg: rgba(240, 90, 103, 0.12);
+
+    /* ==========================================================================
+     3. COLOR — OVERLAYS / EFFECTS
+     ========================================================================== */
+
+    --mo-color-overlay-01: rgba(0, 0, 0, 0.20);
+    --mo-color-overlay-02: rgba(0, 0, 0, 0.36);
+    --mo-color-overlay-03: rgba(0, 0, 0, 0.56);
+
+    --mo-color-accent-glow-soft: rgba(45, 124, 255, 0.18);
+    --mo-color-accent-glow-min: rgba(45, 124, 255, 0.08);
+
+    /* ==========================================================================
+     4. TYPOGRAPHY — FONT FAMILIES
+     ========================================================================== */
+
+    --mo-font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+    --mo-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Consolas,
+        "Liberation Mono", monospace;
+
+    /* ==========================================================================
+     5. TYPOGRAPHY — FONT SIZES
+     ========================================================================== */
+
+    --mo-text-2xs: 11px;
+    --mo-text-xs: 12px;
+    --mo-text-sm: 13px;
+    --mo-text-md: 14px;
+    --mo-text-lg: 16px;
+    --mo-text-xl: 18px;
+    --mo-text-2xl: 20px;
+    --mo-text-3xl: 24px;
+    --mo-text-4xl: 28px;
+    --mo-text-5xl: 36px;
+
+    /* ==========================================================================
+     6. TYPOGRAPHY — LINE HEIGHT
+     ========================================================================== */
+
+    --mo-leading-tight: 1.1;
+    --mo-leading-snug: 1.25;
+    --mo-leading-normal: 1.45;
+    --mo-leading-relaxed: 1.6;
+
+    /* ==========================================================================
+     7. TYPOGRAPHY — FONT WEIGHTS
+     ========================================================================== */
+
+    --mo-weight-regular: 400;
+    --mo-weight-medium: 500;
+    --mo-weight-semibold: 600;
+    --mo-weight-bold: 700;
+
+    /* ==========================================================================
+     8. TYPOGRAPHY — TRACKING
+     ========================================================================== */
+
+    --mo-tracking-tight: -0.02em;
+    --mo-tracking-normal: 0;
+    --mo-tracking-wide: 0.04em;
+    --mo-tracking-wider: 0.08em;
+
+    /* ==========================================================================
+     9. SPACING — 8PX SYSTEM
+     ========================================================================== */
+
+    --mo-space-0: 0;
+    --mo-space-1: 4px;
+    --mo-space-2: 8px;
+    --mo-space-3: 12px;
+    --mo-space-4: 16px;
+    --mo-space-5: 20px;
+    --mo-space-6: 24px;
+    --mo-space-7: 28px;
+    --mo-space-8: 32px;
+    --mo-space-10: 40px;
+    --mo-space-12: 48px;
+    --mo-space-14: 56px;
+    --mo-space-16: 64px;
+    --mo-space-20: 80px;
+    --mo-space-24: 96px;
+
+    /* ==========================================================================
+     10. RADIUS
+     ========================================================================== */
+
+    --mo-radius-sm: 10px;
+    --mo-radius-md: 12px;
+    --mo-radius-lg: 14px;
+    --mo-radius-xl: 16px;
+    --mo-radius-2xl: 20px;
+    --mo-radius-pill: 999px;
+
+    /* ==========================================================================
+     11. BORDER WIDTH
+     ========================================================================== */
+
+    --mo-border-0: 0;
+    --mo-border-1: 1px;
+    --mo-border-2: 2px;
+
+    /* ==========================================================================
+     12. SHADOWS
+     Minimal, technical, restrained
+     ========================================================================== */
+
+    --mo-shadow-none: none;
+    --mo-shadow-card:
+        0 2px 8px rgba(0, 0, 0, 0.16),
+        0 0 0 1px rgba(28, 36, 48, 0.72);
+    --mo-shadow-card-hover:
+        0 8px 24px rgba(0, 0, 0, 0.22),
+        0 0 0 1px rgba(37, 49, 66, 0.88);
+    --mo-shadow-button:
+        0 2px 8px rgba(45, 124, 255, 0.18);
+    --mo-shadow-focus:
+        0 0 0 2px rgba(45, 124, 255, 0.18);
+
+    /* ==========================================================================
+     13. BLUR
+     ========================================================================== */
+
+    --mo-blur-sm: 6px;
+    --mo-blur-md: 10px;
+    --mo-blur-lg: 16px;
+
+    /* ==========================================================================
+     14. ICON SYSTEM
+     ========================================================================== */
+
+    --mo-icon-size-sm: 16px;
+    --mo-icon-size-md: 20px;
+    --mo-icon-size-lg: 24px;
+    --mo-icon-size-xl: 28px;
+
+    --mo-icon-stroke: 1.5;
+    --mo-icon-color-default: var(--mo-color-text-secondary);
+    --mo-icon-color-active: var(--mo-color-accent-system);
+
+    /* ==========================================================================
+     15. HEADER / NAV
+     ========================================================================== */
+
+    --mo-header-height: 72px;
+    --mo-header-padding-x: 20px;
+    --mo-header-padding-y: 16px;
+
+    --mo-bottom-nav-height: 72px;
+    --mo-bottom-nav-padding-x: 16px;
+    --mo-bottom-nav-padding-y: 10px;
+
+    /* ==========================================================================
+     16. SCREEN LAYOUT
+     ========================================================================== */
+
+    --mo-screen-max-width: 480px;
+    --mo-screen-padding-x: 20px;
+    --mo-screen-padding-top: 20px;
+    --mo-screen-padding-bottom: 96px;
+
+    --mo-section-gap-sm: 16px;
+    --mo-section-gap-md: 24px;
+    --mo-section-gap-lg: 32px;
+
+    /* ==========================================================================
+     17. CARD TOKENS
+     ========================================================================== */
+
+    --mo-card-bg-primary: var(--mo-color-surface-primary);
+    --mo-card-bg-secondary: var(--mo-color-surface-secondary);
+    --mo-card-border: var(--mo-color-border-subtle);
+    --mo-card-border-strong: var(--mo-color-border-strong);
+
+    --mo-card-padding-primary: 20px;
+    --mo-card-padding-secondary: 16px;
+    --mo-card-padding-metric: 12px;
+
+    --mo-card-radius-primary: 16px;
+    --mo-card-radius-secondary: 14px;
+    --mo-card-radius-metric: 12px;
+
+    /* ==========================================================================
+     18. BUTTON TOKENS
+     ========================================================================== */
+
+    --mo-button-height-sm: 36px;
+    --mo-button-height-md: 44px;
+    --mo-button-height-lg: 52px;
+
+    --mo-button-padding-x-sm: 12px;
+    --mo-button-padding-x-md: 16px;
+    --mo-button-padding-x-lg: 20px;
+
+    --mo-button-radius: 12px;
+
+    --mo-button-primary-bg: var(--mo-color-accent-system);
+    --mo-button-primary-bg-hover: var(--mo-color-accent-system-hover);
+    --mo-button-primary-bg-active: var(--mo-color-accent-system-active);
+    --mo-button-primary-text: var(--mo-color-text-primary);
+
+    --mo-button-secondary-bg: transparent;
+    --mo-button-secondary-border: var(--mo-color-accent-system);
+    --mo-button-secondary-text: var(--mo-color-accent-system);
+
+    --mo-button-danger-bg: var(--mo-color-state-risk);
+    --mo-button-danger-text: var(--mo-color-text-primary);
+
+    /* ==========================================================================
+     19. INPUT TOKENS
+     ========================================================================== */
+
+    --mo-input-height: 44px;
+    --mo-input-radius: 12px;
+    --mo-input-bg: var(--mo-color-surface-secondary);
+    --mo-input-border: var(--mo-color-border-subtle);
+    --mo-input-border-focus: var(--mo-color-accent-system);
+    --mo-input-text: var(--mo-color-text-primary);
+    --mo-input-placeholder: var(--mo-color-text-tertiary);
+
+    /* ==========================================================================
+     20. BADGE TOKENS
+     ========================================================================== */
+
+    --mo-badge-height: 24px;
+    --mo-badge-padding-x: 10px;
+    --mo-badge-radius: 999px;
+    --mo-badge-font-size: 11px;
+    --mo-badge-font-weight: 600;
+    --mo-badge-tracking: 0.06em;
+
+    /* ==========================================================================
+     21. TIMELINE / PIPELINE TOKENS
+     ========================================================================== */
+
+    --mo-timeline-line-width: 2px;
+    --mo-timeline-node-size: 10px;
+    --mo-timeline-node-size-active: 12px;
+    --mo-timeline-gap: 24px;
+
+    --mo-timeline-line-color: var(--mo-color-border-strong);
+    --mo-timeline-node-pending: var(--mo-color-text-tertiary);
+    --mo-timeline-node-active: var(--mo-color-accent-system);
+    --mo-timeline-node-complete: var(--mo-color-state-aligned);
+
+    /* ==========================================================================
+     22. PROGRESS / CHART TOKENS
+     ========================================================================== */
+
+    --mo-progress-track: rgba(255, 255, 255, 0.08);
+    --mo-progress-fill: var(--mo-color-accent-system);
+    --mo-progress-fill-success: var(--mo-color-state-aligned);
+    --mo-chart-grid: rgba(255, 255, 255, 0.06);
+    --mo-chart-line: var(--mo-color-accent-system);
+    --mo-chart-line-secondary: var(--mo-color-state-tension);
+    --mo-chart-point: var(--mo-color-text-primary);
+
+    /* ==========================================================================
+     23. MOTION TOKENS
+     Calm, precise, engineered
+     ========================================================================== */
+
+    --mo-duration-instant: 80ms;
+    --mo-duration-fast: 120ms;
+    --mo-duration-base: 200ms;
+    --mo-duration-medium: 320ms;
+    --mo-duration-slow: 400ms;
+    --mo-duration-progress: 800ms;
+    --mo-duration-pulse: 600ms;
+    --mo-duration-splash: 1200ms;
+
+    --mo-ease-standard: ease-out;
+    --mo-ease-system: cubic-bezier(0.4, 0, 0.2, 1);
+    --mo-ease-emphasized: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+    /* ==========================================================================
+     24. Z-INDEX
+     ========================================================================== */
+
+    --mo-z-base: 1;
+    --mo-z-header: 10;
+    --mo-z-nav: 20;
+    --mo-z-overlay: 30;
+    --mo-z-modal: 40;
+    --mo-z-toast: 50;
+
+    /* ==========================================================================
+     25. SPLASH / BRAND INTRO
+     ========================================================================== */
+
+    --mo-splash-bg: var(--mo-color-bg-primary);
+    --mo-splash-line-color: var(--mo-color-accent-system);
+    --mo-splash-node-color: var(--mo-color-accent-system);
+    --mo-splash-wordmark-color: var(--mo-color-text-primary);
+
+    /* ==========================================================================
+     26. CONTENT GATING / PREMIUM
+     ========================================================================== */
+
+    --mo-premium-overlay-bg: rgba(11, 15, 20, 0.56);
+    --mo-premium-overlay-border: rgba(45, 124, 255, 0.24);
+    --mo-premium-blur: 10px;
+    --mo-premium-badge-bg: rgba(45, 124, 255, 0.14);
+    --mo-premium-badge-text: var(--mo-color-accent-system);
+
+    /* ==========================================================================
+     27. SAFE AREAS
+     ========================================================================== */
+
+    --mo-safe-top: env(safe-area-inset-top, 0px);
+    --mo-safe-right: env(safe-area-inset-right, 0px);
+    --mo-safe-bottom: env(safe-area-inset-bottom, 0px);
+    --mo-safe-left: env(safe-area-inset-left, 0px);
+}
+
+/* ==========================================================================
+   OPTIONAL SEMANTIC TOKENS
+   These aliases make engineering implementation easier.
+   ========================================================================== */
+
+:root {
+    /* Surfaces */
+    --background: var(--mo-color-bg-primary);
+    --foreground: var(--mo-color-text-primary);
+
+    --card: var(--mo-card-bg-primary);
+    --card-foreground: var(--mo-color-text-primary);
+
+    --surface-muted: var(--mo-color-surface-secondary);
+    --surface-elevated: var(--mo-color-surface-tertiary);
+
+    --border: var(--mo-color-border-subtle);
+    --border-strong: var(--mo-color-border-strong);
+
+    /* Brand */
+    --primary: var(--mo-color-accent-system);
+    --primary-foreground: var(--mo-color-text-primary);
+
+    --secondary: var(--mo-color-surface-secondary);
+    --secondary-foreground: var(--mo-color-text-primary);
+
+    /* State */
+    --success: var(--mo-color-state-success);
+    --warning: var(--mo-color-state-warning);
+    --destructive: var(--mo-color-state-alert);
+
+    /* Typography */
+    --font-sans: var(--mo-font-sans);
+    --font-mono: var(--mo-font-mono);
+
+    /* Radius */
+    --radius-sm: var(--mo-radius-sm);
+    --radius-md: var(--mo-radius-md);
+    --radius-lg: var(--mo-radius-lg);
+    --radius-xl: var(--mo-radius-xl);
+}
+
+/* ==========================================================================
+   REFERENCE USAGE NOTES
+   - Use tokens only. Avoid hardcoded values.
+   - Prefer semantic aliases in components where possible.
+   - State colors must remain functional, not decorative.
+   - Blue remains the primary MOVE OS system accent.
+   ========================================================================== */

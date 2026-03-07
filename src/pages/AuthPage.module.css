@@ -4,7 +4,7 @@
     align-items: center;
     justify-content: center;
     flex: 1;
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
     background-color: transparent;
     text-align: center;
 }
@@ -12,32 +12,32 @@
 .logo {
     width: 64px;
     height: 64px;
-    background-color: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background-color: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    color: var(--accent);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 32px;
     font-weight: 800;
-    margin-bottom: var(--sp-4);
+    margin-bottom: var(--mo-space-8);
 }
 
 .title {
     font-size: 32px;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--foreground);
     letter-spacing: -0.5px;
-    margin-bottom: var(--sp-2);
+    margin-bottom: var(--mo-space-4);
 }
 
 .subtitle {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     max-width: 280px;
     line-height: 1.5;
-    margin-bottom: var(--sp-6);
+    margin-bottom: var(--mo-space-16);
 }
 
 .authBox {
@@ -45,7 +45,7 @@
     max-width: 320px;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-3);
+    gap: var(--mo-space-6);
 }
 
 .googleBtn {
@@ -55,15 +55,15 @@
     gap: 12px;
     width: 100%;
     height: 48px;
-    background-color: var(--text-primary);
+    background-color: var(--foreground);
     color: var(--bg-base);
     border: none;
     border-radius: var(--radius-md);
-    font-family: var(--font-primary);
+    font-family: var(--font-sans);
     font-size: 15px;
     font-weight: 600;
     cursor: pointer;
-    transition: opacity var(--duration-base);
+    transition: opacity var(--mo-duration-base);
 }
 
 .googleBtn:disabled {
@@ -82,9 +82,9 @@
 
 .disclaimer {
     position: absolute;
-    bottom: var(--sp-6);
+    bottom: var(--mo-space-16);
     font-size: 11px;
-    color: var(--text-secondary);
+    color: var(--mo-color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 1px;
 }

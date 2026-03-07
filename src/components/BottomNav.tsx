@@ -1,13 +1,14 @@
 import styles from './BottomNav.module.css';
 import { NavLink } from 'react-router-dom';
-import { LayoutGrid, ListChecks, LineChart, User } from 'lucide-react';
+import { LayoutGrid, ListChecks, LineChart, User, Compass } from 'lucide-react';
 import { useI18n } from '../i18n/useI18n';
 
 const NAV_ITEMS = [
-    { path: '/', label: 'navHome' as const, Icon: LayoutGrid },
-    { path: '/mission', label: 'navMission' as const, Icon: ListChecks },
+    { path: '/', label: 'Home' as any, Icon: LayoutGrid },
+    { path: '/explore', label: 'Explore' as any, Icon: Compass },
+    { path: '/mission', label: 'Mission' as any, Icon: ListChecks },
     { path: '/progress', label: 'navProgress' as const, Icon: LineChart },
-    { path: '/system', label: 'navSystem' as const, Icon: User },
+    { path: '/profile', label: 'Profile' as any, Icon: User },
 ];
 
 export default function BottomNav() {

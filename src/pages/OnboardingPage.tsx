@@ -230,7 +230,7 @@ export default function OnboardingPage() {
         },
         regulate: {
             title: 'REGULATE',
-            color: 'var(--accent)',
+            color: 'var(--primary)',
             bullets: [
                 'Build local tissue tolerance',
                 'Repattern faulty movement mechanics',
@@ -376,7 +376,7 @@ export default function OnboardingPage() {
                         <div className={styles.formGroup}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <label className={styles.label}>Current Pain Level ({formData.pain_current}/10)</label>
-                                <span className={styles.dynamicLabel} style={{ color: Number(formData.pain_current) >= 6 ? 'var(--state-alert)' : Number(formData.pain_current) >= 3 ? 'var(--state-warning)' : 'var(--accent)' }}>
+                                <span className={styles.dynamicLabel} style={{ color: Number(formData.pain_current) >= 6 ? 'var(--destructive)' : Number(formData.pain_current) >= 3 ? 'var(--warning)' : 'var(--primary)' }}>
                                     {getPainText(Number(formData.pain_current))}
                                 </span>
                             </div>
@@ -565,7 +565,7 @@ export default function OnboardingPage() {
 
                             <button
                                 className={`${styles.wearableBtn} ${formData.wearable_type === 'skip' ? styles.wearableActive : ''}`}
-                                style={{ marginTop: 'var(--sp-4)' }}
+                                style={{ marginTop: 'var(--mo-space-8)' }}
                                 onClick={() => handleWearableSync('skip')}
                             >
                                 <span>Skip for now</span>

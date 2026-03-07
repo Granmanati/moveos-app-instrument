@@ -136,7 +136,7 @@ export default function ProgressPage() {
     const CustomTooltip = ({ active, payload, label }: any) => {
         if (active && payload && payload.length) {
             return (
-                <div style={{ background: '#1A1A1F', border: '1px solid #2A2A35', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
+                <div style={{ background: '#1A1A1F', border: '1px solid #2A2A35', padding: '8px 12px', borderRadius: '8px', fontSize: '12px', color: 'var(--foreground)', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }}>
                     <p style={{ margin: '0 0 4px 0', color: '#8A8F98', fontWeight: 600 }}>{label}</p>
                     <p style={{ margin: 0, color: payload[0].color, fontWeight: 700 }}>
                         {payload[0].name}: {payload[0].value}
@@ -171,10 +171,10 @@ export default function ProgressPage() {
                 )}
 
                 {viewState === 'error' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
-                        <Icon name="error" style={{ color: 'var(--state-warning)' }} size={48} />
-                        <h2 style={{ color: 'var(--text-primary)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
-                        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--mo-space-8)', gap: '16px' }}>
+                        <Icon name="error" style={{ color: 'var(--warning)' }} size={48} />
+                        <h2 style={{ color: 'var(--foreground)', fontSize: '18px', fontWeight: 600 }}>System Error</h2>
+                        <p style={{ color: 'var(--mo-color-text-secondary)', fontSize: '14px' }}>{errorMsg}</p>
                         <div style={{ marginTop: '16px', width: '200px' }}>
                             <PrimaryButton onClick={fetchProgress}>Retry Connection</PrimaryButton>
                         </div>
@@ -184,7 +184,7 @@ export default function ProgressPage() {
                 {viewState === 'success' && (
                     <>
                         {/* Toggle Segment */}
-                        <div className={styles.tabContainer} style={{ width: '100%', marginBottom: 'var(--sp-2)' }}>
+                        <div className={styles.tabContainer} style={{ width: '100%', marginBottom: 'var(--mo-space-4)' }}>
                             <button className={`${styles.tabBtn} ${activeTab === '7d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('7d')}>7 DAYS</button>
                             <button className={`${styles.tabBtn} ${activeTab === '30d' ? styles.tabActive : ''}`} style={{ flex: 1 }} onClick={() => setActiveTab('30d')}>30 DAYS</button>
                         </div>
@@ -229,17 +229,17 @@ export default function ProgressPage() {
                             <div className={styles.chartUI}>
                                 {metrics.sessionVolume === 0 ? (
                                     <div className={styles.emptyConsoleState}>
-                                        <Icon name="timeline" style={{ color: 'var(--text-secondary)' }} size={24} />
+                                        <Icon name="timeline" style={{ color: 'var(--mo-color-text-secondary)' }} size={24} />
                                         <h2>AWAITING SESSION DATA</h2>
                                     </div>
                                 ) : (
                                     <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={chartData} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
-                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--mo-color-text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
                                                 <YAxis hide domain={[0, 1]} />
                                                 <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} content={<CustomTooltip />} />
-                                                <Bar dataKey="completed" name="Completed" fill="var(--accent)" radius={[2, 2, 0, 0]} maxBarSize={16} isAnimationActive={true} />
+                                                <Bar dataKey="completed" name="Completed" fill="var(--primary)" radius={[2, 2, 0, 0]} maxBarSize={16} isAnimationActive={true} />
                                             </BarChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -256,17 +256,17 @@ export default function ProgressPage() {
                             <div className={styles.chartUI}>
                                 {chartData.filter(d => d.pain !== null).length === 0 ? (
                                     <div className={styles.emptyConsoleState}>
-                                        <Icon name="monitoring" style={{ color: 'var(--text-secondary)' }} size={24} />
+                                        <Icon name="monitoring" style={{ color: 'var(--mo-color-text-secondary)' }} size={24} />
                                         <h2>NO PAIN LOGS IN WINDOW</h2>
                                     </div>
                                 ) : (
                                     <div style={{ height: '160px', width: '100%', position: 'relative', marginLeft: '-15px' }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <LineChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
-                                                <YAxis domain={[0, 10]} stroke="#3A3A45" tick={{ fill: 'var(--text-secondary)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={30} />
+                                                <XAxis dataKey="displayDate" stroke="#3A3A45" tick={{ fill: 'var(--mo-color-text-secondary)', fontSize: 10, fontFamily: 'monospace' }} tickMargin={10} axisLine={false} tickLine={false} />
+                                                <YAxis domain={[0, 10]} stroke="#3A3A45" tick={{ fill: 'var(--mo-color-text-secondary)', fontSize: 10, fontFamily: 'monospace' }} axisLine={false} tickLine={false} width={30} />
                                                 <Tooltip content={<CustomTooltip />} />
-                                                <Line type="monotone" dataKey="pain" name="Pain" stroke="var(--state-warning)" strokeWidth={2} dot={{ r: 3, fill: '#101015', stroke: 'var(--state-warning)', strokeWidth: 2 }} activeDot={{ r: 5, fill: 'var(--state-warning)', stroke: '#fff' }} connectNulls={true} />
+                                                <Line type="monotone" dataKey="pain" name="Pain" stroke="var(--warning)" strokeWidth={2} dot={{ r: 3, fill: '#101015', stroke: 'var(--warning)', strokeWidth: 2 }} activeDot={{ r: 5, fill: 'var(--warning)', stroke: 'var(--foreground)' }} connectNulls={true} />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     </div>
@@ -280,10 +280,10 @@ export default function ProgressPage() {
                                 <h2 className={styles.sectionTitle}>LOAD BALANCE</h2>
                                 <span className={styles.chartStatus}>ANALYZED</span>
                             </div>
-                            <div className={styles.chartUI} style={{ padding: 'var(--sp-4)' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--text-secondary)' }}>
-                                    <span>LEFT <strong style={{ color: 'var(--text-primary)' }}>{metrics.loadBalanceLeft}%</strong></span>
-                                    <span><strong style={{ color: 'var(--text-primary)' }}>{metrics.loadBalanceRight}%</strong> RIGHT</span>
+                            <div className={styles.chartUI} style={{ padding: 'var(--mo-space-8)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontFamily: 'var(--font-mono)', fontSize: '11px', color: 'var(--mo-color-text-secondary)' }}>
+                                    <span>LEFT <strong style={{ color: 'var(--foreground)' }}>{metrics.loadBalanceLeft}%</strong></span>
+                                    <span><strong style={{ color: 'var(--foreground)' }}>{metrics.loadBalanceRight}%</strong> RIGHT</span>
                                 </div>
                                 <div className={styles.balanceBarContainer}>
                                     <div className={styles.balanceFillLeft} style={{ width: `${metrics.loadBalanceLeft}%` }} />

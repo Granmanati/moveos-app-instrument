@@ -1,7 +1,7 @@
 .btn {
-    background: var(--accent);
+    background: var(--primary);
     color: white;
-    border: 1px solid var(--accent);
+    border: 1px solid var(--primary);
     border-radius: var(--radius-md);
     font-weight: 600;
     font-size: 15px;
@@ -10,8 +10,8 @@
     justify-content: center;
 
     cursor: pointer;
-    transition: all var(--duration-fast) var(--ease-standard);
-    font-family: var(--font-primary);
+    transition: all var(--mo-duration-fast) var(--mo-ease-standard);
+    font-family: var(--font-sans);
 }
 
 .fullWidth {
@@ -20,19 +20,19 @@
 
 .size-sm {
     height: 36px;
-    padding: 0 var(--sp-3);
+    padding: 0 var(--mo-space-6);
     font-size: 13px;
     border-radius: var(--radius-sm);
 }
 
 .size-md {
     height: 48px;
-    padding: 0 var(--sp-4);
+    padding: 0 var(--mo-space-8);
 }
 
 .size-lg {
     height: 56px;
-    padding: 0 var(--sp-5);
+    padding: 0 var(--mo-space-12);
     font-size: 17px;
 }
 

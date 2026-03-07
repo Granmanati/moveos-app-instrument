@@ -1,35 +1,46 @@
 .headerLockup {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    align-items: center;
+    justify-content: center;
+    padding: var(--mo-space-4) 0;
+    gap: var(--mo-space-2);
 }
 
 .topRow {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: var(--mo-space-2);
 }
 
 .symbol {
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--mo-color-accent-system);
 }
 
 .wordmark {
-    font-size: 16px;
+    font-family: var(--mo-font-sans);
     font-weight: 700;
-    color: var(--text-primary);
-    letter-spacing: 2px;
-    font-family: var(--font-primary);
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    color: var(--mo-color-text-primary);
+}
+
+.title {
+    font-family: var(--mo-font-sans);
+    font-weight: 600;
+    font-size: 18px;
+    letter-spacing: 0.05em;
+    color: var(--mo-color-text-primary);
+    margin-top: var(--mo-space-2);
 }
 
 .sublabel {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--text-secondary);
-    letter-spacing: 0.5px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    opacity: 0.8;
 }

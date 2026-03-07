@@ -1,6 +1,6 @@
 .card {
-    background: var(--surface-subtle);
-    border: 1px solid var(--border-subtle);
+    background: var(--card);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     
     width: 100%;
@@ -13,20 +13,20 @@
 }
 
 .pad-sm {
-    padding: var(--sp-3);
+    padding: var(--mo-space-6);
 }
 
 .pad-md {
-    padding: var(--sp-4);
+    padding: var(--mo-space-8);
 }
 
 .pad-lg {
-    padding: var(--sp-5);
+    padding: var(--mo-space-12);
 }
 
 .interactive {
     cursor: pointer;
-    transition: all var(--duration-base) var(--ease-standard);
+    transition: all var(--mo-duration-base) var(--mo-ease-standard);
 }
 
 .interactive:hover {

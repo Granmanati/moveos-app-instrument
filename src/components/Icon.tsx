@@ -65,7 +65,7 @@ export const Icon: React.FC<IconProps> = ({
 }) => {
     // Active uses accent blue, inactive uses muted color.
     // Explicit override via style prop takes precedence if provided.
-    const color = active ? 'var(--accent)' : 'var(--text-secondary)';
+    const color = active ? 'var(--primary)' : 'var(--mo-color-text-secondary)';
 
     // Fallback to Info if name is not found in map
     const LucideIcon = iconMap[name] || Info;

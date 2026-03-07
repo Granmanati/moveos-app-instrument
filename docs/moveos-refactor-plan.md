@@ -1,153 +1,382 @@
-# MOVE OS UI Refactor Plan
-Version 1.0
+# MOVE OS — Refactor & Stabilization Plan
+Version: 1.0
+Target Quality: 9.8 / 10
+Status: Implementation Roadmap
 
-Objective:
+This document defines the required refactor actions to stabilize the MOVE OS codebase.
 
-Transform the current interface into a consistent MOVE OS system.
-
-Refactoring will occur in controlled phases.
-
----
-
-# Phase 1 — Design Token System
-
-Goal:
-
-Centralize all visual constants.
-
-Tasks:
-
-• define color tokens: Map new HEX codes and remove `rgba()` opacity hacks.
-  - Background Primary: `#0B0F14` (Current `--bg-default` is `#070A12`)
-  - Text Primary: `#F4F7FB` (Current `--text-primary` is `rgba(255, 255, 255, 0.92)`)
-  - Text Secondary: `#8A93A3` (Current `--text-secondary` is `rgba(255, 255, 255, 0.65)`)
-  - Surface Subtle: `#141A22` (Current uses `--surface-1/2/3`)
-  - Border Subtle: `#1C2430` (Current uses `--border-1/2`)
-• define typography tokens: Import `IBM Plex Mono` to `index.css` (currently missing).
-• define spacing tokens: Ensure strict adherence to 8px grid.
-• define border and radius tokens: Set default card radius to 12-16px.
-• **Purge Rule Violators**: Delete `--glow-accent`, `--glow-border`, `linear-gradient` in buttons, and `radial-gradient` in `body` from `index.css` immediately. Delete `--ease-bounce` (`iconBounce`).
-
-All hardcoded styling must be removed.
-
-Example tokens:
-
-COLOR_BACKGROUND_PRIMARY
-COLOR_SYSTEM_ACCENT
-COLOR_STATE_SUCCESS
-COLOR_STATE_WARNING
-COLOR_STATE_ALERT
+The objective is to transform the current AI-generated structure into a **clean, scalable product architecture**.
 
 ---
 
-# Phase 2 — UI Primitives
+# 1. Refactor Objectives
 
-Goal:
+MOVE OS must achieve:
 
-Standardize foundational components.
+• fast load time  
+• consistent UI structure  
+• reusable components  
+• predictable routing  
+• clean separation between UI and logic  
 
-Components to refactor in `src/components/ui/`:
+Current problems detected:
 
-`PrimaryButton` & `SecondaryButton`: Remove linear gradients and drop shadows. Make them flat with 1px border.  
-`Card` (Missing primitive): Extract `metricCard`, `upgradeCard`, `sessionCard` from `HomePage.css` and `ProfilePage.css` into a unified `<Card>` primitive using `#141A22` and `1px solid #1C2430`.  
-`Input`  
-`StatusBadge`: Refactor to use only `#18B67A` (Success), `#E8A23A` (Warning), `#E45462` (Alert). Remove arbitrary colors.  
-`VideoHUDPreview`: Remove scrim linear gradients.
-
-Requirements:
-
-• use tokens only  
-• remove custom styling variations  
-• enforce consistent spacing
+• duplicated headers  
+• inconsistent layouts  
+• orphan pages  
+• sequential API calls blocking UI  
+• oversized loading states  
 
 ---
 
-# Phase 3 — Dashboard Refactor
+# 2. Target Architecture
 
-Target: `src/pages/HomePage.tsx`
+Final project structure:
 
-Goal:
 
-Redesign the main system screen. Remove the "motivational" greeting (e.g. `Hola, Atleta`) and replace it with strict system state labels.
+src/
 
-Elements required:
+components/
+SystemHeader
+BottomNav
+SystemCard
+MetricCard
+ExerciseCard
+Timeline
 
-System Status (Currently mapped as "Phase of Inicial", needs generic technical state mapping)  
-Return Rate (Currently "Sessions", needs mapping to technical return rate)  
-Active Mission (Currently "Generate Today's Session", needs a structural mission block)  
-Daily Progress (7-day timeline needs technical refresh)  
+layout/
+AppShell
 
-The dashboard must clearly communicate:
+pages/
+HomePage
+MissionPage
+ExplorePage
+ProgressPage
+SystemPage
 
-system state first.
+context/
+AuthContext
+SystemContext
+
+services/
+supabaseClient
+systemEngine
+
+hooks/
+useSession
+useProgress
+useMission
+
+styles/
+tokens.css
+
+
+This structure eliminates duplicated logic and enforces modular design.
 
 ---
 
-# Phase 4 — Mode Screens
+# 3. Critical Refactor Phase 1
+### Routing Cleanup
 
-Refactor each Mode to follow system rules.
+Target routes must be:
 
-Modes:
 
-LevelMove Mode  
-Recovery Mode  
-Performance Mode  
+/
+Home
 
-Each mode must:
+/mission
+MissionPage
 
-• reuse global components
-• maintain system consistency
-• only adjust emphasis
+/explore
+ExplorePage
+
+/progress
+ProgressPage
+
+/system
+SystemPage
+
+
+Actions:
+
+• remove old `/profile` route  
+• remove duplicate Explore routes  
+• ensure BottomNav matches routing  
 
 ---
 
-# Phase 5 — Structural Interface Layer
+# 4. Header Standardization
 
-Introduce subtle system architecture visuals.
+Problem:
+
+Multiple pages define their own headers.
+
+Solution:
+
+All pages must use:
+
+<SystemHeader /> ```
+
+Pages must pass header configuration through props.
+
+Example:
+
+<AppShell
+  title="MISSION"
+  subtitle="Execute adaptation protocol"
+>
+
+No page should manually implement headers.
+
+5. Layout Normalization
+
+Current problem:
+
+Some pages inject content directly outside layout rules.
+
+Solution:
+
+All pages must follow:
+
+<AppShell>
+   PageContent
+</AppShell>
+
+AppShell responsibilities:
+
+• header rendering
+• spacing control
+• bottom navigation
+
+Pages only define content blocks.
+
+6. Loading Optimization
+
+Current problem:
+
+Sequential network calls.
+
+Example waterfall:
+
+getSession
+
+refreshSubscription
+
+fetchProfile
+
+Solution:
+
+Parallel loading.
+
+Example pattern:
+
+Promise.all([
+  getSession(),
+  fetchProfile(),
+])
+
+UI must render immediately using skeleton components.
+
+Never block UI.
+
+7. Skeleton UI
+
+Replace full-screen loaders with skeleton blocks.
 
 Examples:
 
-• thin connection lines
-• node markers
-• partial frame segments
+Home:
 
-Must remain subtle.
+SystemCardSkeleton
+MetricCardSkeleton
 
----
+Mission:
 
-# Phase 6 — Motion Layer
+ExerciseCardSkeleton
+TimelineSkeleton
 
-Introduce motion elements:
+Progress:
 
-• node activation
-• progress movement
-• subtle system transitions
+ChartSkeleton
 
-No playful animations allowed.  
-**Critical Action**: Remove `iconBounce` and `--ease-bounce` from `BottomNav.module.css` and `index.css`. Replace with linear fast fades.
+This ensures perceived performance < 100ms.
 
----
+8. Mission Refactor
 
-# Phase 7 — Landing Page Alignment
+Mission currently behaves partially like a feed.
 
-Marketing pages must follow the same design system.
+Target structure:
+
+SessionContext
+SessionProgress
+ExecutionTimeline
+ExerciseBlocks
+CompletionState
+
+Remove:
+
+• large video dominance
+• unstructured lists
+
+Mission must behave like an execution pipeline.
+
+9. Explore Refactor
+
+Explore remains part of navigation.
+
+But it must follow feed rules.
+
+Structure:
+
+VideoFeed
+ContentCard
+EducationalSnippet
+ExerciseTechnique
+
+Feed must support:
+
+• infinite scroll
+• premium gating
+• content tagging
+
+10. Progress Refactor
+
+Progress must only show system metrics.
+
+Allowed metrics:
+
+• Return Consistency
+• Session Volume
+• Pain Trend
+• Load Balance
+
+Remove:
+
+• social-style statistics
+• irrelevant charts
+
+11. System Screen Migration
+
+Profile page must be fully replaced.
+
+New page:
+
+SystemPage
+
+Blocks:
+
+Identity
+Subscription
+SystemMetrics
+Settings
+Version
+SignOut
+
+Rename all references from Profile → System.
+
+12. Bottom Navigation
+
+Final navigation order:
+
+Home
+Mission
+Explore
+Progress
+System
+
+Rules:
+
+• icons 24px
+• label optional
+• active tab = blue
+
+13. Icon System Implementation
+
+Icons must come from a single library.
+
+Recommended:
+
+Lucide Icons
+
+Stroke width:
+
+1.5
+
+Size:
+
+24px
+
+No filled icons.
+
+14. Motion Implementation
+
+Motion must follow MOVE OS motion rules.
+
+Durations:
+
+120ms
+200ms
+400ms
+
+Examples:
+
+• timeline activation
+• card transitions
+• progress bar updates
 
 Avoid:
 
-marketing visual language that differs from product UI.
+• bounce
+• elastic motion
 
----
+15. Performance Targets
 
-# Expected Outcome
+MOVE OS must achieve:
 
-After refactor:
+First paint < 500ms
+UI visible < 100ms
+Route transitions < 200ms
 
-MOVE OS should visually communicate:
+Techniques:
 
-• a real operating system
-• adaptive intelligence
-• premium technology product
+• lazy load pages
+• parallel API calls
+• skeleton UI
 
----
+16. Branding Consistency
 
-# End of Document
+MOVE OS logo must appear in:
+
+• header
+• splash screen
+• onboarding
+
+Structure:
+
+symbol + MOVE OS wordmark
+17. Splash Screen
+
+Add startup animation.
+
+Structure:
+
+MOVE OS symbol
+fade in
+line animation
+transition to Home
+
+Duration:
+
+1.2s
+18. Final Quality Checklist
+
+Before release verify:
+
+• headers consistent
+• routing clean
+• no duplicate pages
+• no full-screen loaders
+• spacing consistent
+• skeleton states implemented
+
+End of Refactor Plan

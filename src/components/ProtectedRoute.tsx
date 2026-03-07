@@ -16,9 +16,9 @@ export default function ProtectedRoute() {
     if (isLoading || !profile) {
         return (
             <AppShell hideNav={true}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: 'var(--sp-4)', marginTop: '10vh' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: 'var(--mo-space-8)', marginTop: '10vh' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-                        <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', letterSpacing: '1.2px', color: 'var(--accent)', fontWeight: 600, animation: 'pulse 1.5s infinite ease-in-out' }}>SYSTEM INITIALIZING</div>
+                        <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', letterSpacing: '1.2px', color: 'var(--primary)', fontWeight: 600, animation: 'pulse 1.5s infinite ease-in-out' }}>SYSTEM INITIALIZING</div>
                         <Skeleton width={180} height={20} borderRadius="var(--radius-full)" />
                     </div>
                     <SkeletonCard style={{ height: 160 }} />

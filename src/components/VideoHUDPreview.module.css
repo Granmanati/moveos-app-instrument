@@ -2,7 +2,7 @@
     position: relative;
     width: 100%;
     height: 100%;
-    background: var(--surface-subtle);
+    background: var(--card);
     display: flex;
     flex-direction: column;
     border-radius: inherit;
@@ -34,7 +34,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--surface-subtle);
+    background: var(--card);
     position: absolute;
     inset: 0;
     z-index: 0;
@@ -50,9 +50,9 @@
 
 .topRow {
     position: absolute;
-    top: var(--sp-3);
-    left: var(--sp-3);
-    right: var(--sp-3);
+    top: var(--mo-space-6);
+    left: var(--mo-space-6);
+    right: var(--mo-space-6);
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -65,19 +65,19 @@
     font-weight: 600;
     letter-spacing: 0.8px;
     text-transform: uppercase;
-    color: var(--text-primary);
+    color: var(--foreground);
     background: rgba(11, 15, 20, 0.6);
     padding: 4px 10px;
     border-radius: 20px;
     backdrop-filter: blur(8px);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
 }
 
 .muteToggle {
     background: rgba(11, 15, 20, 0.6);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
     backdrop-filter: blur(8px);
-    color: var(--text-primary);
+    color: var(--foreground);
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -90,19 +90,19 @@
 
 .overlayContent {
     position: absolute;
-    bottom: var(--sp-4);
-    left: var(--sp-4);
-    right: var(--sp-4);
+    bottom: var(--mo-space-8);
+    left: var(--mo-space-8);
+    right: var(--mo-space-8);
     z-index: 2;
     display: flex;
     flex-direction: column;
-    gap: var(--sp-2);
+    gap: var(--mo-space-4);
 }
 
 .cardTitle {
     font-size: 20px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--foreground);
     line-height: 1.2;
     margin: 0;
 }
@@ -118,9 +118,9 @@
     font-size: 11px;
     font-family: var(--font-mono);
     font-weight: 500;
-    color: var(--text-primary);
+    color: var(--foreground);
     background: rgba(20, 26, 34, 0.8);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--border);
     padding: 4px 10px;
     border-radius: 20px;
     backdrop-filter: blur(4px);
