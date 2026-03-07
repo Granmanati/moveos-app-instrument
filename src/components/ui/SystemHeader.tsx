@@ -2,7 +2,7 @@ import styles from './SystemHeader.module.css';
 
 interface SystemHeaderProps {
     symbolOnly?: boolean;
-    sublabel?: "SYSTEM ACTIVE" | "ADAPTIVE MOVEMENT SYSTEM" | "MOVEMENT OPERATING SYSTEM";
+    sublabel?: string;
 }
 
 export function SystemHeader({ symbolOnly = false, sublabel = "SYSTEM ACTIVE" }: SystemHeaderProps) {

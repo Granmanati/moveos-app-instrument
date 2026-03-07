@@ -5,9 +5,9 @@ import { useI18n } from '../i18n/useI18n';
 
 const NAV_ITEMS = [
     { path: '/', label: 'navHome' as const, Icon: LayoutGrid },
-    { path: '/today', label: 'navMission' as const, Icon: ListChecks },
+    { path: '/mission', label: 'navMission' as const, Icon: ListChecks },
     { path: '/progress', label: 'navProgress' as const, Icon: LineChart },
-    { path: '/profile', label: 'navSystem' as const, Icon: User },
+    { path: '/system', label: 'navSystem' as const, Icon: User },
 ];
 
 export default function BottomNav() {

@@ -1,0 +1,27 @@
+.skeleton {
+    background: linear-gradient(90deg,
+            var(--bg-card-hover) 0%,
+            rgba(255, 255, 255, 0.08) 50%,
+            var(--bg-card-hover) 100%);
+    background-size: 200% 100%;
+    animation: pulse 1.5s infinite ease-in-out;
+}
+
+.skeletonCard {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: var(--sp-4);
+    display: flex;
+    flex-direction: column;
+}
+
+@keyframes pulse {
+    0% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}

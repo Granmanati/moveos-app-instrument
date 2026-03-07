@@ -7,6 +7,7 @@ import { Icon } from '../components/Icon';
 import { safeSelect } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
 
 export default function ProgressPage() {
     const { user } = useAuth();
@@ -147,19 +148,25 @@ export default function ProgressPage() {
     };
 
     return (
-        <AppShell>
+        <AppShell sublabel="SYSTEM LOGS">
             <div className={styles.page}>
-                <header className={styles.header}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <p style={{ fontSize: '12px', letterSpacing: '1.2px', color: 'var(--accent)', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>MOVE OS</p>
-                    </div>
-                    <h1 className={styles.title} style={{ marginTop: '8px' }}>Progress</h1>
-                </header>
 
                 {viewState === 'loading' && (
-                    <div style={{ display: 'flex', flexDirection: 'column', height: '50vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                        <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                        <p style={{ marginTop: '16px', fontSize: '14px' }}>Aggregating system logs...</p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Skeleton width={150} height={28} />
+                            <Skeleton width={80} height={28} borderRadius="var(--radius-full)" />
+                        </div>
+                        <SkeletonCard style={{ height: 250 }} />
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+                            <Skeleton width={120} height={24} />
+                        </div>
+                        <SkeletonCard style={{ height: 200 }} />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                            <SkeletonCard style={{ height: 100 }} />
+                            <SkeletonCard style={{ height: 100 }} />
+                        </div>
                     </div>
                 )}
 

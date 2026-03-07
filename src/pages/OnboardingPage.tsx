@@ -193,7 +193,7 @@ export default function OnboardingPage() {
             }
             await refreshProfile();
             localStorage.removeItem(ONBOARDING_STATE_KEY);
-            navigate('/today', { state: { isNewOnboarding: true } });
+            navigate('/mission', { state: { isNewOnboarding: true } });
         } catch (e) {
             console.error(e);
         } finally {
@@ -210,7 +210,7 @@ export default function OnboardingPage() {
             }
             await refreshProfile();
             localStorage.removeItem(ONBOARDING_STATE_KEY);
-            navigate('/today', { state: { isNewOnboarding: true } });
+            navigate('/mission', { state: { isNewOnboarding: true } });
         } catch (e) {
             console.error(e);
         } finally {

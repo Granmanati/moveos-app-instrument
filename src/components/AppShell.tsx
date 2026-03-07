@@ -3,30 +3,23 @@ import BottomNav from './BottomNav';
 import styles from './AppShell.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLocation } from 'react-router-dom';
+import { SystemHeader } from './ui/SystemHeader';
 
 interface AppShellProps {
-    title?: ReactNode;
-    subtitle?: ReactNode;
-    customHeader?: ReactNode;
+    sublabel?: string;
     hideNav?: boolean;
     children: ReactNode;
 }
 
-export default function AppShell({ title, subtitle, customHeader, hideNav = false, children }: AppShellProps) {
+export default function AppShell({ sublabel, hideNav = false, children }: AppShellProps) {
     const location = useLocation();
 
     return (
         <div className={styles.shell}>
             <div className={styles.systemOverlay} />
-            {customHeader ? (
-                <div className={styles.headerWrapper}>{customHeader}</div>
-            ) : (title || subtitle) ? (
-                <header className={styles.header}>
-                    <div className={styles.brandLabel}>MOVE OS</div>
-                    {title && <h1 className={styles.title}>{title}</h1>}
-                    {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
-                </header>
-            ) : null}
+            <div className={styles.headerWrapper}>
+                <SystemHeader sublabel={sublabel} />
+            </div>
 
             <main className={`${styles.content} ${hideNav ? styles.contentFullHeight : ''}`}>
                 <AnimatePresence mode="wait">

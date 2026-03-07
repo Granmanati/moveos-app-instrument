@@ -7,11 +7,11 @@ import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import { SystemHeader } from '../components/ui/SystemHeader';
 import { SystemStatusIndicator } from '../components/ui/SystemStatusIndicator';
 import { PrimaryCard } from '../components/ui/PrimaryCard';
 import { MetricCard } from '../components/ui/MetricCard';
 import { MetricBar } from '../components/ui/MetricBar';
+import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
 import { useI18n } from '../i18n/useI18n';
 
 interface HomeSnapshot {
@@ -104,7 +104,7 @@ export default function HomePage() {
     }
 
     return (
-        <AppShell customHeader={<SystemHeader />}>
+        <AppShell sublabel="SYSTEM ACTIVE">
 
             {errorMsg && viewState === 'error' && (
                 <div style={{ background: 'rgba(228, 84, 98, 0.1)', color: 'var(--state-alert)', border: '1px solid rgba(228, 84, 98, 0.2)', padding: 'var(--sp-3)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', marginBottom: 'var(--sp-4)' }}>
@@ -114,9 +114,30 @@ export default function HomePage() {
             )}
 
             {viewState === 'loading' ? (
-                <div style={{ textAlign: 'center', padding: '3rem 0', color: 'var(--text-secondary)' }}>
-                    <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                    <p style={{ marginTop: '12px', fontSize: '14px' }}>{t('homeCalibrating')}</p>
+                <div className={styles.dashboardLayout}>
+                    {/* 1. System Status Skeleton */}
+                    <section className={styles.systemStatusSection}>
+                        <div className={styles.nodeIdentity}>
+                            <Skeleton height={20} width={120} style={{ marginBottom: 4 }} />
+                            <Skeleton height={32} width={200} />
+                        </div>
+                        <Skeleton height={28} width={150} borderRadius="var(--radius-full)" />
+                    </section>
+
+                    {/* 2. Active Mission Skeleton */}
+                    <section className={styles.section}>
+                        <Skeleton height={20} width={150} style={{ marginBottom: 16 }} />
+                        <SkeletonCard style={{ height: 160 }} />
+                    </section>
+
+                    {/* 3. System Metrics Skeleton */}
+                    <section className={styles.section}>
+                        <Skeleton height={20} width={150} style={{ marginBottom: 16 }} />
+                        <div className={styles.metricsGrid}>
+                            <SkeletonCard style={{ height: 120 }} />
+                            <SkeletonCard style={{ height: 120 }} />
+                        </div>
+                    </section>
                 </div>
             ) : snapshot ? (
                 <div className={styles.dashboardLayout}>
@@ -148,7 +169,7 @@ export default function HomePage() {
                                 </div>
                             ) : (
                                 <div style={{ marginTop: '16px' }}>
-                                    <PrimaryButton onClick={() => navigate('/today')}>
+                                    <PrimaryButton onClick={() => navigate('/mission')}>
                                         EXECUTE ADAPTATION
                                     </PrimaryButton>
                                 </div>

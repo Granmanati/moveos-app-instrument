@@ -96,11 +96,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const fetchProfile = async (userId: string) => {
         try {
-            // Refresh subscription state (expire stale trials) first
-            const { data: refreshedData } = await supabase.rpc('refresh_subscription_state');
-            if (refreshedData) {
-                // The RPC returns updated fields, but we still fetch full profile
-            }
+            // Background refresh subscription state (expire stale trials) to avoid blocking UI render
+            Promise.resolve(supabase.rpc('refresh_subscription_state')).catch((err: any) => console.error('Silent refresh failed:', err));
 
             const { data, error } = await supabase
                 .from('user_profile')

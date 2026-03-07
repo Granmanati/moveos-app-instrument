@@ -1,5 +1,5 @@
-import { useEffect, useState, useRef } from 'react';
-import styles from './TodayPage.module.css';
+import { useEffect, useState } from 'react';
+import styles from './MissionPage.module.css';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -9,9 +9,9 @@ import { Icon } from '../components/Icon';
 import { VideoHUDPreview } from '../components/VideoHUDPreview';
 import { safeSelect, safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
-import { SystemHeader } from '../components/ui/SystemHeader';
 import { PrimaryCard } from '../components/ui/PrimaryCard';
 import { MissionCard } from '../components/ui/MissionCard';
+import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
 
 interface ExerciseLibrary {
     id: number | string;
@@ -38,7 +38,7 @@ interface SessionExercise {
     session_exercise_logs: SessionExerciseLog[];
 }
 
-export default function TodayPage() {
+export default function MissionPage() {
     const { user, profile } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
@@ -236,7 +236,7 @@ export default function TodayPage() {
     const remainingBlocks = exercises.filter(ex => !ex.is_completed && ex.id !== currentBlock?.id && ex.id !== nextBlock?.id);
 
     return (
-        <AppShell customHeader={<SystemHeader />}>
+        <AppShell sublabel="ADAPTIVE MOVEMENT SYSTEM">
 
             {viewState === 'error' && (
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: 'var(--sp-8) var(--sp-4)', gap: '16px' }}>
@@ -250,9 +250,16 @@ export default function TodayPage() {
             )}
 
             {viewState === 'loading' && (
-                <div style={{ display: 'flex', flexDirection: 'column', height: '60vh', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)' }}>
-                    <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} size={32} />
-                    <p style={{ marginTop: '16px', fontSize: '14px' }}>Loading movement pipeline...</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', width: '100%', padding: 'var(--sp-4)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Skeleton width={180} height={32} />
+                        <Skeleton width={100} height={20} />
+                    </div>
+                    <Skeleton width="100%" height={40} borderRadius="var(--radius-full)" />
+                    <Skeleton width="60%" height={28} style={{ marginTop: '16px' }} />
+                    <SkeletonCard style={{ height: 350 }} />
+                    <Skeleton width="40%" height={28} style={{ marginTop: '24px' }} />
+                    <SkeletonCard style={{ height: 100 }} />
                 </div>
             )}
 
@@ -291,8 +298,6 @@ export default function TodayPage() {
                                 <div className={styles.progressBarFill} style={{ width: `${totalCount > 0 ? (completedCount / totalCount) * 100 : 0}%` }} />
                             </div>
                         </div>
-                    </section>
-
                     </motion.section>
 
                     <AnimatePresence mode="popLayout">
@@ -387,7 +392,7 @@ export default function TodayPage() {
                                     title={getBlockName(nextBlock.block_order)}
                                     subtitle={`${nextBlock.exercise_library?.name}`}
                                     duration={`${nextBlock.sets}x${nextBlock.reps_min}-${nextBlock.reps_max}`}
-                                    status="upcoming"
+                                    status="pending"
                                 />
                             </motion.section>
                         )}
@@ -411,42 +416,39 @@ export default function TodayPage() {
                     </AnimatePresence>
 
                     {/* Action Footer */}
-            <div className={styles.actionFooter}>
-                <PrimaryButton
-                    disabled={!allCompleted || session.state === 'completed'}
-                    onClick={handleCompleteSession}
-                >
-                    {session.state === 'completed' ? 'MISSION ALREADY VERIFIED' : 'VERIFY MISSION COMPLETION'}
-                </PrimaryButton>
-            </div>
+                    <div className={styles.actionFooter}>
+                        <PrimaryButton
+                            disabled={!allCompleted || session.state === 'completed'}
+                            onClick={handleCompleteSession}
+                        >
+                            {session.state === 'completed' ? 'MISSION ALREADY VERIFIED' : 'VERIFY MISSION COMPLETION'}
+                        </PrimaryButton>
+                    </div>
 
-        </div>
-    )
-}
+                </div>
+            )}
 
-{
-    showPremiumGate && (
-        <div className={styles.modalOverlay}>
-            <div className={styles.modalContent}>
-                <div className={styles.modalIconBox}>
-                    <Icon name="lock" size={32} />
+            {showPremiumGate && (
+                <div className={styles.modalOverlay}>
+                    <div className={styles.modalContent}>
+                        <div className={styles.modalIconBox}>
+                            <Icon name="lock" size={32} />
+                        </div>
+                        <h2 className={styles.modalTitle}>SYSTEM ENGINE LOCK</h2>
+                        <p className={styles.modalText}>
+                            Enable dynamic load adjustment and execution tracking.
+                        </p>
+                        <div className={styles.modalActions}>
+                            <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
+                                UPGRADE PIPELINE
+                            </button>
+                            <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)}>
+                                ACKNOWLEDGE
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <h2 className={styles.modalTitle}>SYSTEM ENGINE LOCK</h2>
-                <p className={styles.modalText}>
-                    Enable dynamic load adjustment and execution tracking.
-                </p>
-                <div className={styles.modalActions}>
-                    <button className={styles.primaryBtn} onClick={() => navigate('/pricing')}>
-                        UPGRADE PIPELINE
-                    </button>
-                    <button className={styles.ghostBtn} onClick={() => setShowPremiumGate(false)}>
-                        ACKNOWLEDGE
-                    </button>
-                </div>
-            </div>
-        </div>
-    )
-}
-        </AppShell >
+            )}
+        </AppShell>
     );
 }
