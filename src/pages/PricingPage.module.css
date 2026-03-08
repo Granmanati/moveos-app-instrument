@@ -1,270 +1,229 @@
 .container {
-    padding-bottom: 120px;
-}
-
-.header {
+    min-height: 100vh;
+    background: var(--mo-color-bg-primary);
     display: flex;
     flex-direction: column;
-    padding: var(--mo-space-16) var(--mo-space-8) var(--mo-space-8);
-    position: relative;
-    text-align: center;
+    padding: 20px 16px 40px;
+    gap: 16px;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
 }
 
 .backBtn {
-    position: absolute;
-    left: var(--mo-space-8);
-    top: var(--mo-space-16);
-    background: transparent;
-    border: none;
-    color: var(--foreground);
-    cursor: pointer;
-    padding: 8px;
-    margin: -8px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: var(--mo-color-text-primary);
+    cursor: pointer;
+    margin-top: 2px;
 }
 
 .headerText {
-    margin-top: var(--mo-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 }
 
-.brandSubtitle {
-    font-size: 11px;
-    letter-spacing: 1.2px;
-    color: var(--primary);
+.brandLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.12em;
     font-weight: 700;
-    margin-bottom: var(--mo-space-4);
 }
 
 .title {
-    font-size: 32px;
-    font-weight: 900;
-    color: var(--foreground);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    margin: 0;
+    line-height: 1.2;
 }
 
-.toggleContainer {
-    display: flex;
-    justify-content: center;
-    margin-bottom: var(--mo-space-16);
-}
-
-.toggleTrack {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 4px;
-    display: flex;
-    gap: 4px;
-}
-
-.toggleBtn {
-    background: transparent;
-    border: none;
-    color: var(--mo-color-text-secondary);
-    padding: 8px 16px;
-    border-radius: 100px;
+.subtitle {
     font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    color: var(--mo-color-text-secondary);
+    margin: 0;
 }
 
-.toggleActive {
-    background: rgba(255, 255, 255, 0.1);
-    color: var(--foreground);
-    
+/* Trial banner */
+.trialBanner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(45, 124, 255, 0.08);
+    border: 1px solid rgba(45, 124, 255, 0.2);
+    border-radius: 10px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.04em;
 }
 
-.plansContainer {
+/* Plans grid */
+.plansGrid {
     display: flex;
     flex-direction: column;
-    gap: var(--mo-space-8);
-    padding: 0 var(--mo-space-8);
+    gap: 10px;
 }
 
 .planCard {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--mo-space-12);
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 16px;
     display: flex;
     flex-direction: column;
+    gap: 12px;
     position: relative;
     overflow: hidden;
-    transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
-.planPremium {
-    background: var(--border);
-    border: 1px solid var(--border);
-    
+.planHighlight {
+    border-color: rgba(45, 124, 255, 0.4);
+    background: rgba(45, 124, 255, 0.04);
 }
 
-.planFree {
-    opacity: 0.8;
-}
-
-.planHeader {
-    margin-bottom: var(--mo-space-8);
-    padding-bottom: var(--mo-space-8);
-    border-bottom: 1px solid var(--border);
-}
-
-.planTitleRow {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--mo-space-4);
-}
-
-.planTitleRow h2 {
-    font-size: 20px;
-    font-weight: 800;
-    color: var(--primary);
+.planCurrent {
+    border-color: var(--mo-color-border-strong);
 }
 
 .popularBadge {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    font-weight: 800;
-    background: var(--primary);
-    color: var(--foreground);
-    padding: 4px 8px;
-    border-radius: 100px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--mo-color-accent-system);
+    color: #fff;
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 10px;
+    border-radius: 0 16px 0 10px;
 }
 
-.priceRow {
+.planHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.planName {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.02em;
+}
+
+.planPricing {
     display: flex;
     align-items: baseline;
-    gap: 4px;
-    margin-bottom: var(--mo-space-4);
+    gap: 2px;
 }
 
-.priceRow .price {
-    font-size: 36px;
-    font-weight: 900;
-    color: var(--foreground);
-    letter-spacing: -1px;
+.planPrice {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
 }
 
-.priceRow .period {
-    font-size: 14px;
-    font-weight: 600;
+.planPeriod {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
     color: var(--mo-color-text-secondary);
 }
 
-.planDesc {
-    font-size: 13px;
+/* Feature list */
+.featureList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.featureItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: 12px;
     color: var(--mo-color-text-secondary);
     line-height: 1.4;
 }
 
-.features {
-    margin-bottom: var(--mo-space-16);
-    flex-grow: 1;
-}
-
-.features ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.features li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    font-size: 14px;
-    color: var(--foreground);
-    font-weight: 500;
-}
-
-.checkIcon {
-    color: var(--mo-color-text-secondary);
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.checkIconAccent {
-    color: var(--primary);
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.actionContainer {
-    margin-top: auto;
-}
-
-.primaryBtn {
+/* CTA Buttons */
+.planBtn {
     width: 100%;
-    height: 48px;
-    background: var(--card);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: 15px;
+    height: 40px;
+    border-radius: 10px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
     font-weight: 700;
+    letter-spacing: 0.08em;
     cursor: pointer;
-    
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--mo-color-border-subtle);
+    background: var(--mo-color-surface-tertiary);
+    color: var(--mo-color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all var(--mo-duration-fast);
 }
 
-.primaryBtn:active {
-    transform: scale(0.98);
+.planBtn:hover:not(:disabled) {
+    background: var(--mo-color-border-strong);
 }
 
-.secondaryBtn {
-    width: 100%;
-    height: 48px;
-    background: var(--card);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease;
+.planBtn:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
-.secondaryBtn:active {
-    background: var(--card);
+.planBtnPrimary {
+    background: var(--mo-color-accent-system);
+    border-color: var(--mo-color-accent-system);
+    color: #fff;
 }
 
-.currentPlanBtn {
-    width: 100%;
-    height: 48px;
+.planBtnPrimary:hover:not(:disabled) {
+    opacity: 0.88;
+    background: var(--mo-color-accent-system);
+}
+
+.planBtnCurrent {
     background: transparent;
-    color: var(--mo-color-text-secondary);
-    border: 1px dashed var(--border);
-    border-radius: var(--radius-md);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
-    cursor: not-allowed;
+    border-color: var(--mo-color-border-strong);
+    color: var(--mo-color-text-tertiary);
 }
 
-.footerActions {
-    margin-top: var(--mo-space-16);
-    padding: 0 var(--mo-space-8);
-}
-
+/* Ghost back button */
 .ghostBtn {
-    width: 100%;
-    height: 48px;
     background: transparent;
     border: none;
-    color: var(--mo-color-text-secondary);
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
+    color: var(--mo-color-text-tertiary);
+    font-size: 13px;
     cursor: pointer;
+    padding: 8px 0;
+    text-align: center;
+    transition: color var(--mo-duration-fast);
+}
+
+.ghostBtn:hover {
+    color: var(--mo-color-text-secondary);
 }

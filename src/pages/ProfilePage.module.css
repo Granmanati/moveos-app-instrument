@@ -1,25 +1,25 @@
 .page {
     display: flex;
     flex-direction: column;
-    padding: var(--mo-space-4) var(--mo-space-6) 120px;
-    gap: var(--mo-space-8);
+    padding: 12px 16px 120px;
+    gap: 12px;
 }
 
 /* Node Identity Block */
 .identityBlock {
     display: flex;
     align-items: center;
-    gap: var(--mo-space-4);
+    gap: 12px;
     background: var(--mo-color-surface-secondary);
-    padding: var(--mo-space-4) var(--mo-space-5);
-    border-radius: var(--mo-radius-lg);
+    padding: 14px 16px;
+    border-radius: 16px;
     border: 1px solid var(--mo-color-border-subtle);
 }
 
 .avatarPlaceholder {
-    width: 48px;
-    height: 48px;
-    border-radius: var(--mo-radius-pill);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
     background: var(--mo-color-surface-tertiary);
     display: flex;
     align-items: center;
@@ -31,79 +31,136 @@
 .identityData {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
+    flex: 1;
 }
 
 .nodeName {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 15px;
+    font-weight: 700;
     margin: 0;
     color: var(--mo-color-text-primary);
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
 }
 
 .memberSince {
     font-family: var(--mo-font-mono);
-    font-size: 10px;
-    color: var(--mo-color-text-secondary);
-    letter-spacing: 0.05em;
-    margin-top: 2px;
+    font-size: 9px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
 }
 
 .phaseLabel {
     font-family: var(--mo-font-mono);
-    font-size: 10px;
+    font-size: 9px;
     color: var(--mo-color-accent-system);
-    letter-spacing: 0.05em;
-    margin-top: 2px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.planBadge {
+    flex-shrink: 0;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-strong);
+    color: var(--mo-color-text-secondary);
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.planActive {
+    background: rgba(45, 124, 255, 0.12);
+    border-color: rgba(45, 124, 255, 0.3);
+    color: var(--mo-color-accent-system);
 }
 
 /* Metrics Grid */
 .metricsGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--mo-space-3);
+    gap: 8px;
 }
 
-/* Sections */
-.section {
+/* Subscription Card */
+.subscriptionCard {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: var(--mo-space-4);
+    gap: 0;
+}
+
+.subRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--mo-color-border-subtle);
+}
+
+.subRow:last-of-type {
+    border-bottom: none;
+}
+
+.subLabel {
+    font-size: 13px;
+    color: var(--mo-color-text-secondary);
+}
+
+.subValue {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.06em;
+}
+
+.statusActive {
+    color: var(--mo-color-state-success, #4CAF7D);
+}
+
+.statusFree {
+    color: var(--mo-color-text-tertiary);
 }
 
 .manageBtn {
+    margin-top: 12px;
     background: var(--mo-color-surface-tertiary);
     color: var(--mo-color-text-primary);
     border: 1px solid var(--mo-color-border-subtle);
-    border-radius: var(--mo-radius-md);
-    padding: 0 var(--mo-space-4);
-    height: 40px;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 0.05em;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+    border-radius: 10px;
+    padding: 0 16px;
+    height: 38px;
+    font-weight: 700;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
     width: 100%;
     cursor: pointer;
-    transition: all var(--mo-duration-fast) var(--mo-ease-system);
+    transition: background var(--mo-duration-fast);
 }
 
 .manageBtn:hover {
     background: var(--mo-color-border-strong);
 }
 
-/* Settings Entry Card */
+/* Settings Entry */
 .settingsEntry {
     display: flex;
     align-items: center;
     justify-content: space-between;
     background: var(--mo-color-surface-secondary);
     border: 1px solid var(--mo-color-border-subtle);
-    border-radius: var(--mo-radius-lg);
-    padding: var(--mo-space-4);
+    border-radius: 16px;
+    padding: 14px 16px;
     cursor: pointer;
     transition: background var(--mo-duration-fast);
 }
@@ -115,13 +172,13 @@
 .entryInfo {
     display: flex;
     align-items: center;
-    gap: var(--mo-space-4);
+    gap: 12px;
 }
 
 .entryIconBox {
     width: 36px;
     height: 36px;
-    border-radius: var(--mo-radius-md);
+    border-radius: 10px;
     background: var(--mo-color-surface-tertiary);
     display: flex;
     align-items: center;
@@ -132,7 +189,7 @@
 .entryText {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 1px;
 }
 
 .entryTitle {
