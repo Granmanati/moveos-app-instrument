@@ -7,8 +7,8 @@ const NAV_ITEMS = [
     { path: '/', label: 'Home' as any, Icon: LayoutGrid },
     { path: '/explore', label: 'Explore' as any, Icon: Compass },
     { path: '/mission', label: 'Mission' as any, Icon: ListChecks },
-    { path: '/progress', label: 'navProgress' as const, Icon: LineChart },
-    { path: '/profile', label: 'Profile' as any, Icon: User },
+    { path: '/progress', label: 'Progress' as any, Icon: LineChart },
+    { path: '/profile', label: 'System' as any, Icon: User },
 ];
 
 export default function BottomNav() {

@@ -1,46 +1,56 @@
 .headerLockup {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    padding: var(--mo-space-4) 0;
-    gap: var(--mo-space-2);
+    justify-content: space-between;
+    height: 56px;
+    padding: 0 16px;
+    border-bottom: 1px solid var(--mo-color-border-subtle);
+    background: var(--mo-color-bg-primary);
 }
 
-.topRow {
+.leftBlock {
     display: flex;
     align-items: center;
-    gap: var(--mo-space-2);
+    gap: 10px;
 }
 
 .symbol {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--mo-color-accent-system);
+    flex-shrink: 0;
+}
+
+.textBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
 }
 
 .wordmark {
     font-family: var(--mo-font-sans);
     font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
     letter-spacing: 0.1em;
     color: var(--mo-color-text-primary);
-}
-
-.title {
-    font-family: var(--mo-font-sans);
-    font-weight: 600;
-    font-size: 18px;
-    letter-spacing: 0.05em;
-    color: var(--mo-color-text-primary);
-    margin-top: var(--mo-space-2);
+    line-height: 1;
 }
 
 .sublabel {
     font-family: var(--mo-font-mono);
-    font-size: 11px;
+    font-size: 9px;
     color: var(--mo-color-text-tertiary);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    line-height: 1;
+}
+
+.screenTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--mo-color-text-secondary);
+    letter-spacing: 0.12em;
     text-transform: uppercase;
 }

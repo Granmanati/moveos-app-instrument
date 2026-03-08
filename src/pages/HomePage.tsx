@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import styles from './HomePage.module.css';
-
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AppShell from '../components/AppShell';
@@ -13,6 +12,7 @@ import { MetricCard } from '../components/ui/MetricCard';
 import { MetricBar } from '../components/ui/MetricBar';
 import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
 import { useI18n } from '../i18n/useI18n';
+import { motion } from 'framer-motion';
 
 interface HomeSnapshot {
     today: string;
@@ -153,28 +153,30 @@ export default function HomePage() {
                     {/* 2. Active Mission */}
                     <section className={styles.section}>
                         <h3 className={styles.sectionTitle}>ACTIVE MISSION</h3>
-                        <PrimaryCard
-                            title={snapshot.today_session ? `PHASE: ${snapshot.today_session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
-                            subtitle={snapshot.today_session && snapshot.today_session.state === 'completed' ? 'MISSION ALIGNED AND COMPLETED' : 'ADAPTIVE PROTOCOL READY'}
-                        >
-                            {!snapshot.today_session ? (
-                                <div style={{ marginTop: '16px' }}>
-                                    <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
-                                        {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'GENERATE PROTOCOL'}
-                                    </PrimaryButton>
-                                </div>
-                            ) : snapshot.today_session.state === 'completed' ? (
-                                <div className={styles.missionCompletedState}>
-                                    <Icon name="check_circle" size={32} style={{ color: 'var(--success)' }} />
-                                </div>
-                            ) : (
-                                <div style={{ marginTop: '16px' }}>
-                                    <PrimaryButton onClick={() => navigate('/mission')}>
-                                        EXECUTE ADAPTATION
-                                    </PrimaryButton>
-                                </div>
-                            )}
-                        </PrimaryCard>
+                        <motion.div whileHover={{ scale: 1.015 }} transition={{ duration: 0.2 }}>
+                            <PrimaryCard
+                                title={snapshot.today_session ? `PHASE: ${snapshot.today_session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
+                                subtitle={snapshot.today_session && snapshot.today_session.state === 'completed' ? 'MISSION ALIGNED AND COMPLETED' : 'ADAPTIVE PROTOCOL READY'}
+                            >
+                                {!snapshot.today_session ? (
+                                    <div style={{ marginTop: '16px' }}>
+                                        <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
+                                            {generating ? <Icon name="autorenew" style={{ animation: 'spin 1s linear infinite' }} /> : 'GENERATE PROTOCOL'}
+                                        </PrimaryButton>
+                                    </div>
+                                ) : snapshot.today_session.state === 'completed' ? (
+                                    <div className={styles.missionCompletedState}>
+                                        <Icon name="check_circle" size={32} style={{ color: 'var(--success)' }} />
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: '16px' }}>
+                                        <PrimaryButton onClick={() => navigate('/mission')}>
+                                            START SESSION
+                                        </PrimaryButton>
+                                    </div>
+                                )}
+                            </PrimaryCard>
+                        </motion.div>
                     </section>
 
                     {/* 3. System Metrics */}

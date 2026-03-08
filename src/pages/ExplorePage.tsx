@@ -4,54 +4,96 @@ import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { PrimaryButton } from '../components/ui/PrimaryButton';
+import { motion } from 'framer-motion';
 
-// Mock data to hydrate the visual design
-const DISCOVERY_FEED = [
+const CATEGORIES = [
+    { id: 'pain', label: 'Pain Relief' },
+    { id: 'mobility', label: 'Mobility' },
+    { id: 'strength', label: 'Strength' },
+    { id: 'recovery', label: 'Recovery' },
+    { id: 'posture', label: 'Posture' },
+    { id: 'injuries', label: 'Injuries' },
+];
+
+const FEED_ITEMS = [
     {
         id: '1',
-        type: 'video',
+        premium: false,
         title: 'Spinal Articulation Protocol',
         category: 'MOBILITY',
-        duration: '12:45',
+        duration: '12 min',
+        expert: 'Dr. Ana Torres',
         thumbnail: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     {
         id: '2',
-        type: 'premium_insight',
-        title: 'Deep Tissue Release & Isometrics',
-        description: 'Advanced protocols for chronic localized pain.',
-    },
-    {
-        id: '3',
-        type: 'video',
-        title: 'Neuromuscular Activation',
+        premium: true,
+        title: 'Neuromuscular Re-Activation',
         category: 'TRAINING',
-        duration: '08:20',
+        duration: '8 min',
+        expert: 'Felipe Ruiz, PT',
         thumbnail: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     },
     {
-        id: '4',
-        type: 'video',
+        id: '3',
+        premium: false,
         title: 'Post-Load Autonomic Recovery',
         category: 'RECOVERY',
-        duration: '15:00',
+        duration: '15 min',
+        expert: 'María Gómez, PhD',
         thumbnail: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    }
+    },
+    {
+        id: '4',
+        premium: true,
+        title: 'Deep Tissue Release & Isometrics',
+        category: 'PAIN RELIEF',
+        duration: '10 min',
+        expert: 'Dr. Carlos Vera',
+        thumbnail: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+        id: '5',
+        premium: false,
+        title: 'Hip Controlled Articular Rotation',
+        category: 'MOBILITY',
+        duration: '6 min',
+        expert: 'Laura Sanz, PT',
+        thumbnail: 'https://images.unsplash.com/photo-1590987337591-47bcd1f4f69b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
 ];
+
+const containerVariants = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.08 } },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' as const } },
+};
 
 export default function ExplorePage() {
     const { tier } = useAuth();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
+    const filteredFeed = FEED_ITEMS.filter(item => {
+        const matchesSearch = !searchQuery || item.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesCategory = !activeCategory || item.category.toLowerCase().includes(activeCategory);
+        return matchesSearch && matchesCategory;
+    });
+
+    const isLocked = (item: typeof FEED_ITEMS[0]) => item.premium && tier === 'free';
 
     return (
         <AppShell title="EXPLORE" sublabel="Movement knowledge engine">
             <div className={styles.page}>
 
-                {/* 2. Search bar */}
+                {/* Search bar */}
                 <div className={styles.searchContainer}>
-                    <Icon name="search" size={20} className={styles.searchIcon} />
+                    <Icon name="search" size={18} className={styles.searchIcon} />
                     <input
                         type="text"
                         className={styles.searchInput}
@@ -59,63 +101,86 @@ export default function ExplorePage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
+                    {searchQuery && (
+                        <button className={styles.searchClear} onClick={() => setSearchQuery('')}>
+                            <Icon name="close" size={16} />
+                        </button>
+                    )}
                 </div>
 
-                {/* 5. Exercise Library Entry */}
-                <div className={styles.libraryCard} onClick={() => console.log('Navigate to library')}>
-                    <div className={styles.libraryInfo}>
-                        <Icon name="menu_book" size={24} className={styles.libraryIcon} />
-                        <div>
-                            <h3 className={styles.libraryTitle}>System Library</h3>
-                            <span className={styles.librarySub}>View full exercise index</span>
-                        </div>
-                    </div>
-                    <Icon name="arrow_forward" size={20} className={styles.libraryArrow} />
+                {/* Category horizontal scroll */}
+                <div className={styles.categoryScroll}>
+                    <button
+                        className={`${styles.categoryChip} ${activeCategory === null ? styles.chipActive : ''}`}
+                        onClick={() => setActiveCategory(null)}
+                    >
+                        All
+                    </button>
+                    {CATEGORIES.map(cat => (
+                        <button
+                            key={cat.id}
+                            className={`${styles.categoryChip} ${activeCategory === cat.id ? styles.chipActive : ''}`}
+                            onClick={() => setActiveCategory(activeCategory === cat.id ? null : cat.id)}
+                        >
+                            {cat.label}
+                        </button>
+                    ))}
                 </div>
 
-                {/* 3 & 4. Discover Feed */}
-                <div className={styles.feedContainer}>
-                    {DISCOVERY_FEED.map((item) => {
-                        if (item.type === 'premium_insight') {
-                            return (
-                                <div key={item.id} className={styles.premiumCard}>
-                                    <div className={styles.premiumIconBox}>
-                                        <Icon name="lock" size={24} />
+                {/* Content feed */}
+                <motion.div
+                    className={styles.feedContainer}
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="show"
+                >
+                    {filteredFeed.map(item => (
+                        <motion.div key={item.id} className={styles.feedCard} variants={itemVariants} whileHover={{ scale: 1.02 }}>
+                            {/* Thumbnail */}
+                            <div
+                                className={styles.thumbnail}
+                                style={{ backgroundImage: `url(${item.thumbnail})` }}
+                            >
+                                {isLocked(item) ? (
+                                    <div className={styles.lockedOverlay}>
+                                        <Icon name="lock" size={28} />
+                                        <span>PREMIUM</span>
                                     </div>
-                                    <div className={styles.premiumContent}>
-                                        <span className={styles.premiumLabel}>PREMIUM PROTOCOL</span>
-                                        <h3 className={styles.premiumTitle}>{item.title}</h3>
-                                        <p className={styles.premiumDesc}>{item.description}</p>
-                                    </div>
-                                    {tier === 'free' ? (
-                                        <PrimaryButton onClick={() => navigate('/pricing')}>UNLOCK PREMIUM</PrimaryButton>
-                                    ) : (
-                                        <PrimaryButton onClick={() => console.log('Access premium protocol')}>ACCESS PROTOCOL</PrimaryButton>
-                                    )}
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <div key={item.id} className={styles.videoCard}>
-                                <div className={styles.videoWrapper} style={{ backgroundImage: `url(${item.thumbnail})` }}>
-                                    <div className={styles.videoOverlay}>
-                                        <div className={styles.playButton}>
-                                            <Icon name="play_arrow" size={32} />
+                                ) : (
+                                    <div className={styles.playOverlay}>
+                                        <div className={styles.playBtn}>
+                                            <Icon name="play_arrow" size={28} />
                                         </div>
                                     </div>
-                                    <div className={styles.videoBadges}>
-                                        <span className={styles.categoryTag}>{item.category}</span>
-                                        <span className={styles.durationTag}>{item.duration}</span>
-                                    </div>
+                                )}
+                                <span className={styles.durationBadge}>{item.duration}</span>
+                                {item.premium && (
+                                    <span className={styles.premiumBadge}>PREMIUM</span>
+                                )}
+                            </div>
+
+                            {/* Card info */}
+                            <div className={styles.cardInfo}>
+                                <div className={styles.cardMeta}>
+                                    <span className={styles.categoryTag}>{item.category}</span>
                                 </div>
-                                <div className={styles.videoInfo}>
-                                    <h3 className={styles.videoTitle}>{item.title}</h3>
+                                <h3 className={styles.cardTitle}>{item.title}</h3>
+                                <div className={styles.cardFooter}>
+                                    <span className={styles.expertName}>{item.expert}</span>
+                                    {isLocked(item) ? (
+                                        <button className={styles.unlockBtn} onClick={() => navigate('/pricing')}>
+                                            UNLOCK
+                                        </button>
+                                    ) : (
+                                        <button className={styles.watchBtn}>
+                                            WATCH
+                                        </button>
+                                    )}
                                 </div>
                             </div>
-                        );
-                    })}
-                </div>
+                        </motion.div>
+                    ))}
+                </motion.div>
 
             </div>
         </AppShell>

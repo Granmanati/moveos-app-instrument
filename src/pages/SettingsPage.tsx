@@ -109,11 +109,11 @@ export default function SettingsPage() {
                     </div>
                 </section>
 
-                {/* System Info */}
+                {/* System */}
                 <section className={styles.section}>
-                    <h3 className={styles.sectionTitle}>System Info</h3>
+                    <h3 className={styles.sectionTitle}>System</h3>
                     <div className={styles.rowGroup}>
-                        {renderRow('info', 'MOVE OS Version', <span className={styles.metaText}>v1.0.0</span>)}
+                        {renderRow('info', 'MOVE OS Version', <span className={styles.metaText}>v1.2.0</span>)}
                         {renderRow('description', 'Terms & Conditions')}
                         {renderRow('policy', 'Privacy Policy')}
                     </div>
