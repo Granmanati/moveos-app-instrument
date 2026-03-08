@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import styles from './TodayPage.module.css';
-import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -267,7 +266,6 @@ function ExerciseDetailSheet({ ex, onClose }: { ex: SessionExercise; onClose: ()
 // ── Main TodayPage ──────────────────────────────────────────────────────────
 export default function TodayPage() {
     const { user, profile } = useAuth();
-    const navigate = useNavigate();
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [session, setSession] = useState<any>(null);
