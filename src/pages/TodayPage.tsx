@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from './TodayPage.module.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -8,9 +9,10 @@ import { Icon } from '../components/Icon';
 import { safeSelect, safeRpc } from '../lib/db';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 import { SkeletonCard } from '../components/ui/Skeleton';
+import { useAdaptiveEngine } from '../engine/useAdaptiveEngine';
+import { EngineAuditPanel } from '../components/ui/EngineAuditPanel';
 
-// ── Types ──────────────────────────────────────────────────────────────────
-interface ExerciseLibrary {
+export interface ExerciseLibrary {
     id: number | string;
     name: string;
     pattern: string;
@@ -18,7 +20,7 @@ interface ExerciseLibrary {
     level: number;
 }
 
-interface SessionExercise {
+export interface SessionExercise {
     id: number | string;
     is_completed: boolean;
     status: string;
@@ -30,7 +32,7 @@ interface SessionExercise {
     exercise_library: ExerciseLibrary;
 }
 
-type GroupKey = 'Recovery' | 'Mobility' | 'Activation' | 'Strength';
+export type GroupKey = 'Recovery' | 'Mobility' | 'Activation' | 'Strength';
 
 const PATTERN_TO_GROUP: Record<string, GroupKey> = {
     recovery: 'Recovery',
@@ -70,11 +72,12 @@ function getThumbnail(id: number | string): string {
 
 // ── Exercise Card ───────────────────────────────────────────────────────────
 function ExerciseCard({
-    ex, index, onTap, onToggle,
+    ex, index, onTap, onToggle, loadModifier
 }: {
     ex: SessionExercise; index: number;
     onTap: (ex: SessionExercise) => void;
     onToggle: (id: number | string) => void;
+    loadModifier?: string;
 }) {
     return (
         <motion.div
@@ -91,6 +94,11 @@ function ExerciseCard({
                 {ex.is_completed && (
                     <div className={styles.exDoneOverlay}>
                         <Icon name="check_circle" size={20} />
+                    </div>
+                )}
+                {loadModifier && loadModifier !== 'maintain' && (
+                    <div className={`${styles.loadBadge} ${loadModifier === 'reduce' ? styles.loadReduce : styles.loadIncrease}`}>
+                        {loadModifier === 'reduce' ? '↓' : '↑'} {loadModifier.toUpperCase()}
                     </div>
                 )}
             </div>
@@ -113,12 +121,13 @@ function ExerciseCard({
 
 // ── Collapsible Group ───────────────────────────────────────────────────────
 function ExerciseGroup({
-    group, exercises, onTap, onToggle,
+    group, exercises, onTap, onToggle, loadModifier
 }: {
     group: GroupKey;
     exercises: SessionExercise[];
     onTap: (ex: SessionExercise) => void;
     onToggle: (id: number | string) => void;
+    loadModifier?: string;
 }) {
     const [open, setOpen] = useState(true);
     const done = exercises.filter(e => e.is_completed).length;
@@ -145,7 +154,14 @@ function ExerciseGroup({
                         className={styles.groupContent}
                     >
                         {exercises.map((ex, i) => (
-                            <ExerciseCard key={ex.id} ex={ex} index={i} onTap={onTap} onToggle={onToggle} />
+                            <ExerciseCard
+                                key={ex.id}
+                                ex={ex}
+                                index={i}
+                                onTap={onTap}
+                                onToggle={onToggle}
+                                loadModifier={loadModifier}
+                            />
                         ))}
                     </motion.div>
                 )}
@@ -266,16 +282,18 @@ function ExerciseDetailSheet({ ex, onClose }: { ex: SessionExercise; onClose: ()
 // ── Main TodayPage ──────────────────────────────────────────────────────────
 export default function TodayPage() {
     const { user, profile } = useAuth();
+    const navigate = useNavigate();
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'empty' | 'success'>('loading');
     const [session, setSession] = useState<any>(null);
     const [exercises, setExercises] = useState<SessionExercise[]>([]);
     const [errorMsg, setErrorMsg] = useState('');
     const [generating, setGenerating] = useState(false);
-    const [sessionStarted, setSessionStarted] = useState(false);
     const [showDetail, setShowDetail] = useState<SessionExercise | null>(null);
     const [showFeedback, setShowFeedback] = useState(false);
     const [feedbackDone, setFeedbackDone] = useState(false);
+
+    const engine = useAdaptiveEngine();
 
     const fetchSession = async () => {
         if (!user) return;
@@ -305,6 +323,30 @@ export default function TodayPage() {
 
     useEffect(() => { fetchSession(); }, [user]); // eslint-disable-line
 
+    const handleStartSession = () => {
+        // Transform exercises into blocks for the execution engine
+        const groupMap: Record<GroupKey, SessionExercise[]> = {
+            Recovery: [],
+            Mobility: [],
+            Activation: [],
+            Strength: [],
+        };
+
+        exercises.forEach(ex => {
+            const group = PATTERN_TO_GROUP[ex.exercise_library.pattern.toLowerCase()] || 'Recovery';
+            groupMap[group].push(ex);
+        });
+
+        const blocks = (['Recovery', 'Mobility', 'Activation', 'Strength'] as GroupKey[])
+            .filter(key => groupMap[key].length > 0)
+            .map(key => ({
+                name: key,
+                exercises: groupMap[key].sort((a, b) => (a.block_order || 0) - (b.block_order || 0))
+            }));
+
+        navigate('/session/play', { state: { blocks } });
+    };
+
     const handleGenerate = async () => {
         setGenerating(true);
         try {
@@ -333,12 +375,26 @@ export default function TodayPage() {
     const groups: Record<GroupKey, SessionExercise[]> = { Recovery: [], Mobility: [], Activation: [], Strength: [] };
     exercises.forEach(ex => { groups[getGroup(ex.exercise_library.pattern)].push(ex); });
 
-    const phase = session?.phase?.toUpperCase() ?? 'REGULATE';
+    const phase = engine.output?.phase.toUpperCase() ?? session?.phase?.toUpperCase() ?? 'REGULATE';
+    const protocolType = engine.output?.protocolType.toUpperCase() ?? 'ADAPTIVE';
+    const sessionGoal = engine.output?.sessionGoal ?? 'Adaptive execution protocol';
+    const safetyBlocked = engine.output?.safetyBlocked ?? false;
+    const safetyNotes = engine.output?.audit.safetyNotes ?? [];
     const displayName = profile?.full_name || 'USER';
 
     return (
         <AppShell title="TODAY" sublabel="Daily protocol">
             <div className={styles.page}>
+                {safetyBlocked && (
+                    <div className={styles.safetyBlock}>
+                        <Icon name="block" size={24} />
+                        <div className={styles.safetyBody}>
+                            <span className={styles.safetyTitle}>SESSION BLOCKED</span>
+                            <span className={styles.safetyDesc}>The adaptive engine has restricted session execution due to safety flags or high strain markers.</span>
+                            {safetyNotes.map((n, i) => <span key={i} className={styles.safetyNote}>· {n}</span>)}
+                        </div>
+                    </div>
+                )}
 
                 {/* Error banner */}
                 {errorMsg && (
@@ -378,13 +434,11 @@ export default function TodayPage() {
                             <div className={styles.protocolMeta}>
                                 <div className={styles.protocolLeft}>
                                     <span className={styles.protocolLabel}>{displayName.toUpperCase()} · {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }).toUpperCase()}</span>
-                                    <span className={styles.protocolPhase}>PHASE: {phase}</span>
-                                    <span className={styles.protocolGoal}>
-                                        {phase === 'REGULATE' ? 'Reduce load · restore baseline movement' :
-                                            phase === 'RECOVER' ? 'Rebuild tissue tolerance and capacity' :
-                                                phase === 'REINFORCE' ? 'Strengthen adaptive responses and load tolerance' :
-                                                    'Adaptive execution protocol'}
-                                    </span>
+                                    <div className={styles.protocolBadgesRow}>
+                                        <span className={styles.protocolPhase}>PHASE: {phase}</span>
+                                        <span className={styles.protocolTypeBadge}>{protocolType}</span>
+                                    </div>
+                                    <span className={styles.protocolGoal}>{sessionGoal}</span>
                                 </div>
                                 <div className={styles.protocolBadge}>
                                     <span className={styles.protocolDuration}>~{Math.max(20, exercises.length * 5)} min</span>
@@ -405,8 +459,8 @@ export default function TodayPage() {
                                 <span className={styles.progressText}>{completedCount}/{exercises.length} blocks</span>
                             </div>
 
-                            {!sessionStarted && session.state !== 'completed' && (
-                                <PrimaryButton onClick={() => setSessionStarted(true)}>
+                            {session.state !== 'completed' && (
+                                <PrimaryButton onClick={handleStartSession}>
                                     START SESSION
                                 </PrimaryButton>
                             )}
@@ -419,22 +473,24 @@ export default function TodayPage() {
                         </div>
 
                         {/* 2. Execution Blocks */}
-                        {(sessionStarted || session.state === 'completed') && (
-                            <div className={styles.groupsStack}>
-                                {GROUP_ORDER.filter(g => groups[g].length > 0).map(g => (
+                        <div className={styles.groupsStack}>
+                            {GROUP_ORDER.filter(g => groups[g].length > 0).map(g => {
+                                const engineBlock = engine.output?.blocks.find(b => b.group.toLowerCase() === g.toLowerCase());
+                                return (
                                     <ExerciseGroup
                                         key={g}
                                         group={g}
                                         exercises={groups[g]}
                                         onTap={setShowDetail}
                                         onToggle={toggleExercise}
+                                        loadModifier={engineBlock?.loadModifier}
                                     />
-                                ))}
-                            </div>
-                        )}
+                                );
+                            })}
+                        </div>
 
                         {/* 3. Feedback CTA — when all done */}
-                        {allDone && !feedbackDone && sessionStarted && (
+                        {allDone && !feedbackDone && (
                             <motion.div
                                 className={styles.feedbackCTA}
                                 initial={{ opacity: 0, y: 8 }}
@@ -468,6 +524,11 @@ export default function TodayPage() {
                                 Exit criteria: Adherence ≥ 80% · Pain ≤ 3/10 for 5 consecutive sessions
                             </p>
                         </div>
+
+                        {/* Engine Audit Panel — dev tool */}
+                        {engine.output && engine.input && (
+                            <EngineAuditPanel output={engine.output} input={engine.input} />
+                        )}
                     </>
                 )}
             </div>

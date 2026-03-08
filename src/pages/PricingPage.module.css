@@ -1,9 +1,10 @@
 .container {
-    min-height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
     background: var(--mo-color-bg-primary);
     display: flex;
     flex-direction: column;
-    padding: 20px 16px 40px;
+    padding: 20px 16px 20px;
     gap: 16px;
     max-width: 430px;
     margin: 0 auto;
@@ -85,10 +86,10 @@
     background: var(--mo-color-surface-secondary);
     border: 1px solid var(--mo-color-border-subtle);
     border-radius: 16px;
-    padding: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     position: relative;
     overflow: hidden;
 }
@@ -136,7 +137,7 @@
 }
 
 .planPrice {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     color: var(--mo-color-text-primary);
 }

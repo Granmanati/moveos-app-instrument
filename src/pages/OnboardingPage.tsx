@@ -17,6 +17,7 @@ export default function OnboardingPage() {
     const [errorMsg, setErrorMsg] = useState('');
     const [showPaywall, setShowPaywall] = useState(false);
     const [billingCycle, setBillingCycle] = useState<'monthly' | 'annually'>('annually');
+    const [showInjuryHistory, setShowInjuryHistory] = useState(false);
 
     const [formData, setFormData] = useState({
         full_name: '',
@@ -250,7 +251,7 @@ export default function OnboardingPage() {
 
     if (showPaywall) {
         return (
-            <div className={styles.page} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div className={styles.page}>
                 <div className={styles.paywallOverlay}>
                     <div className={styles.paywallContent}>
                         <div className={styles.paywallHeader}>
@@ -286,8 +287,11 @@ export default function OnboardingPage() {
                             <button className={styles.primaryBtn} onClick={handleStartTrial} disabled={loading}>
                                 {loading ? 'Initializing...' : 'Start 7-day trial'}
                             </button>
-                            <button className={styles.secondaryBtn} onClick={handleNotNow} disabled={loading}>
-                                Not now, continue to Home
+                            <button className={styles.secondaryBtn} onClick={handleNotNow} disabled={loading} style={{ marginTop: 4, fontWeight: 600, color: 'var(--foreground)' }}>
+                                Continue with Free
+                            </button>
+                            <button className={styles.secondaryBtn} onClick={handleNotNow} disabled={loading} style={{ fontSize: 13, opacity: 0.7 }}>
+                                Maybe later
                             </button>
                         </div>
                     </div>
@@ -309,12 +313,19 @@ export default function OnboardingPage() {
                     <div className={styles.backSpace} />
                 )}
 
-                <div className={styles.progressContainer}>
-                    <div className={styles.progressText}>STEP {step} OF 6</div>
-                    <div className={styles.progressBar}>
-                        <div className={styles.progressFill} style={{ width: `${(step / 6) * 100}%` }} />
+                {step <= 6 && (
+                    <div className={styles.progressContainer}>
+                        <div className={styles.progressText}>STEP {step} OF 6</div>
+                        <div className={styles.progressBar}>
+                            <div className={styles.progressFill} style={{ width: `${(step / 6) * 100}%` }} />
+                        </div>
                     </div>
-                </div>
+                )}
+                {step === 7 && (
+                    <div className={styles.progressContainer}>
+                        <div className={styles.progressText} style={{ color: 'var(--primary)' }}>CALIBRATION COMPLETE</div>
+                    </div>
+                )}
 
                 <div className={styles.backSpace} />
             </div>
@@ -404,15 +415,25 @@ export default function OnboardingPage() {
                         </div>
 
                         <div className={styles.formGroup}>
-                            <label className={styles.label}>Injury History (Optional)</label>
-                            <textarea
-                                name="injury_history"
-                                value={formData.injury_history}
-                                onChange={handleChange}
-                                placeholder="e.g., right ankle sprain 6 months ago"
-                                className={styles.textarea}
-                                rows={2}
-                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowInjuryHistory(!showInjuryHistory)}
+                                style={{ background: 'transparent', border: 'none', color: 'var(--mo-color-text-secondary)', textAlign: 'left', fontWeight: 600, fontSize: 13, cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+                            >
+                                <Icon name={showInjuryHistory ? "expand_less" : "expand_more"} size={16} />
+                                {showInjuryHistory ? 'Hide' : 'Add'} Injury History (Optional)
+                            </button>
+                            {showInjuryHistory && (
+                                <textarea
+                                    name="injury_history"
+                                    value={formData.injury_history}
+                                    onChange={handleChange}
+                                    placeholder="e.g., right ankle sprain 6 months ago"
+                                    className={styles.textarea}
+                                    rows={2}
+                                    autoFocus
+                                />
+                            )}
                         </div>
                     </div>
                 )}
@@ -605,9 +626,11 @@ export default function OnboardingPage() {
                 {step <= 6 ? (
                     <button className={styles.primaryBtn} onClick={handleNext}>Continue</button>
                 ) : (
-                    <button className={styles.primaryBtn} onClick={handleGenerateSession} disabled={loading}>
-                        {loading ? 'Initializing Engine...' : 'Generate First Session ⚡'}
-                    </button>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+                        <button className={styles.primaryBtn} onClick={handleGenerateSession} disabled={loading}>
+                            {loading ? 'Initializing Engine...' : 'Generate First Session ⚡'}
+                        </button>
+                    </div>
                 )}
             </div>
         </div>

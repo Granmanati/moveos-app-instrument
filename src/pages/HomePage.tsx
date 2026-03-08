@@ -11,6 +11,8 @@ import { MetricBar } from '../components/ui/MetricBar';
 import { SkeletonCard } from '../components/ui/Skeleton';
 import { useI18n } from '../i18n/useI18n';
 import { motion } from 'framer-motion';
+import { useAdaptiveEngine } from '../engine/useAdaptiveEngine';
+import { EngineAuditPanel } from '../components/ui/EngineAuditPanel';
 
 interface HomeSnapshot {
     today: string;
@@ -23,25 +25,47 @@ interface HomeSnapshot {
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
-// Deterministic insight from real data
-function getInsight(snapshot: HomeSnapshot): string {
-    if (snapshot.avg_pain_7d >= 6) return 'High pain load detected. Session intensity should be reduced this cycle.';
-    if (snapshot.adherence_7d < 40) return 'Consistency below threshold. System adaptation is impaired without regular stimulus.';
-    if (snapshot.adherence_7d >= 80 && snapshot.avg_pain_7d < 3) return 'Optimal adaptation window. System responding well to current protocol.';
-    if (snapshot.sessions_30d <= 4) return 'Low session volume this month. Increase frequency to drive adaptive response.';
-    return 'System progressing within expected adaptation parameters.';
-}
+const STATE_COLORS: Record<string, string> = {
+    aligned: 'var(--mo-color-state-success, #4CAF7D)',
+    compensating: 'var(--mo-color-state-warning, #F5A623)',
+    risk: 'var(--mo-color-state-alert, #F05A67)',
+};
 
-function getSysState(snapshot: HomeSnapshot): { label: string; desc: string; color: string; state: 'nominal' | 'load' | 'alert' } {
-    if (snapshot.avg_pain_7d >= 6) return { label: 'HIGH STRAIN', desc: 'Pain load exceeds optimal threshold', color: 'var(--mo-color-state-alert, #F05A67)', state: 'alert' };
-    if (snapshot.avg_pain_7d >= 3 || snapshot.adherence_7d < 50) return { label: 'COMPENSATING', desc: 'System adapting under suboptimal conditions', color: 'var(--mo-color-state-warning, #F5A623)', state: 'load' };
-    return { label: 'NOMINAL', desc: 'All systems operating within protocol range', color: 'var(--mo-color-state-success, #4CAF7D)', state: 'nominal' };
-}
+const STATE_LABELS: Record<string, string> = {
+    aligned: 'NOMINAL',
+    compensating: 'COMPENSATING',
+    risk: 'HIGH STRAIN',
+};
+
+const STATE_DESCS: Record<string, string> = {
+    aligned: 'All systems operating within protocol range',
+    compensating: 'System adapting under suboptimal conditions',
+    risk: 'Pain load exceeds safe threshold',
+};
+
+const STATE_ICONS: Record<string, string> = {
+    aligned: 'check_circle',
+    compensating: 'warning',
+    risk: 'error',
+};
+
+const DECISION_ICONS: Record<string, string> = {
+    progress: 'trending_up',
+    hold: 'pause_circle',
+    regress: 'trending_down',
+};
+
+const DECISION_LABELS: Record<string, string> = {
+    progress: 'PROGRESSING',
+    hold: 'HOLDING',
+    regress: 'REGRESSING',
+};
 
 export default function HomePage() {
     const { user, profile } = useAuth();
     const navigate = useNavigate();
     const { t } = useI18n();
+    const engine = useAdaptiveEngine();
 
     const [viewState, setViewState] = useState<'loading' | 'error' | 'success'>('loading');
     const [snapshot, setSnapshot] = useState<HomeSnapshot | null>(null);
@@ -83,9 +107,17 @@ export default function HomePage() {
     };
 
     const session = snapshot?.today_session ?? null;
-    const sys = snapshot ? getSysState(snapshot) : null;
-    const insight = snapshot ? getInsight(snapshot) : null;
     const adherence = Math.min(snapshot?.adherence_7d ?? 0, 100);
+
+    // Engine-driven values — fall back to snapshot-derived values while engine loads
+    const engineState = engine.output?.systemState ?? 'aligned';
+    const sysColor = STATE_COLORS[engineState];
+    const sysLabel = STATE_LABELS[engineState];
+    const sysDesc = STATE_DESCS[engineState];
+    const sysIcon = STATE_ICONS[engineState];
+    const insight = engine.output?.adaptiveMessage ?? null;
+    const sessionGoal = engine.output?.sessionGoal ?? null;
+    const progressionDecision = engine.output?.progressionDecision ?? null;
     const displayName = profile?.full_name || 'USER';
 
     // Weekly dots — always 7, starting Monday
@@ -141,15 +173,19 @@ export default function HomePage() {
                             <div className={styles.sysLeft}>
                                 <span className={styles.sysNodeLabel}>NODE · {displayName.toUpperCase()}</span>
                                 <div className={styles.sysStateRow}>
-                                    <div className={styles.sysDot} style={{ background: sys!.color }} />
-                                    <span className={styles.sysStateLabel} style={{ color: sys!.color }}>{sys!.label}</span>
+                                    <div className={styles.sysDot} style={{ background: sysColor }} />
+                                    <span className={styles.sysStateLabel} style={{ color: sysColor }}>{sysLabel}</span>
+                                    {progressionDecision && (
+                                        <span className={styles.progressionBadge} style={{ color: sysColor }}>
+                                            <Icon name={DECISION_ICONS[progressionDecision]} size={11} />
+                                            {DECISION_LABELS[progressionDecision]}
+                                        </span>
+                                    )}
                                 </div>
-                                <span className={styles.sysDesc}>{sys!.desc}</span>
+                                <span className={styles.sysDesc}>{sysDesc}</span>
                             </div>
-                            <div className={styles.sysBadge} style={{ borderColor: sys!.color + '40', color: sys!.color }}>
-                                {sys!.state === 'nominal' ? <Icon name="check_circle" size={20} /> :
-                                    sys!.state === 'load' ? <Icon name="warning" size={20} /> :
-                                        <Icon name="error" size={20} />}
+                            <div className={styles.sysBadge} style={{ borderColor: sysColor + '40', color: sysColor }}>
+                                <Icon name={sysIcon} size={20} />
                             </div>
                         </motion.div>
 
@@ -168,11 +204,13 @@ export default function HomePage() {
                                         {session ? `PHASE: ${session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
                                     </span>
                                     <span className={styles.missionGoal}>
-                                        {session
-                                            ? session.state === 'completed'
+                                        {sessionGoal
+                                            ? sessionGoal
+                                            : session?.state === 'completed'
                                                 ? 'Protocol completed · All blocks executed'
-                                                : 'Adaptive protocol ready for execution'
-                                            : 'No session generated for today'}
+                                                : session
+                                                    ? 'Adaptive protocol ready for execution'
+                                                    : 'No session generated for today'}
                                     </span>
                                 </div>
                                 {session?.state === 'completed' && (
@@ -297,17 +335,22 @@ export default function HomePage() {
                                     <Icon name="bolt" size={13} className={styles.lastMetaIcon} />
                                     <span
                                         className={styles.lastMetaValue}
-                                        style={{ color: sys!.color, fontSize: 10 }}
+                                        style={{ color: sysColor, fontSize: 10 }}
                                     >
-                                        {sys!.label}
+                                        {sysLabel}
                                     </span>
                                     <span className={styles.lastMetaLabel}>RESPONSE</span>
                                 </div>
                             </div>
                         </motion.div>
+
+                        {/* Engine Audit Panel — dev tool */}
+                        {engine.output && engine.input && (
+                            <EngineAuditPanel output={engine.output} input={engine.input} />
+                        )}
                     </>
                 )}
             </div>
-        </AppShell>
+        </AppShell >
     );
 }

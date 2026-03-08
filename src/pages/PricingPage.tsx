@@ -6,22 +6,6 @@ import { useAuth } from '../contexts/AuthContext';
 
 const PLANS = [
     {
-        id: 'free',
-        name: 'Free',
-        price: '$0',
-        period: 'forever',
-        badge: null,
-        highlight: false,
-        features: [
-            'Core exercise library (20 exercises)',
-            'Basic adaptive protocol',
-            'Session history (7 days)',
-            'Pain tracking',
-        ],
-        cta: 'Current Plan',
-        ctaDisabled: true,
-    },
-    {
         id: 'premium',
         name: 'Premium',
         price: '$15',
@@ -144,17 +128,33 @@ export default function PricingPage() {
                 })}
             </div>
 
-            <button
-                className={styles.ghostBtn}
-                onClick={async () => {
-                    setDismissing(true);
-                    try { await dismissPaywall(); navigate(-1); }
-                    finally { setDismissing(false); }
-                }}
-                disabled={dismissing}
-            >
-                {dismissing ? 'Closing...' : 'Maybe later'}
-            </button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 'auto', paddingTop: 16 }}>
+                {tier !== 'free' && (
+                    <button
+                        className={styles.ghostBtn}
+                        style={{ color: 'var(--mo-color-text-primary)', fontWeight: 600 }}
+                        onClick={async () => {
+                            setDismissing(true);
+                            try { await dismissPaywall(); navigate(-1); }
+                            finally { setDismissing(false); }
+                        }}
+                        disabled={dismissing}
+                    >
+                        {dismissing ? 'Applying...' : 'Continue with Free'}
+                    </button>
+                )}
+                <button
+                    className={styles.ghostBtn}
+                    onClick={async () => {
+                        setDismissing(true);
+                        try { await dismissPaywall(); navigate(-1); }
+                        finally { setDismissing(false); }
+                    }}
+                    disabled={dismissing}
+                >
+                    {dismissing ? 'Closing...' : 'Maybe later'}
+                </button>
+            </div>
         </div>
     );
 }

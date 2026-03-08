@@ -12,6 +12,8 @@ import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
 import RoutinePreviewPage from './pages/RoutinePreviewPage';
 import ExerciseExecutionPage from './pages/ExerciseExecutionPage';
+import ExercisePlayerPage from './pages/ExercisePlayerPage';
+import SessionSummaryPage from './pages/SessionSummaryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { SplashScreen } from './components/SplashScreen';
@@ -32,6 +34,9 @@ export default function App() {
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
+                <Route path="/session/play" element={<ExercisePlayerPage />} />
+                <Route path="/session/summary" element={<SessionSummaryPage />} />
+
                 {/* Onboarding: full-screen, no bottom nav */}
                 <Route path="/onboarding" element={<OnboardingPage />} />
 

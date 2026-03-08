@@ -184,6 +184,87 @@
     color: var(--mo-color-accent-system);
 }
 
+/* ─── Safety Block ──────────────────────────────── */
+.safetyBlock {
+    background: rgba(240, 90, 103, 0.1);
+    border: 1px solid rgba(240, 90, 103, 0.25);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    color: var(--mo-color-state-alert, #F05A67);
+    margin-bottom: 20px;
+}
+
+.safetyBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.safetyTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.safetyDesc {
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(240, 90, 103, 0.8);
+}
+
+.safetyNote {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-state-alert, #F05A67);
+    margin-top: 4px;
+}
+
+/* ─── Protocol Badges ───────────────────────────── */
+.protocolBadgesRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.protocolTypeBadge {
+    background: rgba(45, 124, 255, 0.08);
+    border: 1px solid rgba(45, 124, 255, 0.2);
+    color: var(--mo-color-accent-system);
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* ─── Load Badge ────────────────────────────────── */
+.loadBadge {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+}
+
+.loadReduce {
+    background: var(--mo-color-state-warning, #F5A623);
+}
+
+.loadIncrease {
+    background: var(--mo-color-state-success, #4CAF7D);
+}
+
 .groupName {
     font-family: var(--mo-font-mono);
     font-size: 11px;

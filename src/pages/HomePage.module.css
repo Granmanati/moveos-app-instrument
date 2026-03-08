@@ -65,8 +65,15 @@
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.45; }
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
 }
 
 .sysStateLabel {
@@ -74,6 +81,20 @@
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 0.06em;
+}
+
+.progressionBadge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-left: 4px;
 }
 
 .sysDesc {
@@ -153,7 +174,7 @@
     display: flex;
 }
 
-.missionCTA > * {
+.missionCTA>* {
     width: 100%;
 }
 
@@ -284,9 +305,18 @@
     transition: background var(--mo-duration-fast);
 }
 
-.dotEmpty { background: var(--mo-color-surface-tertiary); }
-.dotDone { background: var(--mo-color-accent-system); }
-.dotToday { background: transparent; border: 2px solid var(--mo-color-accent-system); }
+.dotEmpty {
+    background: var(--mo-color-surface-tertiary);
+}
+
+.dotDone {
+    background: var(--mo-color-accent-system);
+}
+
+.dotToday {
+    background: transparent;
+    border: 2px solid var(--mo-color-accent-system);
+}
 
 .dotLabel {
     font-family: var(--mo-font-mono);
