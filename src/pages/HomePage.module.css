@@ -1,104 +1,352 @@
-.dashboardLayout {
+.page {
     display: flex;
     flex-direction: column;
-    gap: var(--mo-space-8);
-    padding: var(--mo-space-8) 0;
+    padding: 12px 16px 120px;
+    gap: 10px;
 }
 
-.systemStatusSection {
+/* Loading */
+.skeletonStack {
     display: flex;
-    align-items: flex-end;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Error banner */
+.errorBanner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(240, 90, 103, 0.08);
+    border: 1px solid rgba(240, 90, 103, 0.2);
+    color: var(--mo-color-state-alert, #F05A67);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
+}
+
+/* ─── 1. SYSTEM STATE CARD ─────────────────────── */
+.sysStateCard {
+    display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: var(--mo-space-4);
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
 }
 
-.nodeIdentity {
+.sysLeft {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 3px;
 }
 
-.nodeLabel {
-    font-size: 10px;
-    font-family: var(--font-mono);
+.sysNodeLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
     color: var(--mo-color-text-tertiary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0;
+    letter-spacing: 0.1em;
 }
 
-.nodeName {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--foreground);
-    font-family: var(--font-sans);
-    letter-spacing: -0.5px;
-    text-transform: uppercase;
-    margin: 0;
-}
-
-.section {
+.sysStateRow {
     display: flex;
-    flex-direction: column;
-    gap: var(--mo-space-4);
+    align-items: center;
+    gap: 7px;
+    margin-top: 2px;
 }
 
-.sectionTitle {
+.sysDot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+.sysStateLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.sysDesc {
     font-size: 11px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    color: var(--mo-color-text-secondary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0 0 4px 0;
+    color: var(--mo-color-text-tertiary);
+    max-width: 220px;
+    line-height: 1.35;
+    margin-top: 1px;
 }
 
-.missionCompletedState {
-    margin-top: var(--mo-space-6);
+.sysBadge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--mo-space-8) 0;
-    background: rgba(24, 182, 122, 0.05);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(24, 182, 122, 0.1);
+    flex-shrink: 0;
 }
 
+/* ─── 2. MISSION CARD ─────────────────────────── */
+.missionCard {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+    transition: border-color var(--mo-duration-fast);
+}
+
+.missionCard:hover {
+    border-color: var(--mo-color-accent-system);
+}
+
+.missionTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.missionSectionLabel {
+    display: block;
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+}
+
+.missionPhase {
+    display: block;
+    font-family: var(--mo-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.06em;
+    margin-bottom: 4px;
+}
+
+.missionGoal {
+    display: block;
+    font-size: 12px;
+    color: var(--mo-color-text-secondary);
+    line-height: 1.4;
+}
+
+.missionDoneIcon {
+    flex-shrink: 0;
+}
+
+.missionCTA {
+    display: flex;
+}
+
+.missionCTA > * {
+    width: 100%;
+}
+
+.viewSessionBtn {
+    background: transparent;
+    border: 1px solid var(--mo-color-border-subtle);
+    color: var(--mo-color-text-secondary);
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: center;
+    width: 100%;
+    transition: all var(--mo-duration-fast);
+}
+
+.viewSessionBtn:hover {
+    color: var(--mo-color-text-primary);
+    border-color: var(--mo-color-border-strong);
+}
+
+/* ─── 3. INSIGHT CARD ─────────────────────────── */
+.insightCard {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    background: rgba(45, 124, 255, 0.05);
+    border: 1px solid rgba(45, 124, 255, 0.15);
+    border-radius: 14px;
+    padding: 12px 14px;
+}
+
+.insightIcon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: rgba(45, 124, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-accent-system);
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.insightBody {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.insightLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.1em;
+}
+
+.insightText {
+    font-size: 12px;
+    color: var(--mo-color-text-secondary);
+    line-height: 1.45;
+}
+
+/* ─── 4. METRICS GRID ─────────────────────────── */
 .metricsGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: var(--mo-space-4);
-}
-
-.consistencyRow {
-    display: flex;
-    justify-content: space-between;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: var(--mo-space-6);
-}
-
-.dayItem {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     gap: 8px;
 }
 
-.dayDot {
-    width: 24px;
-    height: 24px;
+/* ─── 5. WEEK CONSISTENCY ─────────────────────── */
+.weekCard {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.weekHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.12em;
+}
+
+.weekCount {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-secondary);
+}
+
+.weekDots {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.weekItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.dot {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--mo-duration-base) var(--mo-ease-system);
+    color: #fff;
+    transition: background var(--mo-duration-fast);
 }
 
-.dayLabel {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--mo-color-text-secondary);
-    letter-spacing: 0.5px;
+.dotEmpty { background: var(--mo-color-surface-tertiary); }
+.dotDone { background: var(--mo-color-accent-system); }
+.dotToday { background: transparent; border: 2px solid var(--mo-color-accent-system); }
+
+.dotLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.06em;
+}
+
+.dotLabelToday {
+    color: var(--mo-color-text-primary);
+    font-weight: 700;
+}
+
+/* ─── 6. LAST SESSION ─────────────────────────── */
+.lastSessionCard {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lastSessionRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.lastMetaItem {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.lastMetaIcon {
+    color: var(--mo-color-text-tertiary);
+}
+
+.lastMetaValue {
+    font-family: var(--mo-font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    line-height: 1;
+}
+
+.lastMetaLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.08em;
+}
+
+.lastMetaDivider {
+    width: 1px;
+    height: 28px;
+    background: var(--mo-color-border-subtle);
+    flex-shrink: 0;
 }
