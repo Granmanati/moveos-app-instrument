@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
 import MissionPage from './pages/MissionPage';
+import TodayPage from './pages/TodayPage';
 import ProgressPage from './pages/ProgressPage';
 import ProfilePage from './pages/ProfilePage';
 import SettingsPage from './pages/SettingsPage';
@@ -38,6 +39,7 @@ export default function App() {
                 <Route path="/">
                   <Route index element={<HomePage />} />
                   <Route path="mission" element={<MissionPage />} />
+                  <Route path="today" element={<TodayPage />} />
                   <Route path="explore" element={<ExplorePage />} />
                   <Route path="explore/routine/:id" element={<RoutinePreviewPage />} />
                   <Route path="explore/execute/:id" element={<ExerciseExecutionPage />} />
