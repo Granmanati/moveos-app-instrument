@@ -9,6 +9,8 @@ import ExplorePage from './pages/ExplorePage';
 import PricingPage from './pages/PricingPage';
 import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
+import RoutinePreviewPage from './pages/RoutinePreviewPage';
+import ExerciseExecutionPage from './pages/ExerciseExecutionPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
 import { SplashScreen } from './components/SplashScreen';
@@ -37,6 +39,8 @@ export default function App() {
                   <Route index element={<HomePage />} />
                   <Route path="mission" element={<MissionPage />} />
                   <Route path="explore" element={<ExplorePage />} />
+                  <Route path="explore/routine/:id" element={<RoutinePreviewPage />} />
+                  <Route path="explore/execute/:id" element={<ExerciseExecutionPage />} />
                   <Route path="progress" element={<ProgressPage />} />
                   <Route path="profile" element={<ProfilePage />} />
                   <Route path="settings" element={<SettingsPage />} />
