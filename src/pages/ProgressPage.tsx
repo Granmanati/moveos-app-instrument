@@ -5,8 +5,8 @@ import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { safeSelect } from '../lib/db';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { Skeleton, SkeletonCard } from '../components/ui/Skeleton';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { SkeletonCard } from '../components/ui/Skeleton';
 import { PrimaryButton } from '../components/ui/PrimaryButton';
 
 const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
