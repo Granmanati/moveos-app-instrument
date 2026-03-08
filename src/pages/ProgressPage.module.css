@@ -1,223 +1,416 @@
 .page {
-    padding: var(--mo-space-8);
     display: flex;
     flex-direction: column;
-    gap: var(--mo-space-8);
+    padding: 12px 16px 120px;
+    gap: 12px;
 }
 
-.header {
-    padding-top: var(--mo-space-6);
-}
-
-.title {
-    font-size: 24px;
-    font-weight: 600;
-    color: var(--foreground);
-}
-
-.subtitle {
-    font-size: 13px;
-    color: var(--mo-color-text-secondary);
-    margin-top: 4px;
-}
-
-.metricsGrid {
+/* 2. Tab bar */
+.tabBar {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--mo-space-6);
-    margin-bottom: var(--mo-space-4);
-}
-
-.systemMetricCard {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--mo-space-6);
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.metricHeader {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--mo-color-text-secondary);
-    letter-spacing: 0.5px;
-}
-
-.metricIcon {
-    color: var(--primary);
-}
-
-.metricValueWrapper {
-    display: flex;
-    align-items: baseline;
-    gap: 4px;
-}
-
-.metricBigValue {
-    font-size: 24px;
-    font-family: var(--font-mono);
-    color: var(--foreground);
-    font-weight: 500;
-}
-
-.metricUnit {
-    font-size: 12px;
-    font-family: var(--font-mono);
-    color: var(--mo-color-text-tertiary);
-}
-
-.metricMicroline {
-    width: 100%;
-    height: 4px;
-    background: var(--bg-base);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-top: 2px;
-}
-
-.microlineFill {
-    height: 100%;
-    background: var(--primary);
-    border-radius: 2px;
-}
-
-.section {
-    display: flex;
-    flex-direction: column;
-    gap: var(--mo-space-6);
-    margin-bottom: var(--mo-space-8);
-}
-
-.chartHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 4px;
-}
-
-.chartStatus {
-    font-size: 9px;
-    font-family: var(--font-mono);
-    color: var(--primary);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.sectionTitle {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    color: var(--mo-color-text-secondary);
-    margin: 0;
-}
-
-.emptyConsoleState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: var(--mo-space-16) var(--mo-space-8);
-    gap: var(--mo-space-4);
-    min-height: 140px;
-}
-
-.emptyConsoleState h2 {
-    color: var(--mo-color-text-secondary);
-    font-size: 11px;
-    font-weight: 600;
-    font-family: var(--font-mono);
-    letter-spacing: 0.5px;
-    margin: 0;
-}
-
-.tabContainer {
-    display: flex;
-    background: var(--bg-base);
-    border-radius: var(--radius-sm);
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 12px;
     padding: 3px;
-    border: 1px solid var(--border);
 }
 
 .tabBtn {
-    padding: 6px 12px;
-    font-size: 11px;
-    font-family: var(--font-mono);
-    font-weight: 500;
-    color: var(--mo-color-text-secondary);
     background: transparent;
     border: none;
-    border-radius: 4px;
+    border-radius: 9px;
+    height: 34px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--mo-color-text-secondary);
     cursor: pointer;
     transition: all var(--mo-duration-fast);
 }
 
 .tabActive {
-    background: var(--surface-muted);
-    color: var(--foreground);
+    background: var(--mo-color-surface-tertiary);
+    color: var(--mo-color-text-primary);
 }
 
-.chartUI {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: var(--mo-space-6);
+/* 3. Summary strip */
+.summaryStrip {
+    display: flex;
+    align-items: center;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+
+.summaryItem {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    gap: 3px;
 }
 
-.balanceBarContainer {
-    width: 100%;
-    height: 12px;
-    background: var(--bg-base);
-    border-radius: 6px;
+.summaryValue {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    font-family: var(--mo-font-mono);
+    letter-spacing: 0.02em;
+}
+
+.summaryLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.stripDivider {
+    width: 1px;
+    height: 28px;
+    background: var(--mo-color-border-subtle);
+    flex-shrink: 0;
+}
+
+/* 4. Health data card */
+.healthCard {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+}
+
+.healthIconBox {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: rgba(45, 124, 255, 0.08);
+    border: 1px solid rgba(45, 124, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-accent-system);
+    flex-shrink: 0;
+}
+
+.healthText {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.healthTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.08em;
+}
+
+.healthDesc {
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+    line-height: 1.35;
+}
+
+.connectBtn {
+    flex-shrink: 0;
+    background: var(--mo-color-accent-system);
+    border: none;
+    color: #fff;
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: opacity var(--mo-duration-fast);
+}
+
+.connectBtn:hover {
+    opacity: 0.85;
+}
+
+/* Generic card shell */
+.card {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.cardHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cardTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--mo-color-text-secondary);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.cardBadge {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.06em;
+}
+
+.insightText {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.04em;
+    padding-top: 4px;
+    border-top: 1px solid var(--mo-color-border-subtle);
+}
+
+/* 5. Weekly consistency */
+.weekGrid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.weekDay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.weekDot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 10px;
+    transition: background var(--mo-duration-fast);
+}
+
+.dotEmpty {
+    background: var(--mo-color-surface-tertiary);
+}
+
+.dotBlue {
+    background: var(--mo-color-accent-system);
+}
+
+.dotGreen {
+    background: var(--mo-color-state-success, #4CAF7D);
+}
+
+.dotAmber {
+    background: var(--mo-color-state-warning, #F5A623);
+}
+
+.dotToday {
+    background: transparent;
+    border: 2px solid var(--mo-color-accent-system);
+}
+
+.weekDayLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.06em;
+}
+
+.todayLabel {
+    color: var(--mo-color-text-primary);
+    font-weight: 700;
+}
+
+/* 7. Load balance */
+.balanceRow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.balanceSide {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-secondary);
+    white-space: nowrap;
+    display: flex;
+    gap: 4px;
+}
+
+.balanceSide strong {
+    color: var(--mo-color-text-primary);
+    font-weight: 700;
+}
+
+.balanceBar {
+    flex: 1;
+    height: 6px;
+    background: var(--mo-color-surface-tertiary);
+    border-radius: 4px;
     display: flex;
     overflow: hidden;
-    position: relative;
 }
 
-.balanceFillLeft {
+.balanceFillL {
     height: 100%;
-    background: var(--primary);
-    opacity: 0.8;
+    background: var(--mo-color-accent-system);
+    border-radius: 4px 0 0 4px;
 }
 
-.balanceFillRight {
-    height: 100%;
-    background: var(--state-info);
-    opacity: 0.4;
-}
-
-.balanceMarker {
-    position: absolute;
-    left: 50%;
-    top: -2px;
-    bottom: -2px;
+.balanceMid {
     width: 2px;
-    background: rgba(255, 255, 255, 0.2);
-    transform: translateX(-50%);
-    z-index: 2;
+    background: var(--mo-color-bg-primary);
+    flex-shrink: 0;
 }
 
-/* Removed fake SVG path properties and fake bar flex containers since Recharts uses standard SVGs directly */
-
-/* Removed success color modifier as per "No fitness vibes. No green." */
-
-.danger {
-    color: var(--destructive);
+.balanceFillR {
+    height: 100%;
+    background: rgba(45, 124, 255, 0.4);
+    border-radius: 0 4px 4px 0;
 }
 
-.warning {
-    color: var(--warning);
+/* 8. Biometrics grid */
+.biometricsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
 }
 
-.accent {
-    color: var(--primary);
+.biometricCell {
+    background: var(--mo-color-surface-tertiary);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.biometricIcon {
+    color: var(--mo-color-text-tertiary);
+}
+
+.biometricValue {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    font-family: var(--mo-font-mono);
+}
+
+.biometricLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.08em;
+}
+
+/* 9. Adaptation log */
+.logTable {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.logRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--mo-color-border-subtle);
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-secondary);
+    align-items: center;
+}
+
+.logRow:last-child {
+    border-bottom: none;
+}
+
+.logHeader {
+    font-size: 9px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.08em;
+    padding-bottom: 6px;
+}
+
+.logDay {
+    color: var(--mo-color-text-primary);
+    font-weight: 600;
+}
+
+.logStatusDone {
+    color: var(--mo-color-state-success, #4CAF7D);
+}
+
+.logStatusSkip {
+    color: var(--mo-color-text-tertiary);
+}
+
+/* Shared states */
+.skeletonStack {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.errorBox {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 16px;
+    background: var(--mo-color-surface-secondary);
+    border-radius: 16px;
+    text-align: center;
+    color: var(--mo-color-text-secondary);
+    font-size: 13px;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 24px 0;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+}
+
+.tooltip {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-strong);
+    padding: 7px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--mo-color-text-primary);
+}
+
+.tooltipLabel {
+    display: block;
+    color: var(--mo-color-text-tertiary);
+    font-family: monospace;
+    margin-bottom: 2px;
+}
+
+.tooltipValue {
+    font-weight: 700;
 }
