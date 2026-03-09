@@ -4,14 +4,19 @@ import type { ExecutionStatus, ExecutionState, SessionBlock } from './executionE
 interface UseExecutionEngineProps {
     blocks: SessionBlock[];
     onComplete: (state: ExecutionState) => void;
+    rehydrationData?: {
+        currentBlockIndex: number;
+        currentExerciseIndex: number;
+        currentSet: number;
+    };
 }
 
-export function useExecutionEngine({ blocks, onComplete }: UseExecutionEngineProps) {
+export function useExecutionEngine({ blocks, onComplete, rehydrationData }: UseExecutionEngineProps) {
     const [state, setState] = useState<ExecutionState>({
         status: 'SET_READY',
-        currentBlockIndex: 0,
-        currentExerciseIndex: 0,
-        currentSet: 1,
+        currentBlockIndex: rehydrationData?.currentBlockIndex ?? 0,
+        currentExerciseIndex: rehydrationData?.currentExerciseIndex ?? 0,
+        currentSet: rehydrationData?.currentSet ?? 1,
         elapsedSeconds: 0,
         isTimerRunning: false,
         metrics: {
@@ -122,6 +127,13 @@ export function useExecutionEngine({ blocks, onComplete }: UseExecutionEnginePro
         }));
     }, []);
 
+    const totalExercises = blocks.reduce((acc, b) => acc + b.exercises.length, 0);
+    let completedExercises = 0;
+    for (let i = 0; i < state.currentBlockIndex; i++) {
+        completedExercises += blocks[i].exercises.length;
+    }
+    completedExercises += state.currentExerciseIndex;
+
     return {
         state,
         currentBlock,
@@ -131,6 +143,6 @@ export function useExecutionEngine({ blocks, onComplete }: UseExecutionEnginePro
         skipRest,
         nextExercise,
         updateMetrics,
-        progress: state.status === 'SESSION_COMPLETE' ? 1 : (state.currentBlockIndex / blocks.length)
+        progress: state.status === 'SESSION_COMPLETE' ? 1 : (completedExercises / totalExercises)
     };
 }

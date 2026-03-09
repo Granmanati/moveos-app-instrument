@@ -5,11 +5,16 @@ import styles from './SessionPlayerPage.module.css';
 import { Icon } from '../components/Icon';
 import { useExecutionEngine } from '../engine/useExecutionEngine';
 import type { SessionBlock } from '../engine/executionEngine/types';
+import { supabase } from '../lib/supabase';
+import { useEffect } from 'react';
 
 export default function SessionPlayerPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const blocks = useMemo(() => (location.state?.blocks || []) as SessionBlock[], [location.state]);
+
+    const sessionId = location.state?.sessionId;
+    const rehydrationData = location.state?.rehydrationData;
 
     const {
         state,
@@ -22,10 +27,37 @@ export default function SessionPlayerPage() {
         progress
     } = useExecutionEngine({
         blocks,
-        onComplete: (finalState) => {
+        rehydrationData,
+        onComplete: async (finalState) => {
+            if (sessionId) {
+                await supabase.from('training_sessions').update({
+                    state: 'awaiting_feedback',
+                    current_block_index: finalState.currentBlockIndex,
+                    current_exercise_index: finalState.currentExerciseIndex,
+                    current_set: finalState.currentSet
+                }).eq('id', sessionId);
+            }
             navigate('/mission', { state: { completedSession: true, metrics: finalState.metrics } });
         }
     });
+
+    // Auto-persistence on key state changes
+    useEffect(() => {
+        if (!sessionId) return;
+
+        const persist = async () => {
+            await supabase.from('training_sessions').update({
+                state: 'in_progress',
+                current_block_index: state.currentBlockIndex,
+                current_exercise_index: state.currentExerciseIndex,
+                current_set: state.currentSet
+            }).eq('id', sessionId);
+        };
+
+        // We persist when status changes (started set, completed set, next ex)
+        // or when moving between exercises/blocks
+        persist();
+    }, [state.currentBlockIndex, state.currentExerciseIndex, state.currentSet, state.status, sessionId]);
 
     const [showExitConfirm, setShowExitConfirm] = useState(false);
 
@@ -178,7 +210,7 @@ export default function SessionPlayerPage() {
                             exit={{ scale: 0.9, opacity: 0 }}
                         >
                             <h2>End Session?</h2>
-                            <p>Your current progress will be lost. The engine needs session data to adapt correctly.</p>
+                            <p>Your current progress is saved. You can resume later from the Mission page.</p>
                             <div className={styles.modalBtns}>
                                 <button className={styles.cancelBtn} onClick={() => setShowExitConfirm(false)}>RESUME</button>
                                 <button className={styles.confirmBtn} onClick={() => navigate('/mission')}>EXIT SESSION</button>

@@ -366,7 +366,7 @@ export default function MissionPage() {
             const today = new Date().toISOString().split('T')[0];
             const q = supabase
                 .from('training_sessions')
-                .select(`id, state, phase, session_exercises (id, is_completed, status, sets, reps_min, reps_max, rest_sec, block_order, exercise_library (id, name, pattern, media_video_url, level))`)
+                .select(`id, state, phase, current_block_index, current_exercise_index, current_set, session_exercises (id, is_completed, status, sets, reps_min, reps_max, rest_sec, block_order, exercise_library (id, name, pattern, media_video_url, level))`)
                 .eq('user_id', user.id)
                 .eq('session_date', today)
                 .maybeSingle();
@@ -378,6 +378,12 @@ export default function MissionPage() {
             setSession(data);
             const sortedExercises = (data.session_exercises || []).sort((a: SessionExercise, b: SessionExercise) => a.block_order - b.block_order);
             setExercises(sortedExercises);
+
+            // Proactive state handling
+            if (data.state === 'awaiting_feedback' && !feedbackDone) {
+                setShowFeedback(true);
+            }
+
             setViewState('success');
             return data;
         } catch (err: any) {
@@ -397,7 +403,7 @@ export default function MissionPage() {
         }
     }, [location.state]);
 
-    const proceedToPlayer = (exercisesToUse: SessionExercise[]) => {
+    const proceedToPlayer = (exercisesToUse: SessionExercise[], sessionId?: string, rehydration?: any) => {
         const groupMap: Record<GroupKey, SessionExercise[]> = {
             Recovery: [],
             Mobility: [],
@@ -417,7 +423,13 @@ export default function MissionPage() {
                 exercises: groupMap[key].sort((a, b) => (a.block_order || 0) - (b.block_order || 0))
             }));
 
-        navigate('/session/play', { state: { blocks } });
+        navigate('/session/play', {
+            state: {
+                blocks,
+                sessionId,
+                rehydrationData: rehydration
+            }
+        });
     };
 
     const handleStartSessionClick = () => {
@@ -425,7 +437,11 @@ export default function MissionPage() {
         if (session.pre_pain === null || session.pre_pain === undefined) {
             setShowCheckin(true);
         } else {
-            proceedToPlayer(exercises);
+            proceedToPlayer(exercises, session.id, {
+                currentBlockIndex: session.current_block_index,
+                currentExerciseIndex: session.current_exercise_index,
+                currentSet: session.current_set
+            });
         }
     };
 
@@ -451,7 +467,7 @@ export default function MissionPage() {
             if (engine.output?.safetyBlocked) return;
 
             if (newSession && newSession.session_exercises) {
-                proceedToPlayer(newSession.session_exercises);
+                proceedToPlayer(newSession.session_exercises, newSession.id);
             }
         } catch (err: any) {
             setErrorMsg('System calibration failed. Please retry protocol generation.');
@@ -589,9 +605,14 @@ export default function MissionPage() {
                                 <span className={styles.progressText}>{completedCount}/{exercises.length} blocks</span>
                             </div>
 
-                            {session.state !== 'completed' && (
+                            {session.state !== 'completed' && session.state !== 'awaiting_feedback' && (
                                 <PrimaryButton onClick={handleStartSessionClick}>
-                                    {completedCount > 0 ? 'CONTINUE SESSION' : 'START SESSION'}
+                                    {completedCount > 0 || session.current_block_index > 0 ? 'CONTINUE SESSION' : 'START SESSION'}
+                                </PrimaryButton>
+                            )}
+                            {session.state === 'awaiting_feedback' && (
+                                <PrimaryButton onClick={() => setShowFeedback(true)}>
+                                    LOG SESSION FEEDBACK
                                 </PrimaryButton>
                             )}
                             {session.state === 'completed' && (
