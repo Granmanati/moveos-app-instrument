@@ -2,17 +2,15 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import HomePage from './pages/HomePage';
 import MissionPage from './pages/MissionPage';
-import TodayPage from './pages/TodayPage';
 import ProgressPage from './pages/ProgressPage';
-import ProfilePage from './pages/ProfilePage';
+import SystemPage from './pages/SystemPage';
 import SettingsPage from './pages/SettingsPage';
 import ExplorePage from './pages/ExplorePage';
 import PricingPage from './pages/PricingPage';
 import AuthPage from './pages/AuthPage';
 import OnboardingPage from './pages/OnboardingPage';
 import RoutinePreviewPage from './pages/RoutinePreviewPage';
-import ExerciseExecutionPage from './pages/ExerciseExecutionPage';
-import ExercisePlayerPage from './pages/ExercisePlayerPage';
+import SessionPlayerPage from './pages/SessionPlayerPage';
 import SessionSummaryPage from './pages/SessionSummaryPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './contexts/AuthContext';
@@ -34,7 +32,7 @@ export default function App() {
 
               {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
-                <Route path="/session/play" element={<ExercisePlayerPage />} />
+                <Route path="/session/play" element={<SessionPlayerPage />} />
                 <Route path="/session/summary" element={<SessionSummaryPage />} />
 
                 {/* Onboarding: full-screen, no bottom nav */}
@@ -44,12 +42,10 @@ export default function App() {
                 <Route path="/">
                   <Route index element={<HomePage />} />
                   <Route path="mission" element={<MissionPage />} />
-                  <Route path="today" element={<TodayPage />} />
                   <Route path="explore" element={<ExplorePage />} />
                   <Route path="explore/routine/:id" element={<RoutinePreviewPage />} />
-                  <Route path="explore/execute/:id" element={<ExerciseExecutionPage />} />
                   <Route path="progress" element={<ProgressPage />} />
-                  <Route path="profile" element={<ProfilePage />} />
+                  <Route path="system" element={<SystemPage />} />
                   <Route path="settings" element={<SettingsPage />} />
                   <Route path="pricing" element={<PricingPage />} />
                 </Route>

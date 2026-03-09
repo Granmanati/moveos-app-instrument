@@ -1,10 +1,10 @@
-import type { SessionExercise } from '../../pages/TodayPage';
+import type { SessionExercise } from '../../pages/MissionPage';
 
 export type ExecutionStatus =
     | 'IDLE'
-    | 'READY'
-    | 'EXECUTING'
-    | 'PAUSED'
+    | 'SET_READY'
+    | 'SET_EXECUTING'
+    | 'RESTING'
     | 'EXERCISE_COMPLETE'
     | 'BLOCK_COMPLETE'
     | 'SESSION_COMPLETE';

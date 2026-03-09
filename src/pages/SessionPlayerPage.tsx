@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import styles from './ExercisePlayerPage.module.css';
+import styles from './SessionPlayerPage.module.css';
 import { Icon } from '../components/Icon';
 import { useExecutionEngine } from '../engine/useExecutionEngine';
 import type { SessionBlock } from '../engine/executionEngine/types';
 
-export default function ExercisePlayerPage() {
+export default function SessionPlayerPage() {
     const location = useLocation();
     const navigate = useNavigate();
     const blocks = useMemo(() => (location.state?.blocks || []) as SessionBlock[], [location.state]);
@@ -15,14 +15,15 @@ export default function ExercisePlayerPage() {
         state,
         currentBlock,
         currentExercise,
-        startTimer,
-        pauseTimer,
-        nextStep,
+        startSet,
+        completeSet,
+        skipRest,
+        nextExercise,
         progress
     } = useExecutionEngine({
         blocks,
         onComplete: (finalState) => {
-            navigate('/session/summary', { state: { metrics: finalState.metrics, blocks } });
+            navigate('/mission', { state: { completedSession: true, metrics: finalState.metrics } });
         }
     });
 
@@ -40,6 +41,63 @@ export default function ExercisePlayerPage() {
         const m = Math.floor(seconds / 60);
         const s = seconds % 60;
         return `${m}:${s.toString().padStart(2, '0')}`;
+    };
+
+    const renderCTA = () => {
+        switch (state.status) {
+            case 'SET_READY':
+                return (
+                    <motion.button
+                        className={styles.mainAction}
+                        onClick={startSet}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <Icon name="play_arrow" size={32} />
+                        <span>START SET</span>
+                    </motion.button>
+                );
+            case 'SET_EXECUTING':
+                return (
+                    <motion.button
+                        className={`${styles.mainAction} ${styles.executing}`}
+                        onClick={completeSet}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <Icon name="check" size={32} />
+                        <span>COMPLETE SET</span>
+                    </motion.button>
+                );
+            case 'RESTING':
+                return (
+                    <div className={styles.restingContainer}>
+                        <div className={styles.restTimer}>
+                            <span className={styles.restLabel}>RESTING</span>
+                            <span className={styles.restValue}>{formatTime(Math.max(0, (currentExercise.rest_sec || 60) - state.elapsedSeconds))}</span>
+                        </div>
+                        <motion.button
+                            className={styles.subActionPrimary}
+                            onClick={skipRest}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <Icon name="fast_forward" size={24} />
+                            <span>SKIP REST</span>
+                        </motion.button>
+                    </div>
+                );
+            case 'EXERCISE_COMPLETE':
+                return (
+                    <motion.button
+                        className={styles.mainAction}
+                        onClick={nextExercise}
+                        whileTap={{ scale: 0.95 }}
+                    >
+                        <Icon name="arrow_forward" size={32} />
+                        <span>NEXT EXERCISE</span>
+                    </motion.button>
+                );
+            default:
+                return null;
+        }
     };
 
     return (
@@ -100,30 +158,7 @@ export default function ExercisePlayerPage() {
                 </div>
 
                 <div className={styles.actions}>
-                    {state.status !== 'EXECUTING' ? (
-                        <motion.button
-                            className={styles.mainAction}
-                            onClick={startTimer}
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <Icon name="play_arrow" size={32} />
-                            <span>START SET</span>
-                        </motion.button>
-                    ) : (
-                        <div className={styles.executingActions}>
-                            <button className={styles.subAction} onClick={pauseTimer}>
-                                <Icon name="pause" size={24} />
-                            </button>
-                            <motion.button
-                                className={styles.completeAction}
-                                onClick={nextStep}
-                                whileTap={{ scale: 0.95 }}
-                            >
-                                <Icon name="check" size={32} />
-                                <span>COMPLETE</span>
-                            </motion.button>
-                        </div>
-                    )}
+                    {renderCTA()}
                 </div>
             </div>
 
@@ -146,7 +181,7 @@ export default function ExercisePlayerPage() {
                             <p>Your current progress will be lost. The engine needs session data to adapt correctly.</p>
                             <div className={styles.modalBtns}>
                                 <button className={styles.cancelBtn} onClick={() => setShowExitConfirm(false)}>RESUME</button>
-                                <button className={styles.confirmBtn} onClick={() => navigate('/today')}>EXIT SESSION</button>
+                                <button className={styles.confirmBtn} onClick={() => navigate('/mission')}>EXIT SESSION</button>
                             </div>
                         </motion.div>
                     </motion.div>

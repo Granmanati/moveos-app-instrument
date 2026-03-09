@@ -5,9 +5,12 @@ import { Icon } from '../components/Icon';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ROUTINES, CATEGORIES, getByCategory, getForYou, type Routine } from '../data/exploreData';
+import { CATEGORIES } from '../data/exploreData';
+import { useContentAssets, type ContentAsset } from '../hooks/useContentAssets';
 
-function RoutineCard({ routine, onClick, locked }: { routine: Routine; onClick: () => void; locked: boolean }) {
+const formatDuration = (sec: number) => `${Math.round(sec / 60)} min`;
+
+function RoutineCard({ asset, onClick, locked }: { asset: ContentAsset; onClick: () => void; locked: boolean }) {
     return (
         <motion.div
             className={styles.routineCard}
@@ -15,7 +18,7 @@ function RoutineCard({ routine, onClick, locked }: { routine: Routine; onClick: 
             whileHover={{ scale: 1.025 }}
             transition={{ duration: 0.18 }}
         >
-            <div className={styles.cardThumb} style={{ backgroundImage: `url(${routine.thumbnail})` }}>
+            <div className={styles.cardThumb} style={{ backgroundImage: `url(${asset.thumbnail_url})` }}>
                 {locked ? (
                     <div className={styles.lockOverlay}>
                         <Icon name="lock" size={18} />
@@ -25,18 +28,18 @@ function RoutineCard({ routine, onClick, locked }: { routine: Routine; onClick: 
                         <Icon name="play_arrow" size={16} />
                     </div>
                 )}
-                <span className={styles.durationChip}>{routine.duration}</span>
-                {routine.premium && <span className={styles.premiumChip}>PRO</span>}
+                <span className={styles.durationChip}>{formatDuration(asset.duration_seconds)}</span>
+                {asset.is_premium && <span className={styles.premiumChip}>PRO</span>}
             </div>
             <div className={styles.cardBody}>
-                <span className={styles.cardTitle}>{routine.title}</span>
-                <span className={styles.cardExpert}>{routine.expert}</span>
+                <span className={styles.cardTitle}>{asset.title}</span>
+                <span className={styles.cardExpert}>{asset.expert_name}</span>
             </div>
         </motion.div>
     );
 }
 
-function FeedCard({ routine, onClick, locked }: { routine: Routine; onClick: () => void; locked: boolean }) {
+function FeedCard({ asset, onClick, locked }: { asset: ContentAsset; onClick: () => void; locked: boolean }) {
     return (
         <motion.div
             className={styles.feedCard}
@@ -44,23 +47,23 @@ function FeedCard({ routine, onClick, locked }: { routine: Routine; onClick: () 
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.15 }}
         >
-            <div className={styles.feedThumb} style={{ backgroundImage: `url(${routine.thumbnail})` }}>
+            <div className={styles.feedThumb} style={{ backgroundImage: `url(${asset.thumbnail_url})` }}>
                 {locked && (
                     <div className={styles.lockOverlay}>
                         <Icon name="lock" size={22} />
                         <span>PREMIUM</span>
                     </div>
                 )}
-                <span className={styles.feedDuration}>{routine.duration}</span>
-                <span className={styles.feedCategory}>{routine.category.toUpperCase()}</span>
+                <span className={styles.feedDuration}>{formatDuration(asset.duration_seconds)}</span>
+                <span className={styles.feedCategory}>{asset.category.toUpperCase()}</span>
             </div>
             <div className={styles.feedBody}>
                 <div>
-                    <h3 className={styles.feedTitle}>{routine.title}</h3>
-                    <span className={styles.feedExpert}>{routine.expert}</span>
+                    <h3 className={styles.feedTitle}>{asset.title}</h3>
+                    <span className={styles.feedExpert}>{asset.expert_name}</span>
                 </div>
                 <div className={styles.feedMeta}>
-                    <span className={styles.exerciseCount}>{routine.exerciseCount} exercises</span>
+                    <span className={styles.exerciseCount}>{asset.exercise_count} exercises</span>
                     {locked ? (
                         <button className={styles.unlockBtn} onClick={e => { e.stopPropagation(); }}>UNLOCK</button>
                     ) : (
@@ -75,19 +78,23 @@ function FeedCard({ routine, onClick, locked }: { routine: Routine; onClick: () 
 export default function ExplorePage() {
     const { tier } = useAuth();
     const navigate = useNavigate();
+    const { loading, assets, getByCategory, getForYou } = useContentAssets();
     const [searchQuery, setSearchQuery] = useState('');
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const searchRef = useRef<HTMLInputElement>(null);
 
-    const isLocked = (r: Routine) => r.premium && tier === 'free';
+    const isLocked = (a: ContentAsset) => a.is_premium && tier === 'free';
 
-    const openRoutine = (r: Routine) => {
-        if (isLocked(r)) { navigate('/pricing'); return; }
-        navigate(`/explore/routine/${r.id}`);
+    const openRoutine = (a: ContentAsset) => {
+        if (isLocked(a)) { navigate('/pricing'); return; }
+        navigate(`/explore/routine/${a.id}`);
     };
 
     const filtered = searchQuery
-        ? ROUTINES.filter(r => r.title.toLowerCase().includes(searchQuery.toLowerCase()) || r.category.toLowerCase().includes(searchQuery.toLowerCase()))
+        ? assets.filter(a =>
+            a.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            a.category.toLowerCase().includes(searchQuery.toLowerCase())
+        )
         : null;
 
     return (
@@ -112,8 +119,12 @@ export default function ExplorePage() {
                     )}
                 </div>
 
-                {/* Search results */}
-                {filtered ? (
+                {loading ? (
+                    <div className={styles.loadingState}>
+                        <Icon name="progress_activity" size={24} className={styles.spin} />
+                        <span>Loading movement engine...</span>
+                    </div>
+                ) : filtered ? (
                     <div className={styles.section}>
                         <div className={styles.sectionHeader}>
                             <span className={styles.sectionTitle}>RESULTS</span>
@@ -126,8 +137,8 @@ export default function ExplorePage() {
                             </div>
                         ) : (
                             <div className={styles.feedStack}>
-                                {filtered.map(r => (
-                                    <FeedCard key={r.id} routine={r} onClick={() => openRoutine(r)} locked={isLocked(r)} />
+                                {filtered.map(a => (
+                                    <FeedCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
                                 ))}
                             </div>
                         )}
@@ -142,7 +153,7 @@ export default function ExplorePage() {
                             >
                                 All
                             </button>
-                            {CATEGORIES.map(cat => (
+                            {(CATEGORIES as unknown as string[]).map(cat => (
                                 <button
                                     key={cat}
                                     className={`${styles.pill} ${activeCategory === cat ? styles.pillActive : ''}`}
@@ -160,8 +171,8 @@ export default function ExplorePage() {
                                     <span className={styles.sectionTitle}>{activeCategory.toUpperCase()}</span>
                                 </div>
                                 <div className={styles.feedStack}>
-                                    {getByCategory(activeCategory).map(r => (
-                                        <FeedCard key={r.id} routine={r} onClick={() => openRoutine(r)} locked={isLocked(r)} />
+                                    {getByCategory(activeCategory).map(a => (
+                                        <FeedCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
                                     ))}
                                 </div>
                             </div>
@@ -174,14 +185,14 @@ export default function ExplorePage() {
                                         <span className={styles.sectionSub}>Personalized picks</span>
                                     </div>
                                     <div className={styles.feedStack}>
-                                        {getForYou().map(r => (
-                                            <FeedCard key={r.id} routine={r} onClick={() => openRoutine(r)} locked={isLocked(r)} />
+                                        {getForYou().map(a => (
+                                            <FeedCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
                                         ))}
                                     </div>
                                 </div>
 
                                 {/* Category carousels */}
-                                {CATEGORIES.map(cat => {
+                                {(CATEGORIES as unknown as string[]).map(cat => {
                                     const items = getByCategory(cat);
                                     if (!items.length) return null;
                                     return (
@@ -191,8 +202,8 @@ export default function ExplorePage() {
                                                 <button className={styles.seeAllBtn} onClick={() => setActiveCategory(cat)}>See all</button>
                                             </div>
                                             <div className={styles.carousel}>
-                                                {items.map(r => (
-                                                    <RoutineCard key={r.id} routine={r} onClick={() => openRoutine(r)} locked={isLocked(r)} />
+                                                {items.map(a => (
+                                                    <RoutineCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
                                                 ))}
                                             </div>
                                         </div>
@@ -206,3 +217,4 @@ export default function ExplorePage() {
         </AppShell>
     );
 }
+

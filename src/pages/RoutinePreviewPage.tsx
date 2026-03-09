@@ -2,15 +2,27 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styles from './RoutinePreviewPage.module.css';
 import { Icon } from '../components/Icon';
 import { motion } from 'framer-motion';
-import { ROUTINES } from '../data/exploreData';
+import { useContentAssets } from '../hooks/useContentAssets';
+
+const formatDuration = (sec: number) => `${Math.round(sec / 60)} min`;
 
 export default function RoutinePreviewPage() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { loading, getById } = useContentAssets();
 
-    const routine = ROUTINES.find(r => r.id === id);
+    const asset = id ? getById(id) : null;
 
-    if (!routine) {
+    if (loading) {
+        return (
+            <div className={styles.loading}>
+                <Icon name="progress_activity" size={32} className={styles.spin} />
+                <span>Loading routine...</span>
+            </div>
+        );
+    }
+
+    if (!asset) {
         return (
             <div className={styles.error}>
                 <Icon name="error" size={32} />
@@ -24,7 +36,7 @@ export default function RoutinePreviewPage() {
         <div className={styles.page}>
             {/* Video/Thumbnail preview */}
             <div className={styles.heroWrap}>
-                <div className={styles.hero} style={{ backgroundImage: `url(${routine.thumbnail})` }}>
+                <div className={styles.hero} style={{ backgroundImage: `url(${asset.thumbnail_url})` }}>
                     <div className={styles.heroOverlay} />
 
                     {/* Back button */}
@@ -38,7 +50,7 @@ export default function RoutinePreviewPage() {
                     </div>
 
                     {/* Category chip */}
-                    <span className={styles.heroCat}>{routine.category.toUpperCase()}</span>
+                    <span className={styles.heroCat}>{asset.category.toUpperCase()}</span>
                 </div>
             </div>
 
@@ -50,26 +62,26 @@ export default function RoutinePreviewPage() {
                     transition={{ duration: 0.28, ease: 'easeOut' }}
                     className={styles.infoBlock}
                 >
-                    <h1 className={styles.title}>{routine.title}</h1>
-                    <span className={styles.expert}>{routine.expert}</span>
+                    <h1 className={styles.title}>{asset.title}</h1>
+                    <span className={styles.expert}>{asset.expert_name}</span>
 
                     {/* Meta row */}
                     <div className={styles.metaRow}>
                         <div className={styles.metaItem}>
                             <Icon name="timer" size={14} className={styles.metaIcon} />
-                            <span>{routine.duration}</span>
+                            <span>{formatDuration(asset.duration_seconds)}</span>
                         </div>
                         <div className={styles.metaDivider} />
                         <div className={styles.metaItem}>
                             <Icon name="format_list_bulleted" size={14} className={styles.metaIcon} />
-                            <span>{routine.exerciseCount} exercises</span>
+                            <span>{asset.exercise_count} exercises</span>
                         </div>
                     </div>
 
                     {/* Primary CTA */}
                     <button
                         className={styles.startBtn}
-                        onClick={() => navigate(`/explore/execute/${routine.id}`)}
+                        onClick={() => navigate(`/explore/execute/${asset.id}`)}
                     >
                         <Icon name="play_arrow" size={16} />
                         START ROUTINE
@@ -79,9 +91,9 @@ export default function RoutinePreviewPage() {
                 {/* Exercise list */}
                 <div className={styles.exerciseList}>
                     <span className={styles.listTitle}>EXERCISE SEQUENCE</span>
-                    {routine.exercises.map((ex, i) => (
+                    {asset.exercises?.map((ex: any, i: number) => (
                         <motion.div
-                            key={ex.id}
+                            key={ex.id || i}
                             className={styles.exerciseRow}
                             initial={{ opacity: 0, x: -8 }}
                             animate={{ opacity: 1, x: 0 }}
@@ -101,3 +113,4 @@ export default function RoutinePreviewPage() {
         </div>
     );
 }
+

@@ -70,7 +70,6 @@ export default function HomePage() {
     const [viewState, setViewState] = useState<'loading' | 'error' | 'success'>('loading');
     const [snapshot, setSnapshot] = useState<HomeSnapshot | null>(null);
     const [errorMsg, setErrorMsg] = useState('');
-    const [generating, setGenerating] = useState(false);
 
     const fetchDashboardData = async () => {
         if (!user) return;
@@ -92,18 +91,8 @@ export default function HomePage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, profile]);
 
-    const handleGenerateSession = async () => {
-        if (!user) return;
-        setGenerating(true);
-        try {
-            const { error } = await safeRpc('generate_session');
-            if (error) { setErrorMsg(error.message); setViewState('error'); return; }
-            await fetchDashboardData();
-        } catch (err: any) {
-            setErrorMsg(err.message || t('error'));
-        } finally {
-            setGenerating(false);
-        }
+    const handleGenerateSession = () => {
+        navigate('/mission');
     };
 
     const session = snapshot?.today_session ?? null;
@@ -222,10 +211,8 @@ export default function HomePage() {
 
                             <div className={styles.missionCTA}>
                                 {!session ? (
-                                    <PrimaryButton onClick={handleGenerateSession} disabled={generating}>
-                                        {generating
-                                            ? <><Icon name="autorenew" size={14} style={{ animation: 'spin 1s linear infinite', marginRight: 6 }} />GENERATING…</>
-                                            : 'GENERATE PROTOCOL'}
+                                    <PrimaryButton onClick={handleGenerateSession}>
+                                        GENERATE PROTOCOL
                                     </PrimaryButton>
                                 ) : session.state !== 'completed' ? (
                                     <PrimaryButton onClick={() => navigate('/mission')}>

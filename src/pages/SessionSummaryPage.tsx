@@ -14,7 +14,7 @@ export default function SessionSummaryPage() {
         return (
             <div className={styles.empty}>
                 <span>No session summary available.</span>
-                <PrimaryButton onClick={() => navigate('/today')}>BACK TO TODAY</PrimaryButton>
+                <PrimaryButton onClick={() => navigate('/mission')}>BACK TO MISSION</PrimaryButton>
             </div>
         );
     }
@@ -70,7 +70,7 @@ export default function SessionSummaryPage() {
                 </div>
 
                 <div className={styles.footer}>
-                    <PrimaryButton onClick={() => navigate('/today')}>
+                    <PrimaryButton onClick={() => navigate('/mission')}>
                         DONE
                     </PrimaryButton>
                 </div>

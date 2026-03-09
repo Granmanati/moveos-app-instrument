@@ -8,7 +8,7 @@ interface UseExecutionEngineProps {
 
 export function useExecutionEngine({ blocks, onComplete }: UseExecutionEngineProps) {
     const [state, setState] = useState<ExecutionState>({
-        status: 'READY',
+        status: 'SET_READY',
         currentBlockIndex: 0,
         currentExerciseIndex: 0,
         currentSet: 1,
@@ -28,17 +28,17 @@ export function useExecutionEngine({ blocks, onComplete }: UseExecutionEnginePro
     const currentBlock = blocks[state.currentBlockIndex];
     const currentExercise = currentBlock?.exercises[state.currentExerciseIndex];
 
-    const startTimer = useCallback(() => {
-        if (state.isTimerRunning) return;
-        setState(prev => ({ ...prev, isTimerRunning: true, status: 'EXECUTING' }));
-    }, [state.isTimerRunning]);
 
     const pauseTimer = useCallback(() => {
-        setState(prev => ({ ...prev, isTimerRunning: false, status: 'PAUSED' }));
+        setState(prev => ({ ...prev, isTimerRunning: false }));
+    }, []);
+
+    const resetTimer = useCallback(() => {
+        setState(prev => ({ ...prev, isTimerRunning: false, elapsedSeconds: 0 }));
     }, []);
 
     useEffect(() => {
-        if (state.isTimerRunning && state.status === 'EXECUTING') {
+        if (state.isTimerRunning) {
             timerRef.current = window.setInterval(() => {
                 setState(prev => ({ ...prev, elapsedSeconds: prev.elapsedSeconds + 1 }));
             }, 1000);
@@ -46,48 +46,72 @@ export function useExecutionEngine({ blocks, onComplete }: UseExecutionEnginePro
             if (timerRef.current) clearInterval(timerRef.current);
         }
         return () => { if (timerRef.current) clearInterval(timerRef.current); };
-    }, [state.isTimerRunning, state.status]);
+    }, [state.isTimerRunning]);
 
-    const nextStep = useCallback(() => {
+    const startSet = useCallback(() => {
+        resetTimer();
+        setState(prev => ({ ...prev, status: 'SET_EXECUTING', isTimerRunning: true }));
+    }, [resetTimer]);
+
+    const completeSet = useCallback(() => {
+        pauseTimer();
         setState(prev => {
             const block = blocks[prev.currentBlockIndex];
             const exercise = block.exercises[prev.currentExerciseIndex];
 
-            // Increment set
             if (prev.currentSet < exercise.sets) {
-                return { ...prev, currentSet: prev.currentSet + 1, status: 'EXECUTING' };
+                // More sets: Resting
+                return { ...prev, status: 'RESTING', elapsedSeconds: 0, isTimerRunning: true };
+            } else {
+                // Last set of exercise
+                return { ...prev, status: 'EXERCISE_COMPLETE' };
             }
+        });
+    }, [blocks, pauseTimer]);
 
-            // Next exercise in block
+    const skipRest = useCallback(() => {
+        setState(prev => ({
+            ...prev,
+            status: 'SET_READY',
+            currentSet: prev.currentSet + 1,
+            elapsedSeconds: 0,
+            isTimerRunning: false
+        }));
+    }, []);
+
+    const nextExercise = useCallback(() => {
+        setState(prev => {
+            const block = blocks[prev.currentBlockIndex];
+
             if (prev.currentExerciseIndex < block.exercises.length - 1) {
                 return {
                     ...prev,
                     currentExerciseIndex: prev.currentExerciseIndex + 1,
                     currentSet: 1,
-                    status: 'EXERCISE_COMPLETE'
+                    status: 'SET_READY',
+                    elapsedSeconds: 0,
+                    isTimerRunning: false
                 };
-            }
-
-            // Next block
-            if (prev.currentBlockIndex < blocks.length - 1) {
+            } else if (prev.currentBlockIndex < blocks.length - 1) {
                 return {
                     ...prev,
                     currentBlockIndex: prev.currentBlockIndex + 1,
                     currentExerciseIndex: 0,
                     currentSet: 1,
-                    status: 'BLOCK_COMPLETE'
+                    status: 'SET_READY',
+                    elapsedSeconds: 0,
+                    isTimerRunning: false
                 };
+            } else {
+                const finalState = {
+                    ...prev,
+                    status: 'SESSION_COMPLETE' as ExecutionStatus,
+                    isTimerRunning: false,
+                    metrics: { ...prev.metrics, endTime: Date.now() }
+                };
+                onComplete(finalState);
+                return finalState;
             }
-
-            // Session complete
-            const finalState = {
-                ...prev,
-                status: 'SESSION_COMPLETE' as ExecutionStatus,
-                isTimerRunning: false,
-                metrics: { ...prev.metrics, endTime: Date.now() }
-            };
-            onComplete(finalState);
-            return finalState;
         });
     }, [blocks, onComplete]);
 
@@ -102,9 +126,10 @@ export function useExecutionEngine({ blocks, onComplete }: UseExecutionEnginePro
         state,
         currentBlock,
         currentExercise,
-        startTimer,
-        pauseTimer,
-        nextStep,
+        startSet,
+        completeSet,
+        skipRest,
+        nextExercise,
         updateMetrics,
         progress: state.status === 'SESSION_COMPLETE' ? 1 : (state.currentBlockIndex / blocks.length)
     };

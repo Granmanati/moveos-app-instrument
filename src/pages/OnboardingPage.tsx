@@ -172,7 +172,12 @@ export default function OnboardingPage() {
             }
 
             // 3. Try generate session directly
-            const { error: genError } = await supabase.rpc('generate_session');
+            const { error: genError } = await supabase.rpc('generate_session', {
+                p_pain: Number(formData.pain_current),
+                p_stiffness: 3, // Default for onboarding
+                p_fatigue: 3,   // Default for onboarding
+                p_readiness: 7  // Default for onboarding
+            });
             if (genError) console.warn("Session generation explicit error:", genError);
 
             // 4. Show Paywall Gate instead of navigating immediately

@@ -1,6 +1,6 @@
 // =============================================================================
 // Module 8: Adaptive Message Builder
-// Generates the clinical-tone adaptive message shown to the user on TodayPage.
+// Generates the clinical-tone adaptive message shown to the user on MissionPage.
 // Messages are deterministic, concise, and MOVE OS–branded.
 // =============================================================================
 

@@ -1,309 +1,778 @@
-.pipelineLayout {
+.page {
     display: flex;
     flex-direction: column;
-    padding: var(--mo-space-4) var(--mo-space-6) 120px;
-    gap: var(--mo-space-8);
+    padding: 12px 16px 120px;
+    gap: 10px;
 }
 
-.errorBox {
+.stack {
     display: flex;
     flex-direction: column;
+    gap: 10px;
+}
+
+.errorBanner {
+    display: flex;
     align-items: center;
-    text-align: center;
-    gap: var(--mo-space-4);
-    background: var(--mo-color-surface-secondary);
-    border: 1px solid var(--mo-color-border-strong);
-    padding: var(--mo-space-8);
-    border-radius: var(--mo-radius-md);
+    gap: 8px;
+    background: rgba(240, 90, 103, 0.08);
+    border: 1px solid rgba(240, 90, 103, 0.2);
+    color: var(--mo-color-state-alert, #F05A67);
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12px;
 }
 
-.loadingSkeleton {
-    padding: var(--mo-space-6);
-}
-
-/* 2. Session Context */
-.contextHeader {
-    display: flex;
-    justify-content: space-between;
+/* ─── Protocol Card ─────────────────────────────── */
+.protocolCard {
     background: var(--mo-color-surface-secondary);
     border: 1px solid var(--mo-color-border-subtle);
-    border-radius: var(--mo-radius-md);
-    padding: var(--mo-space-4) var(--mo-space-5);
-}
-
-.contextRow {
+    border-radius: 16px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 12px;
 }
 
-.contextLabel {
-    font-family: var(--mo-font-mono);
-    font-size: 10px;
-    color: var(--mo-color-text-tertiary);
-    letter-spacing: 0.05em;
-}
-
-.contextValue {
-    font-family: var(--mo-font-sans);
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--mo-color-text-primary);
-    letter-spacing: 0.05em;
-}
-
-/* 3. Session Progress Section */
-.progressSection {
-    display: flex;
-    flex-direction: column;
-    gap: var(--mo-space-3);
-}
-
-.progressHeader {
+.protocolMeta {
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.protocolLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+}
+
+.protocolLabel {
     font-family: var(--mo-font-mono);
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--mo-color-text-secondary);
-    text-transform: uppercase;
+    font-size: 9px;
+    color: var(--mo-color-text-tertiary);
     letter-spacing: 0.1em;
 }
 
-.progressNumbers {
+.protocolPhase {
+    font-family: var(--mo-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--mo-color-accent-system);
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+.protocolGoal {
+    font-size: 12px;
+    color: var(--mo-color-text-secondary);
+    line-height: 1.35;
+    margin-top: 2px;
+}
+
+.protocolBadge {
+    flex-shrink: 0;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 10px;
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+}
+
+.protocolDuration {
+    font-family: var(--mo-font-mono);
+    font-size: 15px;
+    font-weight: 700;
     color: var(--mo-color-text-primary);
 }
 
-.progressBarBg {
+.protocolDurationLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.1em;
+}
+
+/* Progress bar */
+.progressWrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progressBar {
+    flex: 1;
     height: 4px;
     background: var(--mo-color-surface-tertiary);
-    border-radius: 2px;
+    border-radius: 4px;
     overflow: hidden;
-    width: 100%;
 }
 
-.progressBarFill {
+.progressFill {
     height: 100%;
     background: var(--mo-color-accent-system);
-    transition: width var(--mo-duration-base) var(--mo-ease-system);
+    border-radius: 4px;
 }
 
-/* 4. Execution Pipeline */
-.timelineContainer {
+.progressText {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.completedBadge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--mo-color-state-success, #4CAF7D);
+    letter-spacing: 0.06em;
+}
+
+/* ─── Exercise Groups ───────────────────────────── */
+.groupsStack {
     display: flex;
     flex-direction: column;
-    position: relative;
-    padding-left: 28px;
-    /* space for the timeline nodes */
-    gap: var(--mo-space-5);
+    gap: 8px;
 }
 
-.timelineLine {
+.group {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.groupHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    transition: background var(--mo-duration-fast);
+}
+
+.groupHeader:hover {
+    background: var(--mo-color-surface-tertiary);
+}
+
+.groupLeft {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.groupIconBox {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: rgba(45, 124, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-accent-system);
+}
+
+/* ─── Safety Block ──────────────────────────────── */
+.safetyBlock {
+    background: rgba(240, 90, 103, 0.1);
+    border: 1px solid rgba(240, 90, 103, 0.25);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    gap: 14px;
+    color: var(--mo-color-state-alert, #F05A67);
+    margin-bottom: 20px;
+}
+
+.safetyBody {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.safetyTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.safetyDesc {
+    font-size: 12px;
+    line-height: 1.4;
+    color: rgba(240, 90, 103, 0.8);
+}
+
+.safetyNote {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-state-alert, #F05A67);
+    margin-top: 4px;
+}
+
+/* ─── Protocol Badges ───────────────────────────── */
+.protocolBadgesRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+}
+
+.protocolTypeBadge {
+    background: rgba(45, 124, 255, 0.08);
+    border: 1px solid rgba(45, 124, 255, 0.2);
+    color: var(--mo-color-accent-system);
+    padding: 2px 8px;
+    border-radius: 5px;
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+/* ─── Load Badge ────────────────────────────────── */
+.loadBadge {
     position: absolute;
-    top: 12px;
-    bottom: 24px;
-    left: 8px;
-    /* 16px node / 2 */
-    width: 2px;
+    bottom: -4px;
+    right: -4px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    font-weight: 800;
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    z-index: 5;
+}
+
+.loadReduce {
+    background: var(--mo-color-state-warning, #F5A623);
+}
+
+.loadIncrease {
+    background: var(--mo-color-state-success, #4CAF7D);
+}
+
+.groupName {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.08em;
+}
+
+.groupCount {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+}
+
+.groupChevron {
+    color: var(--mo-color-text-tertiary);
+}
+
+.groupContent {
+    overflow: hidden;
+    border-top: 1px solid var(--mo-color-border-subtle);
+}
+
+/* ─── Exercise Card ─────────────────────────────── */
+.exCard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--mo-color-border-subtle);
+    transition: background var(--mo-duration-fast);
+}
+
+.exCard:last-child {
+    border-bottom: none;
+}
+
+.exCard:hover {
+    background: var(--mo-color-surface-tertiary);
+}
+
+.exCardDone {
+    opacity: 0.55;
+}
+
+.exThumb {
+    width: 44px;
+    height: 44px;
+    border-radius: 9px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+    background-color: var(--mo-color-surface-tertiary);
+}
+
+.exDoneOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(76, 175, 125, 0.4);
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+.exBody {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.exName {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--mo-color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.exMeta {
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-tertiary);
+}
+
+.exCheck {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: transparent;
+    border: 1px solid var(--mo-color-border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--mo-color-text-tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all var(--mo-duration-fast);
+}
+
+.exCheckDone {
+    background: var(--mo-color-state-success, #4CAF7D);
+    border-color: var(--mo-color-state-success, #4CAF7D);
+    color: #fff;
+}
+
+/* ─── Feedback CTA ──────────────────────────────── */
+.feedbackCTA {
+    background: rgba(45, 124, 255, 0.06);
+    border: 1px solid rgba(45, 124, 255, 0.2);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.feedbackCtaText {
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-text-secondary);
+}
+
+.feedbackDone {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--mo-font-mono);
+    font-size: 11px;
+    color: var(--mo-color-state-success, #4CAF7D);
+    padding: 10px 0;
+}
+
+/* ─── Phase Card ────────────────────────────────── */
+.phaseCard {
+    background: var(--mo-color-surface-secondary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 14px;
+    padding: 13px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.phaseCardLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.12em;
+}
+
+.phaseRow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.phaseStep {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    position: relative;
+}
+
+.phaseStep:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    right: -50%;
+    height: 1px;
     background: var(--mo-color-border-subtle);
     z-index: 0;
 }
 
-.timelineItem {
+.phaseDot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-subtle);
     position: relative;
     z-index: 1;
+    transition: all var(--mo-duration-fast);
+}
+
+.phaseDotActive {
+    background: var(--mo-color-accent-system);
+    border-color: var(--mo-color-accent-system);
+    box-shadow: 0 0 0 3px rgba(45, 124, 255, 0.2);
+}
+
+.phaseStepLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 8px;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.06em;
+}
+
+.phaseStepActive .phaseStepLabel {
+    color: var(--mo-color-accent-system);
+    font-weight: 700;
+}
+
+.phaseExitCriteria {
+    font-size: 11px;
+    color: var(--mo-color-text-tertiary);
+    margin: 0;
+    border-top: 1px solid var(--mo-color-border-subtle);
+    padding-top: 8px;
+    line-height: 1.4;
+    font-family: var(--mo-font-mono);
+}
+
+/* ─── Empty State ────────────────────────────────── */
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    padding: 40px 16px;
+}
+
+.emptyTitle {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+}
+
+.emptyDesc {
+    font-size: 12px;
+    color: var(--mo-color-text-tertiary);
+    max-width: 260px;
+}
+
+/* ─── Overlays / Sheets ─────────────────────────── */
+.feedbackOverlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 15, 20, 0.7);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    max-width: 430px;
+    margin: 0 auto;
+}
+
+.feedbackSheet {
+    background: var(--mo-color-surface-secondary);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--mo-color-border-strong);
+    padding: 12px 20px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.detailSheet {
+    background: var(--mo-color-bg-primary);
+    border-radius: 20px 20px 0 0;
+    border-top: 1px solid var(--mo-color-border-strong);
+    overflow: hidden;
+    max-height: 88vh;
+    overflow-y: auto;
     display: flex;
     flex-direction: column;
 }
 
-.timelineNode {
-    position: absolute;
-    left: -28px;
-    top: 8px;
-    /* Align with content optical center */
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: var(--mo-color-bg-primary);
-    border: 2px solid var(--mo-color-border-strong);
+.sheetHandle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--mo-color-border-strong);
+    align-self: center;
+    margin-bottom: 4px;
+}
+
+.feedbackTitle {
+    font-family: var(--mo-font-mono);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    letter-spacing: 0.08em;
+    margin: 0;
+    text-align: center;
+}
+
+.feedbackSub {
+    font-size: 12px;
+    color: var(--mo-color-text-secondary);
+    text-align: center;
+    margin: 0;
+}
+
+.feedbackLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.12em;
+}
+
+.moodRow {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.moodBtn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-subtle);
+    border-radius: 12px;
+    padding: 10px 6px;
+    cursor: pointer;
+    transition: all var(--mo-duration-fast);
+}
+
+.moodActive {
+    border-color: var(--mo-color-accent-system);
+    background: rgba(45, 124, 255, 0.08);
+}
+
+.moodEmoji {
+    font-size: 22px;
+}
+
+.moodLabel {
+    font-family: var(--mo-font-mono);
+    font-size: 9px;
+    color: var(--mo-color-text-secondary);
+    letter-spacing: 0.06em;
+}
+
+.painTrack {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+}
+
+.painDot {
+    flex: 1;
+    height: 32px;
+    border-radius: 7px;
+    background: var(--mo-color-surface-tertiary);
+    border: 1px solid var(--mo-color-border-subtle);
+    font-family: var(--mo-font-mono);
+    font-size: 10px;
+    color: var(--mo-color-text-secondary);
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all var(--mo-duration-base);
+    transition: all var(--mo-duration-fast);
+    min-width: 0;
 }
 
-.nodepending {
-    /* default styles */
-}
-
-.nodeactive {
-    border-color: var(--mo-color-accent-system);
-}
-
-.nodePulse {
-    width: 8px;
-    height: 8px;
+.painDotActive {
     background: var(--mo-color-accent-system);
-    border-radius: 50%;
-    animation: pulseNode var(--mo-duration-pulse) infinite alternate var(--mo-ease-system);
+    border-color: var(--mo-color-accent-system);
+    color: #fff;
+    font-weight: 700;
 }
 
-@keyframes pulseNode {
-    from {
-        opacity: 0.4;
-        transform: scale(0.8);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1.1);
-    }
+.skipBtn {
+    background: transparent;
+    border: none;
+    color: var(--mo-color-text-tertiary);
+    font-size: 13px;
+    cursor: pointer;
+    text-align: center;
+    padding: 6px 0;
 }
 
-.nodecompleted {
-    background: var(--mo-color-state-success);
-    border-color: var(--mo-color-state-success);
-    color: var(--mo-color-bg-primary);
-}
-
-/* Content Blocks */
-.timelineContent {
+/* Detail Sheet */
+.detailVideo {
     width: 100%;
-}
-
-.collapsedRow {
+    aspect-ratio: 16/9;
+    background-size: cover;
+    background-position: center;
+    position: relative;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: var(--mo-space-3) 0;
-    border-bottom: 1px solid transparent;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.collapsedTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--mo-color-text-secondary);
+.detailVideoOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(11, 15, 20, 0.4);
 }
 
-.collapsedMeta {
+.detailPlayBtn {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(11, 15, 20, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1.5px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+    z-index: 2;
+}
+
+.detailClose {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(11, 15, 20, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    cursor: pointer;
+    z-index: 3;
+}
+
+.detailBody {
+    padding: 16px 18px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.detailHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.detailName {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--mo-color-text-primary);
+    margin: 0;
+}
+
+.detailMeta {
     font-family: var(--mo-font-mono);
     font-size: 11px;
     color: var(--mo-color-text-tertiary);
 }
 
-.collapsedCompleted .collapsedTitle {
-    color: var(--mo-color-text-primary);
-}
-
-/* 5. Execution Block */
-.executionBlock {
+.detailSection {
     display: flex;
     flex-direction: column;
-    gap: var(--mo-space-4);
-    margin-top: var(--mo-space-4);
+    gap: 6px;
 }
 
-.executionBox {
-    width: 100%;
-    height: 180px;
-    border-radius: var(--mo-radius-sm);
-    overflow: hidden;
-    position: relative;
-    background: var(--mo-color-surface-tertiary);
-    border: 1px solid var(--mo-color-border-strong);
-}
-
-.parametersGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--mo-space-2);
-}
-
-.paramBox {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    background: var(--mo-color-surface-tertiary);
-    border: 1px solid var(--mo-color-border-strong);
-    border-radius: var(--mo-radius-sm);
-    padding: var(--mo-space-3);
-    gap: 4px;
-}
-
-.paramLabel {
+.detailSectionLabel {
     font-family: var(--mo-font-mono);
-    font-size: 10px;
+    font-size: 9px;
+    font-weight: 700;
     color: var(--mo-color-text-tertiary);
+    letter-spacing: 0.12em;
 }
 
-.paramValue {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--mo-color-text-primary);
-}
-
-/* 6. Block Completion State */
-.blockCompletionState {
-    display: flex;
-    flex-direction: column;
-    gap: var(--mo-space-4);
-    background: rgba(24, 182, 122, 0.05);
-    border: 1px solid rgba(24, 182, 122, 0.15);
-    border-radius: var(--mo-radius-md);
-    padding: var(--mo-space-4);
-}
-
-.completionBanner {
-    display: flex;
-    align-items: center;
-    gap: var(--mo-space-3);
-}
-
-.completionText {
-    display: flex;
-    flex-direction: column;
-}
-
-.completionTitle {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--mo-color-text-primary);
-}
-
-.completionSub {
-    font-size: 12px;
-    color: var(--mo-color-text-secondary);
-}
-
-/* 7. Mission Completion State */
-.missionCompletionState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: var(--mo-color-surface-secondary);
-    border: 1px solid var(--mo-color-border-strong);
-    border-radius: var(--mo-radius-lg);
-    padding: var(--mo-space-8);
-    text-align: center;
-    margin-top: var(--mo-space-6);
-}
-
-.missionCompletionIcon {
-    color: var(--mo-color-state-success);
-    margin-bottom: var(--mo-space-4);
-}
-
-.missionCompletionTitle {
-    font-size: 20px;
-    font-weight: 600;
-    color: var(--mo-color-text-primary);
-    margin: 0 0 8px 0;
-    letter-spacing: 0.05em;
-}
-
-.missionCompletionDesc {
+.detailText {
     font-size: 13px;
     color: var(--mo-color-text-secondary);
+    line-height: 1.5;
     margin: 0;
+}
+
+.detailList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.detailList li {
+    font-size: 13px;
+    color: var(--mo-color-text-secondary);
+    padding-left: 14px;
+    position: relative;
+    line-height: 1.4;
+}
+
+.detailList li::before {
+    content: '·';
+    position: absolute;
+    left: 4px;
+    color: var(--mo-color-accent-system);
 }

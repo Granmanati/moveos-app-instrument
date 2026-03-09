@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import styles from './ProfilePage.module.css';
+import styles from './SystemPage.module.css';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { MetricCard } from '../components/ui/MetricCard';
 
-export default function ProfilePage() {
+export default function SystemPage() {
     const { user, profile, tier, subscriptionStatus, trialDaysLeft } = useAuth();
     const navigate = useNavigate();
 
