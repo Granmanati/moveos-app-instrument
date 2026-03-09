@@ -1,8 +1,8 @@
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
 @import './tokens.css';
 
 /* =========================================================================
-   GLOBAL RESET
+   1. GLOBAL RESET & BASE
    ========================================================================= */
 
 * {
@@ -13,23 +13,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-body {
-  font-family: var(--font-sans);
-  background: var(--background);
-  color: var(--foreground);
-  line-height: 1.5;
-  overflow-x: hidden;
+:root {
+  --transition-speed: var(--mo-duration-base);
+  --ease: var(--mo-ease-system);
 }
 
-/* Base button reset for consistent rendering */
-button {
-  font-family: var(--font-sans);
-  /* Touch target safety */
-  touch-action: manipulation;
+body {
+  font-family: var(--mo-font-sans);
+  background-color: var(--mo-color-bg-primary);
+  color: var(--mo-color-text-primary);
+  line-height: var(--mo-leading-normal);
+  overflow-x: hidden;
+  transition: background-color var(--transition-speed) var(--ease), color var(--transition-speed) var(--ease);
+}
+
+/* IBM Plex Mono for technical precision */
+.mono {
+  font-family: var(--mo-font-mono);
+  letter-spacing: var(--mo-tracking-wider);
+  text-transform: uppercase;
+  font-size: var(--mo-text-xs);
 }
 
 /* =========================================================================
-   LAYOUT SYSTEM (MOBILE FIRST CONSTRAINT)
+   2. LAYOUT SYSTEM
    ========================================================================= */
 
 #root {
@@ -41,128 +48,156 @@ button {
 
 .app-wrapper {
   width: 100%;
-  max-width: 430px;
+  max-width: 480px;
+  /* Aligned with mo-screen-max-width */
   position: relative;
-  background: transparent;
+  background-color: var(--mo-color-bg-primary);
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
   margin: 0 auto;
+  border-left: 0.5px solid var(--mo-color-border-subtle);
+  border-right: 0.5px solid var(--mo-color-border-subtle);
 }
 
-/* Prevent layout breaking on large screens by explicitly centering the shell */
 .app-container {
   display: flex;
   flex-direction: column;
   flex: 1;
   position: relative;
   overflow-x: hidden;
-  /* Space for physical BottomNav */
-  padding-bottom: 90px;
+  padding-bottom: var(--mo-bottom-nav-height);
 }
 
-/* =========================================================================
-   REUSABLE UI COMPONENTS (V1.4)
-   ========================================================================= */
-
-.primaryBtn {
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0 var(--mo-space-4);
-  height: 48px;
-  font-weight: 500;
-  font-size: 15px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--mo-duration-fast) var(--mo-ease-system);
-  width: 100%;
+.page-content {
+  padding: var(--mo-screen-padding-top) var(--mo-screen-padding-x);
+  animation: pageFadeIn var(--mo-duration-medium) var(--mo-ease-system) forwards;
 }
 
-.primaryBtn:hover {
-  opacity: 0.9;
-}
-
-.primaryBtn:active {
-  transform: scale(0.98);
-}
-
-.primaryBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.secondaryBtn {
-  background: var(--card);
-  color: var(--foreground);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 0 var(--mo-space-4);
-  height: 48px;
-  font-weight: 500;
-  font-size: 15px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all var(--mo-duration-fast) var(--mo-ease-system);
-  width: 100%;
-}
-
-.secondaryBtn:hover {
-  background: var(--border);
-}
-
-.secondaryBtn:active {
-  transform: scale(0.98);
-}
-
-/* Global Card Rules */
-.base-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition: all var(--mo-duration-base) var(--mo-ease-system);
-  overflow: hidden;
-}
-
-.base-card:hover {
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-.base-card:active {
-  transform: scale(0.99);
-}
-
-/* =========================================================================
-   MICRO-ANIMATIONS
-   ========================================================================= */
-
-@keyframes pageEnter {
-  0% {
+@keyframes pageFadeIn {
+  from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(4px);
   }
 
-  100% {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-.animate-page-enter {
-  animation: pageEnter 220ms var(--mo-ease-system) forwards;
+/* =========================================================================
+   3. PREMIUM BRAND GRAMMAR
+   ========================================================================= */
+
+/* Micro-grid background (Subtle) */
+.micro-grid {
+  background-image: radial-gradient(var(--mo-color-border-subtle) 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
 }
 
-/* Subtle glow pulse */
-@keyframes pulseGlow {
-  0% {}
+/* Broken Corner Frame */
+.modular-frame {
+  position: relative;
+  border: 0.5px solid var(--mo-color-border-subtle);
+  border-radius: var(--mo-radius-lg);
+  background-color: var(--mo-color-surface-primary);
+  padding: var(--mo-card-padding-primary);
+}
 
-  70% {}
+/* The "Broken" corner effect using clip-path or pseudo-elements */
+.modular-frame::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  width: 12px;
+  height: 12px;
+  background-color: var(--mo-color-bg-primary);
+  clip-path: polygon(0 0, 100% 0, 0 100%);
+  z-index: 2;
+}
 
-  100% {}
+/* Node Connectors */
+.node-line {
+  position: relative;
+}
+
+.node-line::before {
+  content: '';
+  position: absolute;
+  background-color: var(--mo-color-border-strong);
+  width: 0.5px;
+}
+
+.node-point {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--mo-color-accent-system);
+  border: 1px solid var(--mo-color-bg-primary);
+  z-index: 3;
+}
+
+/* =========================================================================
+   4. UI COMPONENTS
+   ========================================================================= */
+
+.primary-btn {
+  background-color: var(--mo-color-accent-system);
+  color: var(--mo-color-text-inverse);
+  border: none;
+  border-radius: var(--mo-button-radius);
+  height: var(--mo-button-height-md);
+  padding: 0 var(--mo-button-padding-x-md);
+  font-family: var(--mo-font-sans);
+  font-weight: var(--mo-weight-semibold);
+  font-size: var(--mo-text-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--mo-duration-fast), opacity var(--mo-duration-fast);
+}
+
+.primary-btn:active {
+  transform: scale(0.97);
+  opacity: 0.9;
+}
+
+.ghost-btn {
+  background: transparent;
+  color: var(--mo-color-text-secondary);
+  border: 0.5px solid var(--mo-color-border-strong);
+  border-radius: var(--mo-button-radius);
+  height: var(--mo-button-height-sm);
+  padding: 0 var(--mo-button-padding-x-sm);
+  font-family: var(--mo-font-mono);
+  font-size: var(--mo-text-xs);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* Typography Overrides */
+h1,
+h2,
+h3 {
+  font-weight: var(--mo-weight-light);
+  letter-spacing: var(--mo-tracking-tight);
+}
+
+.label-mono {
+  font-family: var(--mo-font-mono);
+  color: var(--mo-color-text-tertiary);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* =========================================================================
+   5. THEME OVERRIDES
+   ========================================================================= */
+
+.light .micro-grid {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.05) 0.5px, transparent 0.5px);
 }

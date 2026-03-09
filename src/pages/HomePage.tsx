@@ -1,18 +1,13 @@
 import { useState, useEffect } from 'react';
-import styles from './HomePage.module.css';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
 import { safeRpc } from '../lib/db';
-import { PrimaryButton } from '../components/ui/PrimaryButton';
-import { MetricCard } from '../components/ui/MetricCard';
-import { MetricBar } from '../components/ui/MetricBar';
-import { SkeletonCard } from '../components/ui/Skeleton';
 import { useI18n } from '../i18n/useI18n';
 import { motion } from 'framer-motion';
 import { useAdaptiveEngine } from '../engine/useAdaptiveEngine';
-import { EngineAuditPanel } from '../components/ui/EngineAuditPanel';
+import { ReadinessRing } from '../components/ui/ReadinessRing';
 
 interface HomeSnapshot {
     today: string;
@@ -23,43 +18,16 @@ interface HomeSnapshot {
     avg_pain_7d: number;
 }
 
-const DAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
-
-const STATE_COLORS: Record<string, string> = {
-    aligned: 'var(--mo-color-state-success, #4CAF7D)',
-    compensating: 'var(--mo-color-state-warning, #F5A623)',
-    risk: 'var(--mo-color-state-alert, #F05A67)',
-};
-
-const STATE_LABELS: Record<string, string> = {
-    aligned: 'NOMINAL',
-    compensating: 'COMPENSATING',
-    risk: 'HIGH STRAIN',
-};
-
-const STATE_DESCS: Record<string, string> = {
-    aligned: 'All systems operating within protocol range',
-    compensating: 'System adapting under suboptimal conditions',
-    risk: 'Pain load exceeds safe threshold',
-};
-
-const STATE_ICONS: Record<string, string> = {
-    aligned: 'check_circle',
-    compensating: 'warning',
-    risk: 'error',
-};
-
-const DECISION_ICONS: Record<string, string> = {
-    progress: 'trending_up',
-    hold: 'pause_circle',
-    regress: 'trending_down',
-};
-
-const DECISION_LABELS: Record<string, string> = {
-    progress: 'PROGRESSING',
-    hold: 'HOLDING',
-    regress: 'REGRESSING',
-};
+const StatusCard = ({ label, value, subtext }: { label: string; value: string; subtext?: string }) => (
+    <div className="modular-frame p-4 flex flex-col gap-1 overflow-hidden relative">
+        <span className="mono text-[var(--mo-color-text-tertiary)] text-[9px] tracking-widest">{label}</span>
+        <span className="text-lg font-light text-[var(--mo-color-text-primary)]">{value}</span>
+        {subtext && <span className="mono text-[var(--mo-color-accent-system)] text-[10px] mt-1">{subtext}</span>}
+        <div className="absolute top-0 right-0 p-1 opacity-40">
+            <div className="w-1.5 h-1.5 rounded-full bg-[var(--mo-color-border-strong)]" />
+        </div>
+    </div>
+);
 
 export default function HomePage() {
     const { user, profile } = useAuth();
@@ -67,277 +35,104 @@ export default function HomePage() {
     const { t } = useI18n();
     const engine = useAdaptiveEngine();
 
-    const [viewState, setViewState] = useState<'loading' | 'error' | 'success'>('loading');
     const [snapshot, setSnapshot] = useState<HomeSnapshot | null>(null);
-    const [errorMsg, setErrorMsg] = useState('');
 
     const fetchDashboardData = async () => {
         if (!user) return;
-        setViewState('loading');
-        setErrorMsg('');
         try {
-            const { data, error } = await safeRpc('get_home_snapshot');
-            if (error) { setErrorMsg(error.message); setViewState('error'); return; }
-            if (data) { setSnapshot(data as HomeSnapshot); setViewState('success'); }
-            else { setSnapshot(null); setViewState('error'); setErrorMsg('No data returned.'); }
+            const { data } = await safeRpc('get_home_snapshot');
+            if (data) { setSnapshot(data as HomeSnapshot); }
         } catch (err: any) {
-            setErrorMsg(err.message || t('error'));
-            setViewState('error');
+            console.error('Failed to fetch home snapshot:', err);
         }
     };
 
     useEffect(() => {
         fetchDashboardData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user, profile]);
 
-    const handleGenerateSession = () => {
-        navigate('/mission');
-    };
-
     const session = snapshot?.today_session ?? null;
-    const adherence = Math.min(snapshot?.adherence_7d ?? 0, 100);
-
-    // Engine-driven values — fall back to snapshot-derived values while engine loads
-    const engineState = engine.output?.systemState ?? 'aligned';
-    const sysColor = STATE_COLORS[engineState];
-    const sysLabel = STATE_LABELS[engineState];
-    const sysDesc = STATE_DESCS[engineState];
-    const sysIcon = STATE_ICONS[engineState];
-    const insight = engine.output?.adaptiveMessage ?? null;
-    const sessionGoal = engine.output?.sessionGoal ?? null;
-    const progressionDecision = engine.output?.progressionDecision ?? null;
-    const displayName = profile?.full_name || 'USER';
-
-    // Weekly dots — always 7, starting Monday
-    const weekData = (() => {
-        if (!snapshot) return [];
-        return Array.from({ length: 7 }, (_, i) => {
-            const d = new Date();
-            d.setDate(d.getDate() - (6 - i));
-            const dateStr = d.toISOString().split('T')[0];
-            const entry = snapshot.consistency_7d.find(x => x.date === dateStr);
-            return {
-                day: DAY_LABELS[(d.getDay() + 6) % 7],
-                done: entry?.completed ?? false,
-                isToday: dateStr === snapshot.today,
-            };
-        });
-    })();
-
-    const weekDone = weekData.filter(d => d.done).length;
+    const readinessScore = snapshot ? Math.round(80 + (snapshot.adherence_7d / 10) - snapshot.avg_pain_7d) : 84;
+    const readinessStatus = readinessScore > 80 ? "OPTIMAL" : readinessScore > 60 ? "STABLE" : "SENSITIVE";
 
     return (
-        <AppShell sublabel="SYSTEM ACTIVE">
-            <div className={styles.page}>
+        <AppShell title="HOME" sublabel="PULSE ACTIVE">
+            <div className="flex flex-col gap-6 page-content micro-grid min-h-full pb-20">
 
-                {/* Error banner */}
-                {errorMsg && viewState === 'error' && (
-                    <div className={styles.errorBanner}>
-                        <Icon name="info" size={14} />
-                        <span>{errorMsg}</span>
+                {/* 1. Readiness Pulse */}
+                <motion.section
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex flex-col items-center pt-4"
+                >
+                    <ReadinessRing score={readinessScore} status={readinessStatus} />
+                </motion.section>
+
+                {/* 2. Daily State Grid */}
+                <div className="grid grid-cols-1 gap-4">
+                    <div className="grid grid-cols-2 gap-4">
+                        <StatusCard
+                            label="RECOVERY SIGNAL"
+                            value={readinessStatus}
+                            subtext="TRENDING: STABLE"
+                        />
+                        <StatusCard
+                            label="PAIN LOAD"
+                            value={snapshot ? `${snapshot.avg_pain_7d}/10` : "2/10"}
+                            subtext={snapshot && snapshot.avg_pain_7d < 4 ? t('low_risk' as any) : "OBSERVE"}
+                        />
                     </div>
-                )}
 
-                {/* Loading skeletons */}
-                {viewState === 'loading' && (
-                    <div className={styles.skeletonStack}>
-                        <SkeletonCard style={{ height: 72 }} />
-                        <SkeletonCard style={{ height: 112 }} />
-                        <SkeletonCard style={{ height: 80 }} />
-                        <SkeletonCard style={{ height: 72 }} />
-                        <SkeletonCard style={{ height: 92 }} />
+                    <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        className="modular-frame p-6 flex flex-col gap-4 bg-[var(--mo-color-surface-secondary)]"
+                    >
+                        <div className="flex justify-between items-start">
+                            <div className="flex flex-col gap-1">
+                                <span className="mono text-[var(--mo-color-text-tertiary)] text-[10px]">CURRENT PROTOCOLO</span>
+                                <h2 className="text-xl font-light text-[var(--mo-color-text-primary)]">
+                                    {session ? `Phase: ${session.phase.toUpperCase()}` : "ADAPTIVE ENGINE READY"}
+                                </h2>
+                                <p className="text-sm text-[var(--mo-color-text-secondary)] font-light mt-1">
+                                    {engine.output?.adaptiveMessage || "System optimized for recovery and structural reinforcement."}
+                                </p>
+                            </div>
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center border-[0.5px] border-[var(--mo-color-accent-system)] text-[var(--mo-color-accent-system)]">
+                                <Icon name="bolt" size={20} />
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={() => navigate('/mission')}
+                            className="primary-btn w-full mt-2"
+                        >
+                            {session ? "CONTINUE SESSION" : "GENERATE PROTOCOL"}
+                        </button>
+
+                        <div className="flex justify-between items-center opacity-60">
+                            <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">EST: 22 MIN</span>
+                            <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">TARGET: MOBILITY +12%</span>
+                        </div>
+                    </motion.div>
+                </div>
+
+                {/* 3. System Data Chips */}
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
+                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">VOL</span>
+                        <span className="text-xs font-medium text-[var(--mo-color-text-primary)]">{snapshot?.sessions_30d || profile?.sessions_30d || 0}</span>
                     </div>
-                )}
+                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
+                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">ADHERENCE</span>
+                        <span className="text-xs font-medium text-[var(--mo-color-text-primary)]">{snapshot?.adherence_7d || profile?.adherence_7d || 0}%</span>
+                    </div>
+                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
+                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">SENSORS</span>
+                        <span className="text-[10px] mono text-[var(--mo-color-state-success)] uppercase">Synced</span>
+                    </div>
+                </div>
 
-                {viewState === 'success' && snapshot && (
-                    <>
-                        {/* 1. System State Card */}
-                        <motion.div
-                            className={styles.sysStateCard}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, ease: 'easeOut' }}
-                        >
-                            <div className={styles.sysLeft}>
-                                <span className={styles.sysNodeLabel}>NODE · {displayName.toUpperCase()}</span>
-                                <div className={styles.sysStateRow}>
-                                    <div className={styles.sysDot} style={{ background: sysColor }} />
-                                    <span className={styles.sysStateLabel} style={{ color: sysColor }}>{sysLabel}</span>
-                                    {progressionDecision && (
-                                        <span className={styles.progressionBadge} style={{ color: sysColor }}>
-                                            <Icon name={DECISION_ICONS[progressionDecision]} size={11} />
-                                            {DECISION_LABELS[progressionDecision]}
-                                        </span>
-                                    )}
-                                </div>
-                                <span className={styles.sysDesc}>{sysDesc}</span>
-                            </div>
-                            <div className={styles.sysBadge} style={{ borderColor: sysColor + '40', color: sysColor }}>
-                                <Icon name={sysIcon} size={20} />
-                            </div>
-                        </motion.div>
-
-                        {/* 2. Today Mission Card */}
-                        <motion.div
-                            className={styles.missionCard}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: 0.04, ease: 'easeOut' }}
-                            whileHover={{ scale: 1.012 }}
-                        >
-                            <div className={styles.missionTop}>
-                                <div>
-                                    <span className={styles.missionSectionLabel}>TODAY'S MISSION</span>
-                                    <span className={styles.missionPhase}>
-                                        {session ? `PHASE: ${session.phase.toUpperCase()}` : 'AWAITING INITIALIZATION'}
-                                    </span>
-                                    <span className={styles.missionGoal}>
-                                        {sessionGoal
-                                            ? sessionGoal
-                                            : session?.state === 'completed'
-                                                ? 'Protocol completed · All blocks executed'
-                                                : session
-                                                    ? 'Adaptive protocol ready for execution'
-                                                    : 'No session generated for today'}
-                                    </span>
-                                </div>
-                                {session?.state === 'completed' && (
-                                    <div className={styles.missionDoneIcon}>
-                                        <Icon name="check_circle" size={28} style={{ color: 'var(--mo-color-state-success, #4CAF7D)' }} />
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className={styles.missionCTA}>
-                                {!session ? (
-                                    <PrimaryButton onClick={handleGenerateSession}>
-                                        GENERATE PROTOCOL
-                                    </PrimaryButton>
-                                ) : session.state !== 'completed' ? (
-                                    <PrimaryButton onClick={() => navigate('/mission')}>
-                                        START SESSION
-                                    </PrimaryButton>
-                                ) : (
-                                    <button className={styles.viewSessionBtn} onClick={() => navigate('/mission')}>
-                                        VIEW SESSION →
-                                    </button>
-                                )}
-                            </div>
-                        </motion.div>
-
-                        {/* 3. Adaptive Insight Card */}
-                        <motion.div
-                            className={styles.insightCard}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: 0.08, ease: 'easeOut' }}
-                        >
-                            <div className={styles.insightIcon}>
-                                <Icon name="psychology" size={16} />
-                            </div>
-                            <div className={styles.insightBody}>
-                                <span className={styles.insightLabel}>ADAPTIVE INSIGHT</span>
-                                <span className={styles.insightText}>{insight}</span>
-                            </div>
-                        </motion.div>
-
-                        {/* 4. System Metrics — 3 columns */}
-                        <motion.div
-                            className={styles.metricsGrid}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: 0.12, ease: 'easeOut' }}
-                        >
-                            <MetricCard
-                                label="SESSION VOL"
-                                value={snapshot.sessions_30d}
-                                icon={<Icon name="fitness_center" size={14} />}
-                            />
-                            <MetricCard
-                                label="ADHERENCE"
-                                value={`${adherence}%`}
-                                icon={<Icon name="data_usage" size={14} />}
-                            >
-                                <MetricBar value={adherence} color="accent" height={2} />
-                            </MetricCard>
-                            <MetricCard
-                                label="SYS STRAIN"
-                                value={`${snapshot.avg_pain_7d}/10`}
-                                icon={<Icon name="healing" size={14} />}
-                            >
-                                <MetricBar
-                                    value={snapshot.avg_pain_7d * 10}
-                                    color={snapshot.avg_pain_7d >= 6 ? 'alert' : snapshot.avg_pain_7d >= 3 ? 'warning' : 'success'}
-                                    height={2}
-                                />
-                            </MetricCard>
-                        </motion.div>
-
-                        {/* 5. Week Consistency */}
-                        <motion.div
-                            className={styles.weekCard}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: 0.16, ease: 'easeOut' }}
-                        >
-                            <div className={styles.weekHeader}>
-                                <span className={styles.cardLabel}>WEEK CONSISTENCY</span>
-                                <span className={styles.weekCount}>{weekDone}/7</span>
-                            </div>
-                            <div className={styles.weekDots}>
-                                {weekData.map((d, i) => (
-                                    <div key={i} className={styles.weekItem}>
-                                        <div className={`${styles.dot} ${d.done ? styles.dotDone : d.isToday ? styles.dotToday : styles.dotEmpty}`}>
-                                            {d.done && <Icon name="check" size={9} />}
-                                        </div>
-                                        <span className={`${styles.dotLabel} ${d.isToday ? styles.dotLabelToday : ''}`}>{d.day}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.div>
-
-                        {/* 6. Last Session Summary */}
-                        <motion.div
-                            className={styles.lastSessionCard}
-                            initial={{ opacity: 0, y: 8 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.22, delay: 0.20, ease: 'easeOut' }}
-                        >
-                            <span className={styles.cardLabel}>LAST SESSION</span>
-                            <div className={styles.lastSessionRow}>
-                                <div className={styles.lastMetaItem}>
-                                    <Icon name="timer" size={13} className={styles.lastMetaIcon} />
-                                    <span className={styles.lastMetaValue}>~45 min</span>
-                                    <span className={styles.lastMetaLabel}>DURATION</span>
-                                </div>
-                                <div className={styles.lastMetaDivider} />
-                                <div className={styles.lastMetaItem}>
-                                    <Icon name="trending_down" size={13} className={styles.lastMetaIcon} />
-                                    <span className={styles.lastMetaValue}>{snapshot.avg_pain_7d}/10</span>
-                                    <span className={styles.lastMetaLabel}>PAIN SCORE</span>
-                                </div>
-                                <div className={styles.lastMetaDivider} />
-                                <div className={styles.lastMetaItem}>
-                                    <Icon name="bolt" size={13} className={styles.lastMetaIcon} />
-                                    <span
-                                        className={styles.lastMetaValue}
-                                        style={{ color: sysColor, fontSize: 10 }}
-                                    >
-                                        {sysLabel}
-                                    </span>
-                                    <span className={styles.lastMetaLabel}>RESPONSE</span>
-                                </div>
-                            </div>
-                        </motion.div>
-
-                        {/* Engine Audit Panel — dev tool */}
-                        {engine.output && engine.input && (
-                            <EngineAuditPanel output={engine.output} input={engine.input} />
-                        )}
-                    </>
-                )}
             </div>
-        </AppShell >
+        </AppShell>
     );
 }

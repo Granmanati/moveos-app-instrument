@@ -360,6 +360,49 @@
 }
 
 /* ==========================================================================
+   MOVE OS — Light Mode Overrides
+   Activated by .light class on root
+   ========================================================================== */
+
+:root.light {
+    --mo-color-bg-primary: #F7FAFD;
+    --mo-color-bg-secondary: #EDF2F7;
+    --mo-color-surface-primary: #FFFFFF;
+    --mo-color-surface-secondary: #F0F4F8;
+    --mo-color-surface-tertiary: #E8EEF4;
+
+    --mo-color-border-subtle: #DDE4EE;
+    --mo-color-border-strong: #CBD5E1;
+
+    --mo-color-text-primary: #0F1722;
+    --mo-color-text-secondary: #4A5568;
+    --mo-color-text-tertiary: #718096;
+    --mo-color-text-inverse: #F4F7FB;
+
+    /* Badges / Panels for light mode */
+    --mo-color-state-aligned-bg: rgba(24, 182, 122, 0.08);
+    --mo-color-state-tension-bg: rgba(245, 181, 70, 0.08);
+    --mo-color-state-risk-bg: rgba(240, 90, 103, 0.08);
+
+    --mo-color-overlay-01: rgba(0, 0, 0, 0.04);
+    --mo-color-overlay-02: rgba(0, 0, 0, 0.08);
+    --mo-color-overlay-03: rgba(0, 0, 0, 0.12);
+
+    --mo-shadow-card:
+        0 2px 12px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.04);
+    --mo-shadow-card-hover:
+        0 8px 24px rgba(0, 0, 0, 0.10),
+        0 0 0 1px rgba(0, 0, 0, 0.06);
+    
+    --mo-progress-track: rgba(0, 0, 0, 0.06);
+    --mo-chart-grid: rgba(0, 0, 0, 0.04);
+
+    --mo-premium-overlay-bg: rgba(247, 250, 253, 0.64);
+    --mo-premium-overlay-border: rgba(45, 124, 255, 0.20);
+}
+
+/* ==========================================================================
    OPTIONAL SEMANTIC TOKENS
    These aliases make engineering implementation easier.
    ========================================================================== */
