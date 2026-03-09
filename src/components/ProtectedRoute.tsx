@@ -15,7 +15,7 @@ export default function ProtectedRoute() {
     // Premium Startup Pre-Render
     if (isLoading || !profile) {
         return (
-            <AppShell title="SYSTEM" sublabel="INITIALIZING" hideNav={true}>
+            <AppShell title="SYSTEM" sublabel="NODE_INITIALIZING" hideNav={true}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', padding: 'var(--mo-space-8)', marginTop: '10vh' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
                         <div style={{ fontSize: '10px', fontFamily: 'var(--font-mono)', letterSpacing: '1.2px', color: 'var(--primary)', fontWeight: 600, animation: 'pulse 1.5s infinite ease-in-out' }}>SYSTEM INITIALIZING</div>
