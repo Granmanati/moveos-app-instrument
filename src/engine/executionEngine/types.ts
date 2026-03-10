@@ -1,5 +1,3 @@
-import type { SessionExercise } from '../../pages/MissionPage';
-
 export type ExecutionStatus =
     | 'IDLE'
     | 'SET_READY'
@@ -8,6 +6,17 @@ export type ExecutionStatus =
     | 'EXERCISE_COMPLETE'
     | 'BLOCK_COMPLETE'
     | 'SESSION_COMPLETE';
+
+export interface SessionExercise {
+    id: string;
+    name: string;
+    description?: string;
+    sets: number;
+    reps: string;
+    rest: number;
+    completed_sets?: number;
+    is_completed?: boolean;
+}
 
 export interface SessionBlock {
     name: string;

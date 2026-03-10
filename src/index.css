@@ -70,7 +70,13 @@ body {
 }
 
 .page-content {
-  padding: var(--mo-screen-padding-top) var(--mo-screen-padding-x);
+  width: 100%;
+  max-width: var(--mo-screen-max-width);
+  margin: 0 auto;
+  padding: var(--mo-screen-padding-top) var(--mo-screen-padding-x) var(--mo-screen-padding-bottom);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mo-section-gap-md);
   animation: pageFadeIn var(--mo-duration-medium) var(--mo-ease-system) forwards;
 }
 

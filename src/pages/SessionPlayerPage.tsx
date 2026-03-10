@@ -104,7 +104,7 @@ export default function SessionPlayerPage() {
                     <div className={styles.restingContainer}>
                         <div className={styles.restTimer}>
                             <span className={styles.restLabel}>RESTING</span>
-                            <span className={styles.restValue}>{formatTime(Math.max(0, (currentExercise.rest_sec || 60) - state.elapsedSeconds))}</span>
+                            <span className={styles.restValue}>{formatTime(Math.max(0, (currentExercise.rest || 60) - state.elapsedSeconds))}</span>
                         </div>
                         <motion.button
                             className={styles.subActionPrimary}
@@ -168,7 +168,7 @@ export default function SessionPlayerPage() {
                 {/* Exercise Info Overlay */}
                 <div className={styles.infoOverlay}>
                     <span className={styles.blockName}>{currentBlock?.name.toUpperCase()}</span>
-                    <h1 className={styles.exerciseName}>{currentExercise.exercise_library.name}</h1>
+                    <h1 className={styles.exerciseName}>{currentExercise.name}</h1>
                 </div>
             </div>
 
@@ -181,7 +181,7 @@ export default function SessionPlayerPage() {
                     </div>
                     <div className={styles.metric}>
                         <span className={styles.metricLabel}>REPS</span>
-                        <span className={styles.metricValue}>{currentExercise.reps_min}<small>–{currentExercise.reps_max}</small></span>
+                        <span className={styles.metricValue}>{currentExercise.reps}</span>
                     </div>
                     <div className={styles.metric}>
                         <span className={styles.metricLabel}>TIME</span>

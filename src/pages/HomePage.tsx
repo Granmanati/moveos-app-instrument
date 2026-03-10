@@ -1,135 +1,159 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
-import { safeRpc } from '../lib/db';
-import { useI18n } from '../i18n/useI18n';
-import { motion } from 'framer-motion';
-import { useAdaptiveEngine } from '../engine/useAdaptiveEngine';
-import { ReadinessRing } from '../components/ui/ReadinessRing';
+import { Card, CardLabel } from '../components/ui/Card';
+import { useNavigate } from 'react-router-dom';
 
-interface HomeSnapshot {
-    today: string;
-    today_session: { id: string; state: string; session_date: string; phase: string } | null;
-    consistency_7d: { date: string; completed: boolean }[];
-    sessions_30d: number;
-    adherence_7d: number;
-    avg_pain_7d: number;
-}
+const IntegratedReadiness = ({ value }: { value: number }) => {
+    const radius = 28;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (value / 100) * circumference;
 
-const StatusCard = ({ label, value, subtext }: { label: string; value: string; subtext?: string }) => (
-    <div className="modular-frame p-4 flex flex-col gap-1 overflow-hidden relative">
-        <span className="mono text-[var(--mo-color-text-tertiary)] text-[9px] tracking-widest">{label}</span>
-        <span className="text-lg font-light text-[var(--mo-color-text-primary)]">{value}</span>
-        {subtext && <span className="mono text-[var(--mo-color-accent-system)] text-[10px] mt-1">{subtext}</span>}
-        <div className="absolute top-0 right-0 p-1 opacity-40">
-            <div className="w-1.5 h-1.5 rounded-full bg-[var(--mo-color-border-strong)]" />
+    return (
+        <div className="relative w-16 h-16 flex items-center justify-center">
+            <svg className="w-full h-full transform -rotate-90">
+                <circle
+                    cx="32"
+                    cy="32"
+                    r={radius}
+                    stroke="var(--mo-color-border-subtle)"
+                    strokeWidth="4"
+                    fill="transparent"
+                />
+                <circle
+                    cx="32"
+                    cy="32"
+                    r={radius}
+                    stroke="var(--mo-color-accent-system)"
+                    strokeWidth="4"
+                    fill="transparent"
+                    strokeDasharray={circumference}
+                    style={{ strokeDashoffset: offset }}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                />
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center mt-0.5">
+                <span className="text-sm font-bold tracking-tight">{value}</span>
+                <span className="mono text-[6px] opacity-50 uppercase tracking-tighter">SCORE</span>
+            </div>
         </div>
-    </div>
+    );
+};
+
+const MetricCard = ({ label, value, unit, trend, status }: { label: string; value: string; unit?: string; trend?: string; status?: 'positive' | 'neutral' | 'warning' }) => (
+    <Card className="p-4 gap-2 bg-[var(--mo-color-surface-secondary)] min-h-[110px]">
+        <CardLabel>{label}</CardLabel>
+        <div className="flex flex-col gap-1 mt-1">
+            <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-semibold tracking-tight">{value}</span>
+                {unit && <span className="text-[10px] text-[var(--mo-color-text-tertiary)] font-medium uppercase">{unit}</span>}
+            </div>
+            {(trend || status) && (
+                <div className="flex items-center gap-1.5 mt-1">
+                    <div className={`w-1 h-1 rounded-full ${status === 'positive' ? 'bg-[var(--mo-color-state-aligned)]' : status === 'warning' ? 'bg-[var(--mo-color-state-tension)]' : 'bg-[var(--mo-color-accent-system)]'}`} />
+                    <span className="mono text-[8px] text-[var(--mo-color-text-secondary)] font-bold uppercase tracking-widest">{trend || 'STABLE'}</span>
+                </div>
+            )}
+        </div>
+    </Card>
 );
 
 export default function HomePage() {
-    const { user, profile } = useAuth();
+    const { profile } = useAuth();
     const navigate = useNavigate();
-    const { t } = useI18n();
-    const engine = useAdaptiveEngine();
 
-    const [snapshot, setSnapshot] = useState<HomeSnapshot | null>(null);
-
-    const fetchDashboardData = async () => {
-        if (!user) return;
-        try {
-            const { data } = await safeRpc('get_home_snapshot');
-            if (data) { setSnapshot(data as HomeSnapshot); }
-        } catch (err: any) {
-            console.error('Failed to fetch home snapshot:', err);
-        }
-    };
-
-    useEffect(() => {
-        fetchDashboardData();
-    }, [user, profile]);
-
-    const session = snapshot?.today_session ?? null;
-    const readinessScore = snapshot ? Math.round(80 + (snapshot.adherence_7d / 10) - snapshot.avg_pain_7d) : 84;
-    const readinessStatus = readinessScore > 80 ? "OPTIMAL" : readinessScore > 60 ? "STABLE" : "SENSITIVE";
+    const readinessScore = profile?.readiness_score || 84;
 
     return (
-        <AppShell title="HOME" sublabel="PULSE ACTIVE">
-            <div className="flex flex-col gap-6 page-content micro-grid min-h-full pb-20">
+        <AppShell title="HOME" sublabel="PULSE_ACTIVE">
+            <div className="page-content py-2">
 
-                {/* 1. Readiness Pulse */}
-                <motion.section
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex flex-col items-center pt-4"
-                >
-                    <ReadinessRing score={readinessScore} status={readinessStatus} />
-                </motion.section>
-
-                {/* 2. Daily State Grid */}
-                <div className="grid grid-cols-1 gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <StatusCard
-                            label="RECOVERY SIGNAL"
-                            value={readinessStatus}
-                            subtext="TRENDING: STABLE"
-                        />
-                        <StatusCard
-                            label="PAIN LOAD"
-                            value={snapshot ? `${snapshot.avg_pain_7d}/10` : "2/10"}
-                            subtext={snapshot && snapshot.avg_pain_7d < 4 ? t('low_risk' as any) : "OBSERVE"}
-                        />
+                {/* 1. HERO CARD — Integrated Status */}
+                <Card className="bg-gradient-to-br from-[var(--mo-color-surface-secondary)] to-[var(--mo-color-bg-primary)] border-[var(--mo-color-accent-system)]/20 p-6 flex flex-col gap-6">
+                    <div className="flex justify-between items-start">
+                        <div className="flex flex-col gap-1.5">
+                            <CardLabel color="var(--mo-color-accent-system)">CURRENT OPERATIONAL STATUS</CardLabel>
+                            <h2 className="text-[28px] font-semibold tracking-tight leading-tight max-w-[200px]">Optimal for Phase 02 Execution.</h2>
+                            <p className="text-[14px] text-[var(--mo-color-text-secondary)] mt-1 max-w-[220px]">
+                                Your biometrics show peak recovery. We recommend a full movement flow today.
+                            </p>
+                        </div>
+                        <IntegratedReadiness value={readinessScore} />
                     </div>
 
-                    <motion.div
-                        whileHover={{ scale: 1.01 }}
-                        className="modular-frame p-6 flex flex-col gap-4 bg-[var(--mo-color-surface-secondary)]"
-                    >
-                        <div className="flex justify-between items-start">
-                            <div className="flex flex-col gap-1">
-                                <span className="mono text-[var(--mo-color-text-tertiary)] text-[10px]">CURRENT PROTOCOLO</span>
-                                <h2 className="text-xl font-light text-[var(--mo-color-text-primary)]">
-                                    {session ? `Phase: ${session.phase.toUpperCase()}` : "ADAPTIVE ENGINE READY"}
-                                </h2>
-                                <p className="text-sm text-[var(--mo-color-text-secondary)] font-light mt-1">
-                                    {engine.output?.adaptiveMessage || "System optimized for recovery and structural reinforcement."}
-                                </p>
-                            </div>
-                            <div className="w-10 h-10 rounded-lg flex items-center justify-center border-[0.5px] border-[var(--mo-color-accent-system)] text-[var(--mo-color-accent-system)]">
-                                <Icon name="bolt" size={20} />
-                            </div>
-                        </div>
-
+                    <div className="flex flex-col gap-4">
                         <button
                             onClick={() => navigate('/mission')}
-                            className="primary-btn w-full mt-2"
+                            className="w-full h-[52px] bg-[var(--mo-color-accent-system)] text-white rounded-[16px] font-semibold flex items-center justify-center gap-2 shadow-[var(--mo-shadow-button)] active:scale-[0.98] transition-all"
                         >
-                            {session ? "CONTINUE SESSION" : "GENERATE PROTOCOL"}
+                            <Icon name="play_arrow" size={20} />
+                            <span>START DAILY PROTOCOL</span>
                         </button>
 
-                        <div className="flex justify-between items-center opacity-60">
-                            <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">EST: 22 MIN</span>
-                            <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">TARGET: MOBILITY +12%</span>
+                        <div className="flex items-center justify-around py-3 border-t-[0.5px] border-t-[var(--mo-color-border-subtle)]">
+                            <div className="flex flex-col items-center">
+                                <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)] uppercase tracking-widest">Duration</span>
+                                <span className="text-[13px] font-medium mt-0.5">24:00 MIN</span>
+                            </div>
+                            <div className="w-[1px] h-6 bg-[var(--mo-color-border-subtle)]" />
+                            <div className="flex flex-col items-center">
+                                <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)] uppercase tracking-widest">Load Factor</span>
+                                <span className="text-[13px] font-medium mt-0.5">ADAPTIVE</span>
+                            </div>
+                            <div className="w-[1px] h-6 bg-[var(--mo-color-border-subtle)]" />
+                            <div className="flex flex-col items-center">
+                                <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)] uppercase tracking-widest">Blocks</span>
+                                <span className="text-[13px] font-medium mt-0.5">03 TOTAL</span>
+                            </div>
                         </div>
-                    </motion.div>
+                    </div>
+                </Card>
+
+                {/* 2. COMPACT METRICS — 2x2 Grid */}
+                <div className="flex flex-col gap-4">
+                    <div className="flex justify-between items-end px-1">
+                        <span className="mono text-[10px] text-[var(--mo-color-text-tertiary)] font-bold tracking-widest uppercase">SYSTEM SIGNALS</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <MetricCard
+                            label="RECOVERY SIGNAL"
+                            value="High"
+                            trend="TREND_POSITIVE"
+                            status="positive"
+                        />
+                        <MetricCard
+                            label="PAIN LOAD"
+                            value="2.4"
+                            unit="/10"
+                            trend="MINIMAL"
+                            status="neutral"
+                        />
+                        <MetricCard
+                            label="MOBILITY GRADE"
+                            value="B+"
+                            trend="IMPROVING"
+                            status="positive"
+                        />
+                        <MetricCard
+                            label="SESSION READINESS"
+                            value="92"
+                            unit="%"
+                            trend="READY"
+                            status="positive"
+                        />
+                    </div>
                 </div>
 
-                {/* 3. System Data Chips */}
-                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
-                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">VOL</span>
-                        <span className="text-xs font-medium text-[var(--mo-color-text-primary)]">{snapshot?.sessions_30d || profile?.sessions_30d || 0}</span>
+                {/* 3. Subtle Context Footer */}
+                <div className="mt-2 p-4 flex items-center gap-3 bg-[var(--mo-color-surface-secondary)]/30 rounded-[20px] border-[0.5px] border-[var(--mo-color-border-subtle)]">
+                    <div className="w-8 h-8 rounded-full bg-[var(--mo-color-state-aligned)]/10 flex items-center justify-center text-[var(--mo-color-state-aligned)]">
+                        <Icon name="check_circle" size={16} />
                     </div>
-                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
-                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">ADHERENCE</span>
-                        <span className="text-xs font-medium text-[var(--mo-color-text-primary)]">{snapshot?.adherence_7d || profile?.adherence_7d || 0}%</span>
-                    </div>
-                    <div className="whitespace-nowrap modular-frame py-2 px-4 flex items-center gap-3">
-                        <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)]">SENSORS</span>
-                        <span className="text-[10px] mono text-[var(--mo-color-state-success)] uppercase">Synced</span>
-                    </div>
+                    <span className="text-[11px] text-[var(--mo-color-text-secondary)] leading-tight">
+                        Last synced with Apple Health **2m ago**. All biometrics are current.
+                    </span>
                 </div>
 
             </div>

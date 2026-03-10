@@ -1,113 +1,107 @@
-import { useState, useRef } from 'react';
 import AppShell from '../components/AppShell';
 import { Icon } from '../components/Icon';
-import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { CATEGORIES } from '../data/exploreData';
-import { useContentAssets, type ContentAsset } from '../hooks/useContentAssets';
+import { Card, CardLabel, CardTitle } from '../components/ui/Card';
 
-const formatDuration = (sec: number) => `${Math.round(sec / 60)} MIN`;
-
-const CollectionCard = ({ asset, onClick, locked }: { asset: ContentAsset; onClick: () => void; locked: boolean }) => (
-    <motion.div
-        whileHover={{ scale: 1.02 }}
-        onClick={onClick}
-        className="flex-shrink-0 w-44 flex flex-col gap-3 cursor-pointer"
-    >
-        <div className="aspect-[3/4] rounded-lg bg-[var(--mo-color-surface-secondary)] border-[0.5px] border-[var(--mo-color-border-subtle)] relative overflow-hidden group">
-            <img src={asset.thumbnail_url} alt={asset.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
-            <div className="absolute top-2 right-2">
-                {locked && <Icon name="lock" size={14} className="text-[var(--mo-color-text-tertiary)]" />}
-            </div>
-            <div className="absolute bottom-2 left-2 flex gap-1">
-                <span className="mono text-[8px] px-1.5 py-0.5 bg-[var(--mo-color-bg-primary)] text-[var(--mo-color-text-primary)] rounded-sm">
-                    {formatDuration(asset.duration_seconds)}
-                </span>
+const CollectionCard = ({
+    title,
+    items,
+    type,
+}: {
+    title: string;
+    items: number;
+    type: string;
+}) => (
+    <Card className="min-w-[240px] max-w-[240px] p-0 overflow-hidden bg-[var(--mo-color-surface-secondary)]">
+        <div className="h-32 bg-[var(--mo-color-border-subtle)] relative overflow-hidden">
+            {/* Placeholder for real generative imagery */}
+            <div className="absolute inset-0 bg-gradient-to-br from-[var(--mo-color-accent-system)]/10 to-transparent" />
+            <div className="absolute bottom-4 left-4">
+                <div className="w-8 h-8 rounded-lg bg-[var(--mo-color-bg-primary)]/80 backdrop-blur-sm border-[0.5px] border-white/10 flex items-center justify-center">
+                    <Icon name="explore" size={18} className="text-white" />
+                </div>
             </div>
         </div>
-        <div className="flex flex-col gap-0.5">
-            <span className="text-[13px] font-medium text-[var(--mo-color-text-primary)] line-clamp-1">{asset.title}</span>
-            <span className="mono text-[9px] text-[var(--mo-color-text-tertiary)] uppercase tracking-wider">{asset.expert_name}</span>
+        <div className="p-4 flex flex-col gap-1">
+            <CardLabel>{type}</CardLabel>
+            <CardTitle>{title}</CardTitle>
+            <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)] uppercase tracking-widest mt-1">{items} PROTOCOLS UNLOCKED</span>
         </div>
-    </motion.div>
+    </Card>
 );
 
-const SectionHeader = ({ title, sub }: { title: string; sub?: string }) => (
-    <div className="flex justify-between items-end mb-4">
-        <div className="flex flex-col">
-            <span className="mono text-[var(--mo-color-text-tertiary)] text-[9px] tracking-[0.2em]">{title.toUpperCase()}</span>
-            {sub && <span className="text-xl font-light text-[var(--mo-color-text-primary)]">{sub}</span>}
-        </div>
-        <button className="mono text-[var(--mo-color-accent-system)] text-[9px] tracking-widest">SEE ALL</button>
+const CategoryChip = ({ label, active = false }: { label: string; active?: boolean }) => (
+    <div className={`px-4 py-2 rounded-full border-[0.5px] transition-all whitespace-nowrap cursor-pointer ${active
+        ? 'bg-[var(--mo-color-accent-system)] border-[var(--mo-color-accent-system)] text-white shadow-[var(--mo-shadow-button)]'
+        : 'bg-[var(--mo-color-surface-primary)] border-[var(--mo-color-border-subtle)] text-[var(--mo-color-text-secondary)] hover:border-[var(--mo-color-border-strong)]'
+        }`}>
+        <span className="text-[13px] font-medium tracking-tight">{label}</span>
     </div>
 );
 
 export default function ExplorePage() {
-    const { tier } = useAuth();
-    const navigate = useNavigate();
-    const { loading, getByCategory, getForYou } = useContentAssets();
-    const [searchQuery, setSearchQuery] = useState('');
-    const searchRef = useRef<HTMLInputElement>(null);
-
-    const isLocked = (a: ContentAsset) => a.is_premium && tier === 'free';
-
-    const openRoutine = (a: ContentAsset) => {
-        if (isLocked(a)) { navigate('/pricing'); return; }
-        navigate(`/explore/routine/${a.id}`);
-    };
 
     return (
-        <AppShell title="EXPLORE" sublabel="Movement Engineering Library">
-            <div className="page-content micro-grid flex flex-col gap-10 pb-20">
+        <AppShell title="EXPLORE" sublabel="CURATED MOVEMENT LIBRARY">
+            <div className="page-content !px-0">
 
-                {/* Search Integration */}
-                <div className="modular-frame py-3 px-4 bg-[var(--mo-color-surface-secondary)] flex items-center gap-3">
-                    <Icon name="search" size={18} className="text-[var(--mo-color-text-tertiary)]" />
-                    <input
-                        ref={searchRef}
-                        type="text"
-                        placeholder="SEARCH PROTOCOLS, SYSTEMS..."
-                        className="bg-transparent border-none outline-none flex-1 mono text-[11px] text-[var(--mo-color-text-primary)] placeholder:text-[var(--mo-color-text-tertiary)]"
-                        value={searchQuery}
-                        onChange={e => setSearchQuery(e.target.value)}
-                    />
+                {/* 1. Search & Filter Foundation */}
+                <div className="px-[var(--mo-screen-padding-x)] flex flex-col gap-6 pt-2">
+                    <div className="flex flex-col gap-2">
+                        <span className="mono text-[10px] text-[var(--mo-color-text-tertiary)] font-bold tracking-widest uppercase">DISCOVERY ENGINE</span>
+                        <h1 className="text-[32px] font-semibold tracking-tight text-[var(--mo-color-text-primary)]">Curated.</h1>
+                    </div>
+
+                    <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--mo-color-text-tertiary)]">
+                            <Icon name="search" size={18} />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Unlock protocols by keyword..."
+                            className="w-full h-[52px] bg-[var(--mo-color-surface-secondary)] border-[0.5px] border-[var(--mo-color-border-subtle)] rounded-[16px] pl-12 pr-4 text-sm focus:outline-none focus:border-[var(--mo-color-accent-system)] transition-colors"
+                        />
+                    </div>
+
+                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1">
+                        <CategoryChip label="All Patterns" active={true} />
+                        <CategoryChip label="Mobility" />
+                        <CategoryChip label="Stability" />
+                        <CategoryChip label="Strength" />
+                        <CategoryChip label="Neuromuscular" />
+                    </div>
                 </div>
 
-                {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20 gap-4">
-                        <div className="w-8 h-8 rounded-full border-2 border-[var(--mo-color-border-subtle)] border-t-[var(--mo-color-accent-system)] animate-spin" />
-                        <span className="mono text-[10px] text-[var(--mo-color-text-tertiary)]">INDEXING ASSETS...</span>
-                    </div>
-                ) : (
-                    <>
-                        {/* For You Highlight */}
-                        <section className="flex flex-col">
-                            <SectionHeader title="Recommendations" sub="Engineered for You" />
-                            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                {getForYou().map(a => (
-                                    <CollectionCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
-                                ))}
-                            </div>
-                        </section>
+                {/* 2. Horizontal Collections */}
+                <div className="flex flex-col gap-8 mt-4">
 
-                        {/* Category Collections */}
-                        {(CATEGORIES as unknown as string[]).map(cat => {
-                            const items = getByCategory(cat);
-                            if (!items.length) return null;
-                            return (
-                                <section key={cat} className="flex flex-col">
-                                    <SectionHeader title="Collection" sub={cat} />
-                                    <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-                                        {items.map(a => (
-                                            <CollectionCard key={a.id} asset={a} onClick={() => openRoutine(a)} locked={isLocked(a)} />
-                                        ))}
-                                    </div>
-                                </section>
-                            );
-                        })}
-                    </>
-                )}
+                    {/* Collection One */}
+                    <div className="flex flex-col gap-4">
+                        <div className="px-[var(--mo-screen-padding-x)] flex justify-between items-end">
+                            <span className="text-[18px] font-semibold text-[var(--mo-color-text-primary)]">Foundational Series</span>
+                            <span className="mono text-[10px] text-[var(--mo-color-accent-system)] font-bold cursor-pointer">SEE ALL</span>
+                        </div>
+                        <div className="flex gap-4 overflow-x-auto px-[var(--mo-screen-padding-x)] pb-4 scrollbar-hide">
+                            <CollectionCard title="Postural Alignment" items={8} type="STABILITY" />
+                            <CollectionCard title="Core Integrated" items={12} type="NEUROMUSCULAR" />
+                            <CollectionCard title="Hip Mechanics" items={6} type="MOBILITY" />
+                        </div>
+                    </div>
+
+                    {/* Collection Two */}
+                    <div className="flex flex-col gap-4">
+                        <div className="px-[var(--mo-screen-padding-x)] flex justify-between items-end">
+                            <span className="text-[18px] font-semibold text-[var(--mo-color-text-primary)]">Adaptive Specialized</span>
+                            <span className="mono text-[10px] text-[var(--mo-color-accent-system)] font-bold cursor-pointer">SEE ALL</span>
+                        </div>
+                        <div className="flex gap-4 overflow-x-auto px-[var(--mo-screen-padding-x)] pb-4 scrollbar-hide">
+                            <CollectionCard title="Pain Reduction 101" items={4} type="CLINICAL" />
+                            <CollectionCard title="Lower Back Relief" items={7} type="ADAPTIVE" />
+                            <CollectionCard title="Neck Release Flow" items={5} type="RECOVERY" />
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </AppShell>
     );

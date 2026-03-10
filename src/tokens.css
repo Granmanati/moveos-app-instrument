@@ -131,11 +131,11 @@
      10. RADIUS
      ========================================================================== */
 
-    --mo-radius-sm: 10px;
+    --mo-radius-sm: 8px;
     --mo-radius-md: 12px;
-    --mo-radius-lg: 14px;
-    --mo-radius-xl: 16px;
-    --mo-radius-2xl: 20px;
+    --mo-radius-lg: 16px;
+    --mo-radius-xl: 20px;
+    --mo-radius-2xl: 24px;
     --mo-radius-pill: 999px;
 
     /* ==========================================================================
@@ -202,7 +202,7 @@
 
     --mo-screen-max-width: 480px;
     --mo-screen-padding-x: 20px;
-    --mo-screen-padding-top: 20px;
+    --mo-screen-padding-top: 24px;
     --mo-screen-padding-bottom: 96px;
 
     --mo-section-gap-sm: 16px;
@@ -220,10 +220,10 @@
 
     --mo-card-padding-primary: 20px;
     --mo-card-padding-secondary: 16px;
-    --mo-card-padding-metric: 12px;
+    --mo-card-padding-metric: 16px;
 
-    --mo-card-radius-primary: 16px;
-    --mo-card-radius-secondary: 14px;
+    --mo-card-radius-primary: 20px;
+    --mo-card-radius-secondary: 16px;
     --mo-card-radius-metric: 12px;
 
     /* ==========================================================================
@@ -394,7 +394,7 @@
     --mo-shadow-card-hover:
         0 8px 24px rgba(0, 0, 0, 0.10),
         0 0 0 1px rgba(0, 0, 0, 0.06);
-    
+
     --mo-progress-track: rgba(0, 0, 0, 0.06);
     --mo-chart-grid: rgba(0, 0, 0, 0.04);
 

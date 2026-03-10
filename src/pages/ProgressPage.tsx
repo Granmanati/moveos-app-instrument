@@ -1,186 +1,137 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import AppShell from '../components/AppShell';
-import { Icon } from '../components/Icon';
-import { safeSelect } from '../lib/db';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Card, CardLabel } from '../components/ui/Card';
+import { AreaChart, Area, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const StatBlock = ({ label, value, color }: { label: string; value: string | number; color?: string }) => (
-    <div className="flex flex-col items-center gap-1">
-        <span className="mono text-[var(--mo-color-text-tertiary)] text-[8px] tracking-widest">{label}</span>
-        <span className="text-lg font-light text-[var(--mo-color-text-primary)]" style={{ color }}>{value}</span>
-    </div>
+const data = [
+    { name: 'Mon', mobility: 65, stability: 70 },
+    { name: 'Tue', mobility: 68, stability: 72 },
+    { name: 'Wed', mobility: 75, stability: 68 },
+    { name: 'Thu', mobility: 82, stability: 75 },
+    { name: 'Fri', mobility: 80, stability: 82 },
+    { name: 'Sat', mobility: 85, stability: 88 },
+    { name: 'Sun', mobility: 90, stability: 92 },
+];
+
+const MetricHighlight = ({ label, value, unit, trend }: { label: string; value: string | number; unit?: string; trend?: string }) => (
+    <Card className="p-5 flex-1 min-w-[140px] bg-[var(--mo-color-surface-secondary)]">
+        <CardLabel>{label}</CardLabel>
+        <div className="flex items-baseline gap-1 mt-2">
+            <span className="text-2xl font-semibold text-[var(--mo-color-text-primary)]">{value}</span>
+            {unit && <span className="text-[10px] text-[var(--mo-color-text-secondary)] font-medium uppercase tracking-wider">{unit}</span>}
+        </div>
+        {trend && (
+            <span className="text-[10px] text-[var(--mo-color-state-aligned)] font-bold mt-1">
+                {trend}
+            </span>
+        )}
+    </Card>
 );
 
 export default function ProgressPage() {
-    const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState<'7d' | '30d'>('7d');
-    const [chartData, setChartData] = useState<any[]>([]);
-    const [metrics, setMetrics] = useState({
-        returnConsistency: 0,
-        painAvg: '0.0',
-        sessionVolume: 0,
-        loadBalanceLeft: 50,
-        loadBalanceRight: 50,
-        systemStatus: 'NOMINAL' as 'NOMINAL' | 'LOAD' | 'FATIGUE',
-    });
-
-    const windowDays = activeTab === '7d' ? 7 : 30;
-
-    const fetchProgress = async () => {
-        if (!user) return;
-        try {
-            const end = new Date();
-            const start = new Date();
-            start.setDate(end.getDate() - (windowDays - 1));
-            const endIso = end.toISOString().split('T')[0];
-            const startIso = start.toISOString().split('T')[0];
-
-            const qPain = supabase.from('v_pain_daily').select('day, pain_avg').gte('day', startIso).lte('day', endIso).eq('user_id', user.id);
-            const qAdh = supabase.from('v_adherence_daily').select('day, completed').gte('day', startIso).lte('day', endIso).eq('user_id', user.id);
-
-            const [painRes, adhRes] = await Promise.all([safeSelect<any[]>(qPain, 'ProgressPain'), safeSelect<any[]>(qAdh, 'ProgressAdh')]);
-
-            if (painRes.error) throw painRes.error;
-
-            const painData = painRes.data || [];
-            const adhData = adhRes.data || [];
-
-            const newData = [];
-            let totalPain = 0;
-            let painDays = 0;
-            let sessionsCompleted = 0;
-
-            for (let i = windowDays - 1; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const dateStr = d.toISOString().split('T')[0];
-                const p = painData.find((x: any) => x.day === dateStr);
-                const a = adhData.find((x: any) => x.day === dateStr);
-                const painVal = p && p.pain_avg != null ? Number(p.pain_avg) : 0;
-                const compVal = a && a.completed ? 1 : 0;
-                totalPain += painVal;
-                if (painVal > 0) painDays++;
-                if (compVal === 1) sessionsCompleted++;
-                newData.push({
-                    date: dateStr,
-                    displayDate: `${d.getDate()}/${d.getMonth() + 1}`,
-                    pain: painVal,
-                    completed: compVal
-                });
-            }
-
-            const painAvg = painDays > 0 ? (totalPain / painDays).toFixed(1) : '0.0';
-            const returnConsistency = Math.round((sessionsCompleted / windowDays) * 100);
-
-            setChartData(newData);
-            setMetrics({
-                returnConsistency,
-                painAvg,
-                sessionVolume: sessionsCompleted,
-                loadBalanceLeft: 48,
-                loadBalanceRight: 52,
-                systemStatus: Number(painAvg) >= 6 ? 'FATIGUE' : 'NOMINAL'
-            });
-        } catch (err: any) {
-            console.error('Failed to fetch progress:', err);
-        }
-    };
-
-    useEffect(() => { fetchProgress(); }, [user, activeTab]);
-
     return (
-        <AppShell title="EVOLUTION" sublabel="System Performance Analytics">
-            <div className="page-content micro-grid flex flex-col gap-8 pb-20">
+        <AppShell title="ANALYTICS" sublabel="SYSTEM EVOLUTION TRACKING">
+            <div className="page-content">
 
-                {/* 1. Summary Strip */}
-                <div className="modular-frame py-6 flex justify-around bg-[var(--mo-color-surface-secondary)]">
-                    <StatBlock label="CONSISTENCY" value={`${metrics.returnConsistency}%`} />
-                    <div className="w-[0.5px] h-8 bg-[var(--mo-color-border-subtle)]" />
-                    <StatBlock label="SESSIONS" value={metrics.sessionVolume} />
-                    <div className="w-[0.5px] h-8 bg-[var(--mo-color-border-subtle)]" />
-                    <StatBlock label="AVG PAIN" value={metrics.painAvg} color="var(--mo-color-state-warning)" />
-                    <div className="w-[0.5px] h-8 bg-[var(--mo-color-border-subtle)]" />
-                    <StatBlock label="STATUS" value={metrics.systemStatus} color="var(--mo-color-state-success)" />
+                {/* 1. Header & Quick Stats */}
+                <div className="flex flex-col gap-2 pt-2">
+                    <span className="mono text-[10px] text-[var(--mo-color-text-tertiary)] font-bold tracking-widest uppercase">PERFORMANCE DASHBOARD</span>
+                    <h1 className="text-[32px] font-semibold tracking-tight text-[var(--mo-color-text-primary)]">Evolution.</h1>
                 </div>
 
-                {/* 2. Pain Overlap Chart */}
-                <div className="modular-frame p-6 flex flex-col gap-4">
-                    <div className="flex justify-between items-center">
-                        <span className="mono text-[var(--mo-color-text-tertiary)] text-[9px] tracking-widest uppercase">Structural Pain Trend</span>
-                        <div className="flex gap-2">
-                            <button onClick={() => setActiveTab('7d')} className={`mono text-[8px] px-2 py-1 rounded ${activeTab === '7d' ? 'bg-[var(--mo-color-accent-system)] text-white' : 'text-[var(--mo-color-text-tertiary)]'}`}>7D</button>
-                            <button onClick={() => setActiveTab('30d')} className={`mono text-[8px] px-2 py-1 rounded ${activeTab === '30d' ? 'bg-[var(--mo-color-accent-system)] text-white' : 'text-[var(--mo-color-text-tertiary)]'}`}>30D</button>
+                <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                    <MetricHighlight label="CONSISTENCY" value="94" unit="%" trend="+4% PK" />
+                    <MetricHighlight label="READINESS" value="82" unit="/100" trend="OPTIMAL" />
+                    <MetricHighlight label="COMPLETION" value="28" unit="PTS" trend="+2 NEW" />
+                </div>
+
+                {/* 2. Main Visualization Card */}
+                <Card className="p-6 h-80 bg-[var(--mo-color-surface-secondary)]">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="flex flex-col gap-1">
+                            <CardLabel>SYSTEM BALANCE</CardLabel>
+                            <h4 className="text-lg font-semibold">Mobility vs. Stability</h4>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-[var(--mo-color-accent-system)]" />
+                                <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">MOB</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-[var(--mo-color-state-tension)]" />
+                                <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">STA</span>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="h-48 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={chartData}>
+                    <div className="flex-1 w-full -ml-6">
+                        <ResponsiveContainer width="105%" height="100%">
+                            <AreaChart data={data}>
                                 <defs>
-                                    <linearGradient id="colorPain" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="var(--mo-color-accent-system)" stopOpacity={0.2} />
+                                    <linearGradient id="colorMob" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="5%" stopColor="var(--mo-color-accent-system)" stopOpacity={0.15} />
                                         <stop offset="95%" stopColor="var(--mo-color-accent-system)" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--mo-color-border-subtle)" opacity={0.5} />
                                 <XAxis
-                                    dataKey="displayDate"
-                                    hide={true}
-                                />
-                                <YAxis hide={true} domain={[0, 10]} />
-                                <Tooltip
-                                    contentStyle={{ background: 'var(--mo-color-surface-primary)', border: '0.5px solid var(--mo-color-border-subtle)', borderRadius: '4px', fontSize: '10px', fontFamily: 'monospace' }}
+                                    dataKey="name"
+                                    axisLine={false}
+                                    tickLine={false}
+                                    tick={{ fontSize: 9, fill: 'var(--mo-color-text-tertiary)', fontFamily: 'IBM Plex Mono' }}
+                                    dy={10}
                                 />
                                 <Area
                                     type="monotone"
-                                    dataKey="pain"
+                                    dataKey="mobility"
                                     stroke="var(--mo-color-accent-system)"
+                                    strokeWidth={2}
                                     fillOpacity={1}
-                                    fill="url(#colorPain)"
-                                    strokeWidth={1.5}
+                                    fill="url(#colorMob)"
+                                />
+                                <Area
+                                    type="monotone"
+                                    dataKey="stability"
+                                    stroke="var(--mo-color-state-tension)"
+                                    strokeWidth={2}
+                                    fill="transparent"
+                                />
+                                <Tooltip
+                                    contentStyle={{
+                                        backgroundColor: 'var(--mo-color-surface-tertiary)',
+                                        border: '0.5px solid var(--mo-color-border-subtle)',
+                                        borderRadius: '12px',
+                                        fontSize: '10px',
+                                        color: 'var(--mo-color-text-primary)'
+                                    }}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
+                </Card>
 
-                    <div className="flex justify-between items-center opacity-60">
-                        <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">Baseline 0.0</span>
-                        <span className="mono text-[8px] text-[var(--mo-color-text-tertiary)]">Peak {Math.max(...chartData.map(d => d.pain), 1).toFixed(1)}</span>
-                    </div>
-                </div>
-
-                {/* 3. Load Balance */}
-                <div className="modular-frame p-6 flex flex-col gap-4">
-                    <span className="mono text-[var(--mo-color-text-tertiary)] text-[9px] tracking-widest uppercase">Bilateral Load Balance</span>
-                    <div className="flex flex-col gap-2">
-                        <div className="flex justify-between text-[11px] mono text-[var(--mo-color-text-secondary)]">
-                            <span>LEFT {metrics.loadBalanceLeft}%</span>
-                            <span>RIGHT {metrics.loadBalanceRight}%</span>
+                {/* 3. Detailed Metrics Group */}
+                <div className="flex flex-col gap-4 mb-4">
+                    <span className="mono text-[10px] text-[var(--mo-color-text-tertiary)] font-bold tracking-widest px-1">HEALTH ARCHIVE</span>
+                    <Card className="p-0 overflow-hidden">
+                        <div className="flex flex-col">
+                            {[
+                                { l: 'Avg Pain Level', v: '2.4', u: '/10', s: 'Improving' },
+                                { l: 'Sleep Quality', v: '7.8', u: 'HRS', s: 'Stable' },
+                                { l: 'Session Adherence', v: '100', u: '%', s: 'Perfect' },
+                            ].map((row, i) => (
+                                <div key={i} className="flex items-center justify-between p-5 border-b-[0.5px] border-[var(--mo-color-border-subtle)] last:border-0 hover:bg-[var(--mo-color-surface-secondary)] transition-colors">
+                                    <div className="flex flex-col gap-1">
+                                        <span className="text-sm font-medium text-[var(--mo-color-text-primary)]">{row.l}</span>
+                                        <span className="mono text-[8px] text-[var(--mo-color-accent-system)] font-bold">{row.s}</span>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                        <span className="text-lg font-semibold">{row.v}</span>
+                                        <span className="mono text-[9px] text-[var(--mo-color-text-secondary)]">{row.u}</span>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
-                        <div className="h-1.5 w-full bg-[var(--mo-color-surface-secondary)] rounded-full overflow-hidden flex">
-                            <div className="h-full bg-[var(--mo-color-accent-system)] opacity-40" style={{ width: `${metrics.loadBalanceLeft}%` }} />
-                            <div className="h-full bg-[var(--mo-color-accent-system)]" style={{ width: `${metrics.loadBalanceRight}%` }} />
-                        </div>
-                    </div>
-                    <p className="text-[11px] text-[var(--mo-color-text-tertiary)] font-light leading-relaxed">
-                        Symmetry within nominal threshold (±5%). Systematic adaptation confirmed.
-                    </p>
-                </div>
-
-                {/* 4. Adaptive Insight */}
-                <div className="modular-frame p-5 border-l-2 border-l-[var(--mo-color-accent-system)] bg-[var(--mo-color-surface-secondary)]">
-                    <div className="flex items-start gap-4">
-                        <div className="w-8 h-8 rounded-full bg-[var(--mo-color-accent-system)] flex items-center justify-center text-white flex-shrink-0">
-                            <Icon name="psychology" size={16} />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <span className="mono text-[var(--mo-color-accent-system)] text-[9px] tracking-widest font-bold">EVOLUTION INSIGHT</span>
-                            <p className="text-sm text-[var(--mo-color-text-primary)] font-light leading-snug pt-1">
-                                Current consistency rate is {metrics.returnConsistency}%. System stabilization phase is approximately 78% complete. Maintain current intensity.
-                            </p>
-                        </div>
-                    </div>
+                    </Card>
                 </div>
 
             </div>
